@@ -1352,6 +1352,20 @@ function recipe_tax_get_terms($vid) {
 }
 
 /**
+ * Hook into generic node creation/update and check if the added node
+ * fixes any links in existing recipes.
+ */
+function recipe_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  switch ($op) {
+    case 'insert':
+    case 'update':
+      // TODO: Could filter for only nodes of type 'ingredient'
+      db_query("UPDATE {recipe_ingredient} SET link='%d' WHERE LOWER(name)='%s'", $node->nid, trim(strtolower($node->title)) );
+      break;
+  }
+}
+
+/**
  * Helper function for array map purposes.
  * @param term the term object from which the tid will be extracted.
  *
