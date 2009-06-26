@@ -1469,7 +1469,7 @@ function theme_recipe_node($node, $yield_form = TRUE) {
   return $output;
 }
 
-function recipe_custom_yield_form($node) {
+function recipe_custom_yield_form($form_id, $node) {
     $form['custom_yield_container'] = array(
       '#type' => 'fieldset',
       '#collapsible' => FALSE,
