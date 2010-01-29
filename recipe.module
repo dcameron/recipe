@@ -1,6 +1,7 @@
 <?php
 // $Id$
 
+
 /**
  * @file
  * recipe.module - share recipes
@@ -463,6 +464,14 @@ function recipe_admin_settings() {
     '#default_value' => variable_get('recipe_export_recipeml_enable', 1),
     '#options' => array(t('Disabled'), t('Enabled')),
     '#description' => t('Enables or disables the Export as RecipeML link.'),
+    '#required' => FALSE,
+  );
+  $form['recipe_hide_summary'] = array(
+    '#type' => 'radios',
+    '#title' => t('Hide Summary'),
+    '#default_value' => variable_get('recipe_hide_summary', 0),
+    '#options' => array(t('Disabled'), t('Enabled')),
+    '#description' => t('Hides or shows the Summary/Yield form.'),
     '#required' => FALSE,
   );
   return system_settings_form($form);
@@ -1557,7 +1566,12 @@ function theme_recipe_node($node, $yield_form = TRUE) {
 
   // Create the output
   $output = '';
-  $output .= '<div class="recipe-summary">'. theme('box', t('Summary'), $summary ) .'</div>';
+  if (variable_get('recipe_hide_summary',0) == 0) {
+    $output .= '<div class="recipe-summary">'. theme('box', t('Summary'), $summary ) .'</div>';
+  } 
+  else {
+    $output .= '<div class="recipe-summary" style="display:none">'. theme('box', t('Summary'), $summary ) .'</div>';
+  }
   $output .= '<div class="recipe-description">'. theme('box', t('Description'), $node->body) .'</div>';
   $output .= '<div class="recipe-ingredients">'. theme('box', t('Ingredients'), theme('item_list', $ingredients)) .'</div>';
   $output .= '<div class="recipe-instructions">'. theme('box', t('Instructions'), $node->instructions) .'</div>';
