@@ -624,7 +624,7 @@ function recipe_ingredient_id_from_name($name) {
       global $active_db;
       $node_link = db_result(db_query("SELECT nid FROM {node} WHERE title = '%s'", $name));
 
-      db_query("INSERT INTO {recipe_ingredient} (name, link) VALUES ('%s', '%s')", $name, $node_link);
+      db_query("INSERT INTO {recipe_ingredient} (name, link) VALUES ('%s', '%d')", $name, $node_link);
       $ingredient_id = db_result(db_query("SELECT id FROM {recipe_ingredient} WHERE LOWER(name)='%s'", trim(strtolower($name))));
     }
     $cache[$name] = $ingredient_id;
@@ -1656,7 +1656,7 @@ function theme_recipe_list(&$output) {
 }
 
 /**
- * Displays more information content, suck as "more" links, and feed images.
+ * Displays more information content, such as "more" links, and feed images.
  *
  * @return
  *   Formatted string containing the output.
