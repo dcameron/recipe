@@ -3,6 +3,27 @@ Readme
 
 A module for sharing cooking recipes
 
+INSTALLATION
+------------
+1. Upload and install the module.
+
+2. Adjust Permissions for user roles. NOTE: a 'site editor' role is supported.
+
+3. In Recipe Admin, enable/disable desired features.
+
+4. Enable a Recipes menu item so users may find it...
+
+5. OPTIONAL: Create a taxonomy vocabulary and name it.
+   For example: 'Recipe Tags'.
+
+   Under Content Types check 'Recipe', and under Settings check desired
+   options and Save.
+
+   Be sure to create at least one Term.
+
+   In Menus, enable a link to Recipes so users may access the module.
+
+
 TODO
 -----
 
