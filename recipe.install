@@ -6,6 +6,10 @@
  * Install, update and uninstall functions for the recipe module.
  */
 
+
+/**
+* Implementation of hook_schema().
+*/
 function recipe_schema() {
   $schema['recipe'] = array(
     'fields' => array(
@@ -129,11 +133,19 @@ function recipe_schema() {
   return $schema;
 }
 
+
+/**
+ * Implementation of hook_install().
+ */
 function recipe_install() {
   drupal_install_schema('recipe');
   recipe_populate_units();
 }
 
+
+/**
+ * load the recipe_units table.
+ */
 function recipe_populate_units() {
   $s = TRUE;
   $s = $s && db_query("INSERT INTO {recipe_unit} VALUES (1, 'Slice', 'sli', 0, 'Unit');");
@@ -168,6 +180,14 @@ function recipe_populate_units() {
   return $s;
 }
 
+
+/**
+* Implementation of hook_uninstall().
+*/
 function recipe_uninstall() {
+  // remove db tables
   drupal_uninstall_schema('recipe');
+
+  // remove variables
+  db_query("DELETE FROM {variable} WHERE name like '%s%%'", 'recipe_');
 }
