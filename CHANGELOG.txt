@@ -1,3 +1,7 @@
+2010-02-03 jvandervort
+
+	* recipe.module: added recipe import function with the plaintext parser.
+
 2010-02-02 17:29  jvandervort
 
 	* recipe.install: remove recipe variables upon uninstall.

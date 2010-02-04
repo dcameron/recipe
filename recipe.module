@@ -483,6 +483,15 @@ function recipe_admin_settings() {
  * Note: when editing this function you must visit 'admin/menu' to reset the cache
  */
 function recipe_menu() {
+  $items['node/add/recipe_import'] = array(
+    'title' => 'Recipe Import',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('recipe_import_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'type' => MENU_NORMAL_ITEM
+  );
+
   $items['recipe'] = array(
     'title' => 'Recipes',
     'page callback' => 'recipe_page',
@@ -1571,7 +1580,7 @@ function theme_recipe_node($node, $yield_form = TRUE) {
   $output = '';
   if (variable_get('recipe_hide_summary',0) == 0) {
     $output .= '<div class="recipe-summary">'. theme('box', t('Summary'), $summary ) .'</div>';
-  } 
+  }
   else {
     $output .= '<div class="recipe-summary" style="display:none">'. theme('box', t('Summary'), $summary ) .'</div>';
   }
@@ -1719,4 +1728,260 @@ function recipe_euclid($number_one, $number_two) {
 
   }
   return $hcf;
+}
+
+
+/**
+ * Form recipe_import_form
+ */
+function recipe_import_form($form_state) {
+
+  $options = array(
+      'recipe_import_parse_plain_text' => t('Plain Text')
+  );
+
+  if (isset($form_state['values']['recipe_preview'])) {
+    $form['#prefix'] = $form_state['values']['recipe_preview'];
+  }
+
+  $form['recipe_format'] = array(
+    '#type' => 'select',
+    '#title' => t('Recipe format'),
+    '#options' => $options,
+    '#default_value' => $form_state['values']['recipe_format'],
+    '#size' => 1,
+    '#description' => t('The recipe input format.'),
+  );
+
+  $form['recipe_import_text'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Paste import data here'),
+    '#default_value' => $form_state['values']['recipe_import_text'],
+    '#cols' => 55,
+    '#rows' => 8,
+    '#required' => TRUE,
+    '#description' => t('Always use preview first to avoid unintended consequences.'),
+  );
+
+  $form['buttons']['preview'] = array(
+    '#type' => 'submit',
+    '#value' => t('Preview'),
+    '#weight' => 1,
+    '#submit' => array('recipe_import_form_preview'),
+  );
+
+  $form['buttons']['import'] = array(
+    '#type' => 'submit',
+    '#value' => t('Import'),
+    '#weight' => 2,
+    '#submit' => array('recipe_import_form_submit'),
+  );
+
+  return $form;
+}
+
+
+/**
+ * Import preview routine that allows that users to see what actually will be imported before doing so.
+ */
+function recipe_import_form_preview($form, &$form_state) {
+  $recipe = recipe_import_parse($form, $form_state);
+
+  if ( $recipe != FALSE ) {
+    $preview = 'Recipe Name: ' . $recipe['title'] . "<br/><br/>";
+
+    $preview .= 'Ingredients:<br/>=====<br/>';
+    foreach ( $recipe['ingredients'] as $i ) {
+      $preview .= $i['quantity'] . " ";
+      if ( $i['unit_obj'] == FALSE ) {
+        $preview .= $i['unit_name'] . "(new) ";
+      }
+      else {
+        $preview .= $i['unit_name'] . "(match) ";
+      }
+
+      if ( $i['ingred_obj'] == FALSE ) {
+        $preview .= $i['ingredient_name'] . "(new)";
+      }
+      else {
+        $preview .= $i['ingredient_name'] . "(match)";
+      }
+      $preview .= '<br/>';
+    }
+
+    $preview .= 'Instructions:<br/>=====<br/>' . $recipe['instructions'] . "<br/>";
+
+    $form_state['values']['recipe_preview'] = '<div class="preview">' . $preview . '</div>';
+    $form_state['rebuild'] = TRUE;
+    drupal_set_title(t('Import Preview'));
+  }
+}
+
+/**
+ * Import preview routine that allows that users to see what actually will be imported before doing so.
+ */
+function recipe_import_form_submit($form, &$form_state) {
+  global $user;
+  $recipe = recipe_import_parse($form, $form_state);
+  if ($recipe) {
+    //node stuff
+    $node = new StdClass();
+    $node->title = $recipe['title'];
+    $node->body = $recipe['title'] . ' imported from Recipe Import';
+    $node->type = 'recipe';
+    $node->uid = $user->uid;
+    $node->promote = 1;
+
+    //recipe stuff
+    $node->source = $user->name;
+    $node->yield = 1;
+    $node->notes = '';
+    $node->instructions = $recipe['instructions'];
+    $node->preptime = 60;
+
+    //ingredients, have to change them into node->ingredients format
+    $ingredient_list = array();
+    foreach ($recipe['ingredients'] as $i) {
+      $ingredient = new StdClass();
+      $ingredient->quantity = $i['quantity'];
+      if ( $i['unit_obj'] != FALSE ) {
+        $ingredient->unit_id = $i['unit_obj']['id'];
+      }
+      $ingredient->name = $i['ingredient_name'];
+
+      $ingredient_list[] = $ingredient;
+    }
+    $node->ingredients = $ingredient_list;
+    node_save($node);
+    $form_state['redirect'] = 'node/'. $node->nid .'/edit';
+    drupal_set_message('Recipe Imported');
+  }
+
+}
+
+
+
+
+/**
+ * Import parsing controller which loads the actual parsing instances based on recipe_format.
+ *
+ * All parser instances should return a $recipe object that looks like this:
+ *
+ * $recipe = array(
+ *   'title' => 'recipe title string',
+ *   'ingredients' => array of ingredients items(below);
+ *   'instuctions' => 'string of instructions'
+ * );
+ *
+ * ingredients items = array(
+ *    'quantity' =>
+ *    'ingredient_name' =>
+ *    'unit_name' =>
+ *    'unit_obj' => comes from database lookup: see recipe_unit_match().  ==FALSE if no-match
+ *    'ingre_obj' => comes from database lookup: see recipe_ingredient_match().  ==FALSE if no-match
+ * );
+ *
+ */
+function recipe_import_parse($form, &$form_state) {
+  $import_function = $form_state['values']['recipe_format'];
+  $text = $form_state['values']['recipe_import_text'];
+
+  $recipe = array();
+  if (function_exists($import_function)) {
+    $recipe = call_user_func($import_function, $text);
+    return $recipe;
+  }
+  else {
+    drupal_set_message('recipe: '. $import_function . '() does not exist.' , 'error');
+    return FALSE;
+  }
+}
+
+
+/**
+ * Parsing instance for plain text recipes
+ */
+function recipe_import_parse_plain_text($text) {
+  // region constants
+  define('TITLE', 0);
+  define('INGREDIENTS', 1);
+  define('DIRECTIONS', 2);
+
+  $recipe = array();
+
+  $region = TITLE;
+  foreach (split("\n", $text) as $line) {
+    $line = trim($line);
+    if ( $region < DIRECTIONS && $line == '' ) {
+      $region++;
+      continue;
+    }
+    if ( $region == TITLE ) {
+      $recipe['title'] = $line;
+    }
+    else if ( $region == INGREDIENTS ) {
+      if ( preg_match('/^([0-9\-\.\/]+) +([A-Za-z]+) +(.*)/', $line, $matches)  ) {
+        $i = array();
+        $i['quantity'] = $matches[1];
+        $i['unit_name'] = $matches[2];
+        $i['ingredient_name'] = $matches[3];
+
+        // FALSE if no-match
+        $i['unit_obj'] = recipe_unit_match($i['unit_name']);
+
+        // FALSE if no-match
+        $i['ingred_obj'] = recipe_ingredient_match($i['ingredient_name']);
+
+        $recipe['ingredients'][] = $i;
+      }
+      else {
+        $recipe['ingredients'][] = "ERROR: CANNOT PARSE " . $line;
+      }
+    }
+    else if ( $region == DIRECTIONS ) {
+      $recipe['instructions'] .= $line ."\n";
+    }
+  }
+  return $recipe;
+}
+
+
+/**
+ * Fetch a recipe_unit.
+ *
+ * @param $recipe_abbrev_name
+ *   A string representing a recipe_abbrev_name.
+ * @return
+ *   A recipe_unit object upon successful load or FALSE
+ */
+function recipe_unit_match($recipe_abbrev_name) {
+  $result = db_query("SELECT id, name, abbreviation FROM {recipe_unit} where abbreviation='%s'", $recipe_abbrev_name);
+  while ($row = db_fetch_object($result)) {
+    return array(
+      'id' => $row->id,
+      'name' => $row->name,
+      'abbreviation' => $row->abbreviation
+    );
+  }
+  return FALSE;
+}
+
+
+/**
+ * Fetch an ingredient.
+ *
+ * @param $recipe_ingredient_name
+ *   A string representing a recipe_ingredient_name.
+ * @return
+ *   A recipe_ingredient object upon successful load or FALSE
+ */
+function recipe_ingredient_match($recipe_ingredient_name) {
+  $result = db_query("SELECT id, name FROM {recipe_ingredient} where name='%s'", $recipe_ingredient_name);
+  while ($row = db_fetch_object($result)) {
+    return array(
+      'id' => $row->id,
+      'name' => $row->name
+    );
+  }
+  return FALSE;
 }
