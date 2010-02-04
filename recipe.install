@@ -188,6 +188,11 @@ function recipe_uninstall() {
   // remove db tables
   drupal_uninstall_schema('recipe');
 
+  // remove node revisions
+  db_query("DELETE FROM {node_revisions} WHERE nid in (select nid from {node} WHERE type='%s')", 'recipe');
+  // remove recipe nodes
+  db_query("DELETE FROM {node} WHERE type = '%s'", 'recipe');
+
   // remove variables
   db_query("DELETE FROM {variable} WHERE name like '%s%%'", 'recipe_');
 }
