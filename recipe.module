@@ -770,13 +770,13 @@ function recipe_save_ingredients($node) {
   foreach ($changes->add as $ingredient) {
     $ingredient->id = recipe_ingredient_id_from_name($ingredient->name);
     $ingredient->quantity = recipe_ingredient_quantity_from_fraction($ingredient->quantity);
-    db_query("INSERT INTO {recipe_node_ingredient} (nid, ingredient_id, quantity, unit_id) VALUES (%d, %d, %f, %d)", $node->nid, $ingredient->id, $ingredient->quantity, $ingredient->unit_id);
+    db_query("INSERT INTO {recipe_node_ingredient} (nid, ingredient_id, quantity, unit_id, weight) VALUES (%d, %d, %f, %d, %d)", $node->nid, $ingredient->id, $ingredient->quantity, $ingredient->unit_id, $ingredient->weight);
   }
 
   foreach ($changes->update as $ingredient) {
     $ingredient->id = recipe_ingredient_id_from_name($ingredient->name);
     $ingredient->quantity = recipe_ingredient_quantity_from_fraction($ingredient->quantity);
-    db_query("UPDATE {recipe_node_ingredient} SET quantity = %f, unit_id = %d WHERE nid = %d AND ingredient_id = %d", $ingredient->quantity, $ingredient->unit_id, $node->nid, $ingredient->id);
+    db_query("UPDATE {recipe_node_ingredient} SET quantity = %f, unit_id = %d, weight = %d WHERE nid = %d AND ingredient_id = %d", $ingredient->quantity, $ingredient->unit_id, $ingredient->weight, $node->nid, $ingredient->id);
   }
 }
 
@@ -788,8 +788,9 @@ function recipe_ingredients_diff($a1, $a2) {
   $return->remove = array();
   $return->update = array();
 
-  foreach ($a1 as $pl) {
+  foreach ($a1 as $key => $pl) {
     $pl = (object)$pl;
+    $pl->weight = $key;
     $pl->name = trim($pl->name);
     if ($pl->name) {
       if (!_in_array($pl, $return->add)) {
@@ -845,6 +846,7 @@ function recipe_load_ingredients($node) {
     i.link,
     ri.quantity,
     ri.unit_id,
+    ri.weight,
     u.abbreviation,
     ri.ingredient_id
   FROM
@@ -856,7 +858,7 @@ function recipe_load_ingredients($node) {
     AND ri.unit_id = u.id
     AND ri.nid = %d
   ORDER BY
-  ri.id", $node->nid);
+  ri.weight, ri.id", $node->nid);
 
   $ingredients = array();
   while ($ingredient = db_fetch_object($rs)) {

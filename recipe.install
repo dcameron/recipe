@@ -72,6 +72,13 @@ function recipe_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
+      'weight' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => 'Ingredient weight within recipe.',
+      ),
     ),
     'primary key' => array('id'),
   );
@@ -195,4 +202,14 @@ function recipe_uninstall() {
 
   // remove variables
   db_query("DELETE FROM {variable} WHERE name like '%s%%'", 'recipe_');
+}
+
+
+/**
+ * Adds weight column to recipe_node_ingredient
+ */
+function recipe_update_6100() {
+  $ret = array();
+  $ret[] = update_sql('ALTER TABLE {recipe_node_ingredient} ADD weight TINYINT NOT NULL default 0');
+  return $ret;
 }
