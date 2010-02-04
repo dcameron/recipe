@@ -1529,11 +1529,14 @@ function theme_recipe_node($node, $yield_form = TRUE) {
         if (!$ingredient->abbreviation) {
           $ingredient->abbreviation = recipe_unit_abbreviation($ingredient->unit_id);
         }
+        if ($ingredient->abbreviation == '') {
+          $ingredient->abbreviation = '&nbsp;';
+        }
         if ($ingredient->quantity > 0) {
           $ingredient->quantity *= $factor;
         }
         else {
-          $ingredient->quantity = '';
+          $ingredient->quantity = '&nbsp;';
         }
         if (variable_get('recipe_fraction_display', t('{%d} %d&frasl;%d'))) {
           $ingredient->quantity = recipe_ingredient_quantity_from_decimal($ingredient->quantity);
@@ -1542,7 +1545,7 @@ function theme_recipe_node($node, $yield_form = TRUE) {
           $ingredient->name = l($ingredient->name, 'node/'. $ingredient->link);
         }
 
-        $ingredients[] = $ingredient->quantity .' <acronym ' . drupal_attributes(array('title' => recipe_unit_name($ingredient->unit_id))) . '">' . $ingredient->abbreviation .'</acronym> '. $ingredient->name;
+        $ingredients[] = '<div style="float:left; text-align:right; width:4em;">'. $ingredient->quantity .'</div><div style="float:left; text-align:left; width:2em; padding-left: 0.5em;"><acronym ' . drupal_attributes(array('title' => recipe_unit_name($ingredient->unit_id))) . '">' . $ingredient->abbreviation .'</acronym></div> '. $ingredient->name;
       }
     }
   }
