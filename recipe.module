@@ -578,7 +578,7 @@ function recipe_block($op = 'list', $delta = 0, $edit = array()) {
 /**
  * Implementation of hook_view().
  */
-function recipe_view(&$node, $teaser = FALSE, $page = FALSE) {
+function recipe_view($node, $teaser = FALSE, $page = FALSE) {
   if ($page) {
     drupal_set_breadcrumb(array(l(t('Home'), ''), l(t('Recipes'), 'recipe')));
     drupal_add_css(drupal_get_path('module', 'recipe') .'/recipe.css');
@@ -1495,14 +1495,17 @@ function theme_recipe_node($node, $yield_form = TRUE) {
   if ($yield_form && intval($node->yield) == $node->yield) {
     if ($_POST['op'] == t('Change')) {
       $yield = $_POST['custom_yield'];
+      $_POST = array();
     }
     else {
       if ($_POST['op'] == t('Halve')) {
         $yield = $_POST['custom_yield']/2;
+        $_POST = array();
       }
       else {
         if ($_POST['op'] == t('Double')) {
           $yield = $_POST['custom_yield']*2;
+          $_POST = array();
         }
       }
     }
@@ -1514,7 +1517,6 @@ function theme_recipe_node($node, $yield_form = TRUE) {
     else {
       $factor = 1;
     }
-    $_POST = array();
     $yield = drupal_get_form('recipe_custom_yield_form', $node);
   }
   else {
