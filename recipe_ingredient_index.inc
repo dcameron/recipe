@@ -7,7 +7,7 @@
  */
 
 function recipe_ingredient_index_page() {
-  drupal_add_css(drupal_get_path('module', 'recipe') .'/recipe_ingredient_index.css', 'module');
+  drupal_add_css(drupal_get_path('module', 'recipe') . '/recipe_ingredient_index.css', 'module');
 
   $page_args = array('current_ingredient' => FALSE, 'ingredient_list' => array(), 'node_list' => array(), 'alpha_list' => array());
   // This is the incoming ingredient id.
@@ -42,7 +42,7 @@ function theme_recipe_ingredient_index_page($page_args = NULL) {
     $list = array();
     foreach (range('a', 'z') as $letter ) {
       if (isset($page_args['alpha_list'][$letter])) {
-        $list[] = l(strtoupper($letter), 'recipe/bying', array('fragment' => 'alpha_'. $letter));
+        $list[] = l(strtoupper($letter), 'recipe/bying', array('fragment' => 'alpha_' . $letter));
       }
       else {
         $list[] = $letter;
@@ -62,10 +62,10 @@ function theme_recipe_ingredient_index_page($page_args = NULL) {
             if ( $last_alpha != '-' ) {
               $output1 .= "</p></fieldset>";
             }
-            $output1 .= '<fieldset><legend><a name="alpha_'. $ingredient->letter . '">'. strtoupper($ingredient->letter) .'</a></legend><p>';
+            $output1 .= '<fieldset><legend><a name="alpha_' . $ingredient->letter . '">' . strtoupper($ingredient->letter) . '</a></legend><p>';
             $last_alpha = $ingredient->letter;
           }
-          $output1 .= l($ingredient->name, 'recipe/bying/'. $ingredient->id) . '<br/>';
+          $output1 .= l($ingredient->name, 'recipe/bying/' . $ingredient->id) . '<br/>';
         }
         $output1 .= "</p></fieldset>";
         $output1 .= '</div>';
@@ -81,9 +81,9 @@ function theme_recipe_ingredient_index_page($page_args = NULL) {
     // render the matching node list.
     if ($page_args['node_list']) {
       $output .= '<div class="recipe-ingredient-nodes">';
-      $output .= '<fieldset><legend>'. $page_args['current_ingredient']->name .'</legend><p>';
+      $output .= '<fieldset><legend>' . $page_args['current_ingredient']->name . '</legend><p>';
       foreach ($page_args['node_list'] as $node) {
-        $output .= l($node->title, 'node/'. $node->nid) . '<br/>';
+        $output .= l($node->title, 'node/' . $node->nid) . '<br/>';
       }
       $output .= '</p></fieldset>';
       $output .= "</div>";

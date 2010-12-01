@@ -7,7 +7,7 @@
  */
 
 function recipe_category_index_page() {
-  drupal_add_css(drupal_get_path('module', 'recipe') .'/recipe_category_index.css', 'module');
+  drupal_add_css(drupal_get_path('module', 'recipe') . '/recipe_category_index.css', 'module');
 
   // You are viewing a term
   $tree = array('current_term' => FALSE, 'term_tree' => array(), 'node_list' => FALSE, 'recent_list' => FALSE);
@@ -128,7 +128,7 @@ function theme_recipe_category_index_page($tree = NULL) {
       array_shift($parents);
       $parents = array_reverse($parents);
       foreach ($parents as $p) {
-        $breadcrumb[] = l($p->name, 'recipe/bycat/'. $p->tid);
+        $breadcrumb[] = l($p->name, 'recipe/bycat/' . $p->tid);
       }
     }
     drupal_set_breadcrumb($breadcrumb);

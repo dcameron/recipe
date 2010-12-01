@@ -179,12 +179,12 @@ function recipe_export_multi($type = NULL) {
     foreach ( $formats as $key => $format ) {
       $format_count = 0;
       if ($format) {
-        $o .= '<br/>'. l($format['format_name'], "admin/content/recipe/export_multi/$key");
+        $o .= '<br/>' . l($format['format_name'], "admin/content/recipe/export_multi/$key");
         $format_count++;
       }
     }
     if ( $format_count == 0 ) {
-      $o .= '<br/><p>'. t('You have no export formats available with the bulk export feature.') . '</p>';
+      $o .= '<br/><p>' . t('You have no export formats available with the bulk export feature.') . '</p>';
     }
     return $o;
   }
@@ -211,12 +211,12 @@ function recipe_import_multi($type = NULL) {
     $format_count = 0;
     foreach ( $formats as $key => $format ) {
       if ($format) {
-        $o .= '<br/>'. l($format['format_name'], "admin/content/recipe/import_multi/$key");
+        $o .= '<br/>' . l($format['format_name'], "admin/content/recipe/import_multi/$key");
         $format_count++;
       }
     }
     if ( $format_count == 0 ) {
-      $o .= '<br/><p>'. t('You have no import formats available with the bulk export feature.') . '</p>';
+      $o .= '<br/><p>' . t('You have no import formats available with the bulk export feature.') . '</p>';
     }
     return $o;
   }

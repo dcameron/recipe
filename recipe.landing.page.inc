@@ -15,7 +15,7 @@ function theme_recipe_landing_page() {
   drupal_set_title(t("Recipes Menu"));
 
   // Add the recipe.css file for this page.
-  drupal_add_css(drupal_get_path('module', 'recipe') .'/recipe.css');
+  drupal_add_css(drupal_get_path('module', 'recipe') . '/recipe.css');
 
   // Get a list of current sub-menus and render them as a list.
   $item = menu_get_item();
@@ -25,7 +25,7 @@ function theme_recipe_landing_page() {
 
   // Add create recipes link if user has perms.
   if (user_access('create recipes')) {
-    $output .= '<dl class="node-type-list"><dt>'. l(t('Add a new Recipe'), 'node/add/recipe') .'</dt><dd>' . t('Add a new recipe to the site.') .'</dd></dl>';
+    $output .= '<dl class="node-type-list"><dt>' . l(t('Add a new Recipe'), 'node/add/recipe') . '</dt><dd>' . t('Add a new recipe to the site.') . '</dd></dl>';
   }
 
   $output .= '</div>';

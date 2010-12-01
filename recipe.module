@@ -19,10 +19,10 @@ function recipe_help($path, $arg) {
     case 'node/add/recipe':
       return variable_get('recipe_help', '');
     case 'admin/content/recipe/export_multi':
-      $output = '<p>' . t('You can enable/disable bulk export formats on the <a href="@modules-page">modules page</a> in the recipes section.', array('@modules-page' => url('admin/build/modules'))) .'</p>';
+      $output = '<p>' . t('You can enable/disable bulk export formats on the <a href="@modules-page">modules page</a> in the recipes section.', array('@modules-page' => url('admin/build/modules'))) . '</p>';
       return $output;
     case 'admin/content/recipe/import_multi':
-      $output = '<p>' . t('You can enable/disable bulk import formats on the <a href="@modules-page">modules page</a> in the recipes section.', array('@modules-page' => url('admin/build/modules'))) .'</p>';
+      $output = '<p>' . t('You can enable/disable bulk import formats on the <a href="@modules-page">modules page</a> in the recipes section.', array('@modules-page' => url('admin/build/modules'))) . '</p>';
       return $output;
   }
 }
@@ -121,7 +121,7 @@ function recipe_link($type, $node = NULL, $teaser = FALSE) {
       }
     }
     if ( count($links) > 0 ) {
-      array_unshift($links, array('title' => '<br/>'. t('Export to') .':', 'html' => TRUE));
+      array_unshift($links, array('title' => '<br/>' . t('Export to') . ':', 'html' => TRUE));
     }
   }
 
@@ -561,7 +561,7 @@ function recipe_menu() {
 
   $items['admin/content/recipe/recipe_index'] = array(
     'title' => 'Indexes',
-    'description' => t('Configure settings for the recipe index page.'),
+    'description' => 'Configure settings for the recipe index page.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('recipe_index_settings_form'),
     'access arguments' => array('administer site configuration'),
@@ -650,7 +650,7 @@ function recipe_block($op = 'list', $delta = 0, $edit = array()) {
  */
 function recipe_view($node, $teaser = FALSE, $page = FALSE) {
 
-  drupal_add_css(drupal_get_path('module', 'recipe') .'/recipe.css');
+  drupal_add_css(drupal_get_path('module', 'recipe') . '/recipe.css');
 
   if ($page) {
     $breadcrumb = array();
@@ -663,7 +663,7 @@ function recipe_view($node, $teaser = FALSE, $page = FALSE) {
         if ($parents = taxonomy_get_parents_all($term->tid)) {
           $parents = array_reverse($parents);
           foreach ($parents as $p) {
-            $breadcrumb[] = l($p->name, 'recipe/bycat/'. $p->tid);
+            $breadcrumb[] = l($p->name, 'recipe/bycat/' . $p->tid);
           }
         }
       }
@@ -797,19 +797,19 @@ function theme_recipe_ingredients($node = NULL) {
         }
 
         if (!empty($ingredient->link)) {
-          $ingredient->name = l($ingredient->name, 'node/'. $ingredient->link);
+          $ingredient->name = l($ingredient->name, 'node/' . $ingredient->link);
         }
 
         $units = '';
         // Print the abbreviation if recipe_unit_display says too or the abbreviation is blank (ie = Unit, which we don't print).
         if ( variable_get('recipe_unit_display', 0) == 0 || $ingredient->abbreviation == '&nbsp;') {
-          $units = '<acronym ' . drupal_attributes(array('title' => recipe_unit_name($ingredient->unit_id))) . '>' . $ingredient->abbreviation .'</acronym>';
+          $units = '<acronym ' . drupal_attributes(array('title' => recipe_unit_name($ingredient->unit_id))) . '>' . $ingredient->abbreviation . '</acronym>';
         }
         else {
           $units = recipe_unit_name($ingredient->unit_id);
         }
-        $fullingredient = strlen($ingredient->note) > 0 ? $ingredient->name . ' (' . $ingredient->note .')' : $ingredient->name;
-        $output .= '<tr><td class="qty">'. $ingredient->quantity .'</td><td class="units">'. $units .'</td><td class="ingredient">'. $fullingredient . '</td></tr>';
+        $fullingredient = strlen($ingredient->note) > 0 ? $ingredient->name . ' (' . $ingredient->note . ')' : $ingredient->name;
+        $output .= '<tr><td class="qty">' . $ingredient->quantity . '</td><td class="units">' . $units . '</td><td class="ingredient">' . $fullingredient . '</td></tr>';
       }
     }
     $output .= '</table>';
@@ -823,10 +823,10 @@ function theme_recipe_summary($node = NULL, $options = array('show_title' => TRU
   $output = '<table>';
 
   // Render the yield.
-  $output .= '<tr><th class="summary-title">'. t('Yield') .'</th><td class="summary-data">'. drupal_get_form('recipe_yield_form', $node) .'</td></tr>';
+  $output .= '<tr><th class="summary-title">' . t('Yield') . '</th><td class="summary-data">' . drupal_get_form('recipe_yield_form', $node) . '</td></tr>';
 
   if ($node->source) {
-    $output .= '<tr><th>'. t('Source') .'</th><td>'. $node->source .'</td></tr>';
+    $output .= '<tr><th>' . t('Source') . '</th><td>' . $node->source . '</td></tr>';
   }
   if ($node->preptime) {
     if ($node->preptime < 60) {
@@ -838,17 +838,17 @@ function theme_recipe_summary($node = NULL, $options = array('show_title' => TRU
     else {
       $node->preptime = t('!time hours', array('!time' => recipe_ingredient_quantity_from_decimal($node->preptime / 60)));
     }
-    $output .= '<tr><th>'. t('Prep time') .'</th><td>'. $node->preptime .'</td></tr>';
+    $output .= '<tr><th>' . t('Prep time') . '</th><td>' . $node->preptime . '</td></tr>';
   }
 
   $vocabs = taxonomy_get_vocabularies('recipe');
   if (count($vocabs) > 0) {
     foreach ($vocabs as $vocab) {
-      $output .= '<tr><th>'. $vocab->name .'</th><td>';
+      $output .= '<tr><th>' . $vocab->name . '</th><td>';
       $terms = taxonomy_node_get_terms_by_vocabulary($node, $vocab->vid);
       foreach ($terms as $term) {
         $term = array_shift($terms);
-        $output .= l($term->name, 'taxonomy/term/'. $term->tid) .' ';
+        $output .= l($term->name, 'taxonomy/term/' . $term->tid) . ' ';
       }
       $output .= '</td></tr>';
     }
@@ -1240,7 +1240,7 @@ function recipe_parse_ingredient_string($ingredient_string) {
     else {
       $ingredient->unit_id = 29;
       $ingredient->abbreviation = '';
-      $ingredient->name = $t_unit .' '. $ingredient->name;
+      $ingredient->name = $t_unit . ' ' . $ingredient->name;
     }
 
     $ingredient->name = trim($ingredient->name);
@@ -1463,7 +1463,7 @@ function recipe_import_form($form_state) {
  * Import preview routine that allows that users to see what actually will be imported before doing so.
  */
 function recipe_import_form_build_preview($form, &$form_state) {
-  drupal_add_css(drupal_get_path('module', 'recipe') .'/recipe.css');
+  drupal_add_css(drupal_get_path('module', 'recipe') . '/recipe.css');
 
   $parsed_recipe_object = recipe_import_parse($form, $form_state);
   if ($parsed_recipe_object != FALSE) {
@@ -1498,7 +1498,7 @@ function recipe_import_form_submit($form, &$form_state) {
   $parsed_recipe_object = recipe_import_parse($form, $form_state);
   if ( ($node = recipe_import_get_node($parsed_recipe_object)) != FALSE ) {
     node_save($node);
-    $form_state['redirect'] = 'node/'. $node->nid .'/edit';
+    $form_state['redirect'] = 'node/' . $node->nid . '/edit';
     drupal_set_message(t('Recipe Imported'));
   }
 
@@ -1623,13 +1623,13 @@ function recipe_unit_fuzzymatch($recipe_name_or_abbrev, $reset = FALSE) {
   foreach ($units as $u) {
     $pats = array();
     // Add name pattern.
-    $pats[] = '^'. $u->name . 's{0,1}$';
+    $pats[] = '^' . $u->name . 's{0,1}$';
     // Add abbreviation pattern.
-    $pats[] = '^'. $u->abbreviation . 's{0,1}\.{0,1}$';
+    $pats[] = '^' . $u->abbreviation . 's{0,1}\.{0,1}$';
     // Add comma separated alias patterns.
     $aliases = explode(',', $u->aliases);
     foreach ($aliases as $alias) {
-      $pats[] = '^'. trim($alias) . 's{0,1}\.{0,1}$';
+      $pats[] = '^' . trim($alias) . 's{0,1}\.{0,1}$';
     }
     $search_pat = implode('|', $pats);
     if (preg_match("/$search_pat/", $recipe_name_or_abbrev)) {
@@ -1641,13 +1641,13 @@ function recipe_unit_fuzzymatch($recipe_name_or_abbrev, $reset = FALSE) {
   foreach ($units as $u) {
     $pats = array();
     // Add name pattern.
-    $pats[] = '^'. $u->name . 's{0,1}$';
+    $pats[] = '^' . $u->name . 's{0,1}$';
     // Add abbreviation pattern.
-    $pats[] = '^'. $u->abbreviation . 's{0,1}\.{0,1}$';
+    $pats[] = '^' . $u->abbreviation . 's{0,1}\.{0,1}$';
     // Add comma separated alias patterns.
     $aliases = explode(',', $u->aliases);
     foreach ($aliases as $alias) {
-      $pats[] = '^'. trim($alias) . 's{0,1}\.{0,1}$';
+      $pats[] = '^' . trim($alias) . 's{0,1}\.{0,1}$';
     }
     $search_pat = implode('|', $pats);
     if (preg_match("/$search_pat/i", $recipe_name_or_abbrev)) {

@@ -7,7 +7,7 @@
  */
 
 function recipe_name_index_page() {
-  drupal_add_css(drupal_get_path('module', 'recipe') .'/recipe_name_index.css', 'module');
+  drupal_add_css(drupal_get_path('module', 'recipe') . '/recipe_name_index.css', 'module');
 
   $node_list = recipe_get_alpha_nodes();
   $alpha_list = recipe_get_node_alpha_list($node_list);
@@ -22,7 +22,7 @@ function theme_recipe_name_index_page($alpha_list = NULL, $node_list = NULL) {
   $list = array();
   foreach (range('a', 'z') as $letter ) {
     if (isset($alpha_list[$letter])) {
-      $list[] = l(strtoupper($letter), 'recipe/byname', array('fragment' => 'alpha_'. $letter));
+      $list[] = l(strtoupper($letter), 'recipe/byname', array('fragment' => 'alpha_' . $letter));
     }
     else {
       $list[] = $letter;
@@ -54,10 +54,10 @@ function theme_recipe_name_index_page($alpha_list = NULL, $node_list = NULL) {
           if ( $last_alpha != '-' ) {
             $output1 .= "</p></fieldset>";
           }
-          $output1 .= '<fieldset><legend><a name="alpha_'. $node->letter . '">'. strtoupper($node->letter) .'</a></legend><p>';
+          $output1 .= '<fieldset><legend><a name="alpha_' . $node->letter . '">' . strtoupper($node->letter) . '</a></legend><p>';
           $last_alpha = $node->letter;
         }
-        $output1 .= l($node->title, 'node/'. $node->nid) . '<br/>';
+        $output1 .= l($node->title, 'node/' . $node->nid) . '<br/>';
       }
       $output1 .= "</p></fieldset>";
       $output .= $output1;
