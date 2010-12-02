@@ -229,12 +229,12 @@ function recipe_uninstall() {
   drupal_uninstall_schema('recipe');
 
   // remove node revisions
-  db_query("DELETE FROM {node_revision} WHERE nid in (select nid from {node} WHERE type = :type)", array(':type'=>'recipe'));
+  db_query("DELETE FROM {node_revision} WHERE nid in (select nid from {node} WHERE type = :type)", array(':type' => 'recipe'));
   // remove recipe nodes
-  db_query("DELETE FROM {node} WHERE type = :type", array(':type'=>'recipe'));
+  db_query("DELETE FROM {node} WHERE type = :type", array(':type' => 'recipe'));
 
   // remove variables
-  db_query("DELETE FROM {variable} WHERE name like ':type%%'", array(':type'=>'recipe'));
+  db_query("DELETE FROM {variable} WHERE name like ':type%%'", array(':type' => 'recipe'));
 }
 
 
@@ -273,7 +273,10 @@ function recipe_update_6101() {
   db_add_field($ret, 'recipe_unit', 'aliases', array('type' => 'varchar', 'length' => 128, 'not null' => TRUE, 'default' => ''));
   $units = get_default_units();
   foreach ( $units as $u ) {
-    db_query("UPDATE {recipe_unit} SET aliases = '%s' WHERE name='%s'", $u['aliases'], $u['name']);
+    db_update('recipe_unit')
+      ->condition('name', $u['name'])
+      ->fields(array('aliases' => $u['aliases']))
+      ->execute();
   }
   return $ret;
 }
