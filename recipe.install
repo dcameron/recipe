@@ -229,12 +229,12 @@ function recipe_uninstall() {
   drupal_uninstall_schema('recipe');
 
   // remove node revisions
-  db_query("DELETE FROM {node_revisions} WHERE nid in (select nid from {node} WHERE type='%s')", 'recipe');
+  db_query("DELETE FROM {node_revision} WHERE nid in (select nid from {node} WHERE type = :type)", array(':type'=>'recipe'));
   // remove recipe nodes
-  db_query("DELETE FROM {node} WHERE type = '%s'", 'recipe');
+  db_query("DELETE FROM {node} WHERE type = :type", array(':type'=>'recipe'));
 
   // remove variables
-  db_query("DELETE FROM {variable} WHERE name like '%s%%'", 'recipe_');
+  db_query("DELETE FROM {variable} WHERE name like ':type%%'", array(':type'=>'recipe'));
 }
 
 

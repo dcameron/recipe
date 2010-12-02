@@ -118,7 +118,7 @@ function recipe_get_nodes_for_ingredients($ids = array()) {
   $placeholders = implode(',', array_fill(0, count($ids), "%d"));
   $sql = "SELECT DISTINCT n.nid, n.title, n.sticky FROM {node} n, {recipe_node_ingredient} rni WHERE n.nid=rni.nid AND rni.ingredient_id IN ($placeholders) AND n.type='recipe' AND n.status=1 ORDER BY n.sticky DESC, n.title";
   $result = db_query($sql, $ids);
-  while ($node = db_fetch_object($result)) {
+  foreach ($result as $node) {
     $list[] = $node;
   }
   return $list;
@@ -133,7 +133,7 @@ function recipe_get_ingredients($iid = NULL) {
     $result = db_query("SELECT DISTINCT ri.id, ri.name FROM {recipe_ingredient} ri, {recipe_node_ingredient} rni  WHERE ri.id=rni.ingredient_id AND ri.id=%d ORDER BY name", $iid);
   }
   $list = array();
-  while ($row = db_fetch_object($result)) {
+  foreach ($result as $row) {
     $list[] = $row;
   }
   return $list;

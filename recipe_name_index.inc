@@ -83,7 +83,7 @@ function theme_recipe_name_index_page($alpha_list = NULL, $node_list = NULL) {
 function recipe_get_alpha_nodes() {
   $list = array();
   $result = db_query("SELECT DISTINCT n.nid, n.title, n.sticky FROM {node} n WHERE n.type='recipe' AND n.status=1 ORDER BY n.title, n.sticky DESC");
-  while ($node = db_fetch_object($result)) {
+  foreach ($result as $node) {
     $list[] = $node;
   }
   return $list;
