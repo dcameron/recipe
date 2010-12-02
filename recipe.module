@@ -1330,18 +1330,18 @@ function recipe_node_prepare($node, $teaser = FALSE) {
   return $node;
 }
 
-/**
- * Hook into generic node creation/update and check if the added node
- * fixes any links in existing recipes.
+
+/*
+ * If there is an ingredient with the same name as a node type ingredient, link them.
  */
-function recipe_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
-  switch ($op) {
-    case 'insert':
-    case 'update':
-      if ($node->type == 'ingredient') {
-        db_query("UPDATE {recipe_ingredient} SET link = %d WHERE LOWER(name) = '%s'", $node->nid, trim(strtolower($node->title)));
-      }
-      break;
+function recipe_node_update($node) {
+  if ($node->type == 'ingredient') {
+    db_query("UPDATE {recipe_ingredient} SET link = :link WHERE LOWER(name) = :name", array(':link' => $node->nid, ':name' => trim(strtolower($node->title))));
+  }
+}
+function recipe_node_insert($node) {
+  if ($node->type == 'ingredient') {
+    recipe_node_update($node);
   }
 }
 
