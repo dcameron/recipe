@@ -146,7 +146,7 @@ function recipe_node_info() {
   return array(
     'recipe' => array(
       'name' => t('Recipe'),
-      'module' => 'recipe',
+      'base' => 'recipe',
       'description' => t('Share your favorite recipes with your fellow cooks.'),
     )
   );
