@@ -193,12 +193,12 @@ function recipe_delete($node) {
 * Implementation of hook_form().
 */
 function recipe_form(&$node, $form_state) {
-  $type = node_get_types('type', $node);
+  $node_types = _node_types_build()->types;
 
   // Title.
   $form['title'] = array(
     '#type' => 'textfield',
-    '#title' => check_plain($type->title_label),
+    '#title' => check_plain($node_types['recipe']->title_label),
     '#default_value' => $node->title,
     '#required' => TRUE,
     '#weight' => -6,
@@ -684,7 +684,7 @@ function recipe_view($node, $teaser = FALSE, $page = FALSE) {
   }
 
   // Prepare and sanitize node fields.
-  $node = recipe_node_prepare($node, $teaser);
+  $node = recipe_node_sanitize($node, $teaser);
 
   // If it is a teaser, you're done.
   if ($teaser) {
@@ -1284,13 +1284,12 @@ function recipe_unit_from_name($name) {
 
 
 /**
- * Custom version of node_prepare().
  * All recipe fields should be run through one of the drupal data checks.
  */
-function recipe_node_prepare($node, $teaser = FALSE) {
+function recipe_node_sanitize($node, $teaser = FALSE) {
 
   // Clean and filter the normal node fields.
-  $node = node_prepare($node, $teaser);
+  //$node = node_prepare($node, $teaser);
 
   if ($teaser == FALSE) {
     $node->body = check_markup($node->body, $node->format, FALSE);
