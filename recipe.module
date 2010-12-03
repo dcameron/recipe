@@ -117,7 +117,7 @@ function recipe_permission() {
  * Implementation of hook_load().
  */
 function recipe_load($node) {
-  $res = db_fetch_object(db_query("SELECT * FROM {recipe} WHERE nid = :nid", array(':nid' => $node->nid)));
+  $res = db_query("SELECT * FROM {recipe} WHERE nid = :nid", array(':nid' => $node->nid));
   $recipe = current($res);
   $recipe->ingredients = recipe_load_ingredients($node);
   return $recipe;
@@ -904,11 +904,11 @@ function recipe_ingredient_id_from_name($name) {
   static $cache;
 
   if (!$cache[$name]) {
-    $ingredient_id = db_query("SELECT id FROM {recipe_ingredient} WHERE LOWER(name) = :name", array(':name' => trim(strtolower($name))));
+    $ingredient_id = db_query("SELECT id FROM {recipe_ingredient} WHERE LOWER(name) = :name", array(':name' => trim(strtolower($name))))->fetchField();
 
     if (!$ingredient_id) {
       global $active_db;
-      $node_link = db_query("SELECT nid FROM {node} n WHERE title = :title;", array(':title' => $name));
+      $node_link = db_query("SELECT nid FROM {node} n WHERE title = :title;", array(':title' => $name))->fetchField();
       if (!$node_link) {
         $node_link = 0;
       }
@@ -917,7 +917,7 @@ function recipe_ingredient_id_from_name($name) {
         $name = trim(strtolower($name));
       }
       db_query("INSERT INTO {recipe_ingredient} (name, link) VALUES ('%s', %d)", $name, $node_link);
-      $ingredient_id = db_query("SELECT id FROM {recipe_ingredient} WHERE LOWER(name)='%s'", trim(strtolower($name)));
+      $ingredient_id = db_query("SELECT id FROM {recipe_ingredient} WHERE LOWER(name) = :name", array(':name' => trim(strtolower($name))))->fetchField();
     }
     $cache[$name] = $ingredient_id;
   }
@@ -1055,7 +1055,7 @@ function recipe_save_ingredients($node) {
 
     // Delete, if you have a valid ri_id and the ingredient name is blank.
     if ( isset($ingredient['ri_id']) && $ingredient['name'] == '' ) {
-      db_query("DELETE FROM {recipe_node_ingredient} WHERE id = %d", $ingredient['ri_id']);
+      db_query("DELETE FROM {recipe_node_ingredient} WHERE id = :id", array(':id' => $ingredient['ri_id']));
     }
 
     // Update, if you have a valid ri_id and the ingredient has a name.
@@ -1122,7 +1122,7 @@ function recipe_load_ingredients($node) {
   ri.weight, ri.id", $node->nid);
 
   $ingredients = array();
-  while ($ingredient = db_fetch_object($rs)) {
+  foreach ($rs as $ingredient) {
     $ingredients[] = $ingredient;
   }
 
