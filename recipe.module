@@ -40,28 +40,28 @@ function recipe_theme($existing, $type, $theme, $path) {
 
     // The ingredients sub-form on the recipe edit screen.
     'ingredients_form' => array(
-      'arguments' => array('form' => NULL),
+      'render element' => 'form',
     ),
 
     'recipe_summary' => array(
       'function' => 'theme_recipe_summary',
-      'arguments' => array('node' => NULL, 'options' => array('show_title' => TRUE)),
+      'variables' => array('node' => NULL, 'options' => array('show_title' => TRUE)),
     ),
 
     'recipe_ingredients' => array(
       'function' => 'theme_recipe_ingredients',
-      'arguments' => array('node' => NULL),
+      'variables' => array('node' => NULL),
     ),
     'recipe_category_index_page' => array(
-      'arguments' => array('tree' => NULL),
+      'variables' => array('tree' => NULL),
       'file' => 'recipe_category_index.inc',
     ),
     'recipe_ingredient_index_page' => array(
-      'arguments' => array('tree' => NULL),
+      'variables' => array('tree' => NULL),
       'file' => 'recipe_ingredient_index.inc',
     ),
     'recipe_name_index_page' => array(
-      'arguments' => array($alpha_list = NULL, $node_list = NULL),
+      'variables' => array($alpha_list = NULL, $node_list = NULL),
       'file' => 'recipe_name_index.inc',
     ),
   );
@@ -113,14 +113,17 @@ function recipe_permission() {
   );
 }
 
+
 /**
  * Implementation of hook_load().
  */
-function recipe_load($node) {
-  $res = db_query("SELECT * FROM {recipe} WHERE nid = :nid", array(':nid' => $node->nid));
-  $recipe = current($res);
-  $recipe->ingredients = recipe_load_ingredients($node);
-  return $recipe;
+function recipe_load($nodes) {
+	print_r('ZIPPO:recipe_load');
+  $result = db_query('SELECT * FROM {recipe} WHERE nid IN (:nids)', array(':nids' => array_keys($nodes)));
+	foreach ($result as $record) {
+    $nodes[$record->nid]->recipe = $record;
+    $nodes[$record['nid']]->recipe['ingredients'] = recipe_load_ingredients($record['nid']);
+  }
 }
 
 /**
@@ -171,6 +174,7 @@ function recipe_node_info() {
       'name' => t('Recipe'),
       'base' => 'recipe',
       'description' => t('Share your favorite recipes with your fellow cooks.'),
+      'locked' => 1,
     )
   );
 }
@@ -216,13 +220,14 @@ function recipe_delete($node) {
 * Implementation of hook_form().
 */
 function recipe_form(&$node, $form_state) {
-  $node_types = _node_types_build()->types;
+
+  $type = node_type_get_type($node);
 
   // Title.
   $form['title'] = array(
     '#type' => 'textfield',
-    '#title' => check_plain($node_types['recipe']->title_label),
-    '#default_value' => $node->title,
+    '#title' => check_plain($type->title_label),
+    '#default_value' => !empty($node->title) ? $node->title : '',
     '#required' => TRUE,
     '#weight' => -6,
   );
@@ -232,7 +237,7 @@ function recipe_form(&$node, $form_state) {
     '#title' => t('Description'),
     '#type' => 'text_format',
     '#format' => isset($node->format) ? $node->format : NULL,
-    '#default_value' => $node->body,
+    '#default_value' => !empty($node->body) ? $node->body : '',
     '#cols' => 60,
     '#rows' => 1,
     '#description' => t('A short description or "teaser" for the recipe.'),
@@ -240,27 +245,29 @@ function recipe_form(&$node, $form_state) {
     '#weight' => -5,
   );
 
-
   $form['yield'] = array(
     '#type' => 'textfield',
     '#title' => t('Yield'),
-    '#default_value' => $node->yield,
+    '#default_value' => !empty($node->yield) ? $node->yield : '',
     '#size' => 4,
     '#maxlength' => 4,
     '#description' => t('The number of servings the recipe will make (whole number integer, ie 5 or 6).'),
     '#required' => TRUE,
     '#weight' => -4,
   );
+
+
   $form['yield_unit'] = array(
     '#type' => 'textfield',
     '#title' => t('Yield Units'),
-    '#default_value' => ($node->yield_unit == '')?t('Servings'):$node->yield_unit,
+    '#default_value' => empty($node->yield_unit) ? t('Servings') : $node->yield_unit,
     '#size' => 16,
     '#maxlength' => 64,
     '#description' => t('The units for the yield field(ie servings, people, cans, cookies, etc).'),
     '#required' => FALSE,
     '#weight' => -4,
   );
+
   $form['ingredients'] = array(
     '#type' => 'fieldset',
     '#collapsible' => FALSE,
@@ -273,7 +280,7 @@ function recipe_form(&$node, $form_state) {
   // This is the autocomplete callback url.
   $callback = 'recipe/ingredient/autocomplete';
 
-  if ( !is_array($node->ingredients) ) {
+  if ( empty($node->ingredients) || !is_array($node->ingredients) ) {
     $node->ingredients = array();
   }
   if (isset($form_state['add_ingredients']) || count($node->ingredients) == 0) {
@@ -301,20 +308,20 @@ function recipe_form(&$node, $form_state) {
     // Strange, but html_entity_decode() doesn't handle &frasl;
     $form['ingredients'][$id]['quantity'] = array(
       '#type' => 'textfield',
-      '#title' => '',
+      '#title' => t('Quantity'),
       '#default_value' => preg_replace('/\&frasl;/', '/', recipe_ingredient_quantity_from_decimal($ingredient->quantity, TRUE)),
       '#size' => 8,
       '#maxlength' => 8,
     );
     $form['ingredients'][$id]['unit_id'] = array(
       '#type' => 'select',
-      '#title' => '',
+      '#title' => t('Unit'),
       '#default_value' => $ingredient->unit_id,
       '#options' => recipe_unit_options(),
     );
     $form['ingredients'][$id]['name'] = array(
       '#type' => 'textfield',
-      '#title' => '',
+      '#title' => t('Name'),
       '#default_value' => $ingredient->name,
       '#size' => 25,
       '#maxlength' => 128,
@@ -322,13 +329,14 @@ function recipe_form(&$node, $form_state) {
     );
     $form['ingredients'][$id]['note'] = array(
       '#type' => 'textfield',
-      '#title' => '',
+      '#title' => t('Note'),
       '#default_value' => $ingredient->note,
       '#size' => 40,
       '#maxlength' => 256
     );
     $form['ingredients'][$id]['weight'] = array(
       '#type' => 'weight',
+      '#title' => t('Weight'),
       '#default_value' => $ingredient->weight,
       '#delta' => $weight_delta,
     );
@@ -349,7 +357,7 @@ function recipe_form(&$node, $form_state) {
     '#title' => t('Instructions'),
     '#type' => 'text_format',
     '#format' => isset($node->format) ? $node->format : NULL,
-    '#default_value' => $node->instructions,
+    '#default_value' => !empty($node->instructions) ? $node->instructions : '',
     '#cols' => 60,
     '#rows' => 10,
     '#description' => t('Step by step instructions on how to prepare and cook the recipe.'),
@@ -359,7 +367,7 @@ function recipe_form(&$node, $form_state) {
   $form["source"] = array(
     '#type' => 'textfield',
     '#title' => t('Source'),
-    '#default_value' => $node->source,
+    '#default_value' => !empty($node->source) ? $node->source : '',
     '#size' => 60,
     '#maxlength' => 127,
     '#description' => t('Optional. Does anyone else deserve credit for this recipe?'),
@@ -372,7 +380,7 @@ function recipe_form(&$node, $form_state) {
     '#title' => t('Additional notes'),
     '#type' => 'text_format',
     '#format' => isset($node->format) ? $node->format : NULL,
-    '#default_value' => $node->notes,
+    '#default_value' => !empty($node->notes) ? $node->notes : '',
     '#cols' => 60,
     '#rows' => 5,
     '#description' => t('Optional. Describe a great dining experience relating to this recipe, or note which wine or other dishes complement this recipe.'),
@@ -382,7 +390,7 @@ function recipe_form(&$node, $form_state) {
   $form['preptime'] = array(
     '#type' => 'select',
     '#title' => t('Preparation time'),
-    '#default_value' => $node->preptime,
+    '#default_value' => !empty($node->preptime) ? $node->preptime : '',
     '#options' => array(
       5 => t('5 minutes'),
       10 => t('10 minutes'),
@@ -414,28 +422,40 @@ function recipe_form(&$node, $form_state) {
 }
 
 
-function theme_ingredients_form($form) {
+function theme_ingredients_form($variables) {
+  $form = $variables['form'];
 
   $header = array('', t('Quantity'), t('Units'), t('Ingredient name'), t('Processing/Notes'), t('Sort Weight'));
+  $rows = array();
   drupal_add_tabledrag('ingredient-list', 'order', 'sibling', 'ingredient-weight');
 
   foreach (element_children($form) as $key) {
+  	
     // Skip the more ingredients button
     if ( is_numeric($key) ) {
-      // Add class to ingredient weight fields for drag and drop.
-      $form[$key]['weight']['#attributes']['class'] = 'ingredient-weight';
 
-      $row = array('');
-      $row[] = drupal_render($form[$key]['ri_id']) . drupal_render($form[$key]['quantity']);
-      $row[] = drupal_render($form[$key]['unit_id']);
-      $row[] = drupal_render($form[$key]['name']);
-      $row[] = drupal_render($form[$key]['note']);
-      $row[] = drupal_render($form[$key]['weight']);
-      $rows[] = array('data' => $row, 'class' => 'draggable');
+	    // Set special classes for drag and drop updating.
+	    $form[$key]['weight']['#attributes']['class'] = array('ingredient-weight');
+
+	    // Build the table row.
+	    $row = array(
+	      'data' => array(
+	        drupal_render($form[$key]['ri_id']) . drupal_render($form[$key]['quantity'])
+	      ),
+	      'class' => array('draggable'),
+	    );
+
+      $row['data'][] = drupal_render($form[$key]['unit_id']);
+      $row['data'][] = drupal_render($form[$key]['name']);
+      $row['data'][] = drupal_render($form[$key]['note']);
+      $row['data'][] = drupal_render($form[$key]['weight']);
+      $rows[] = $row;
     }
   }
-  $output = theme('table', $header, $rows, array('id' => 'ingredient-list'));
-  $output .= drupal_render($form);
+
+  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'ingredient-list')));
+  $output .= drupal_render_children($form);
+
   return $output;
 }
 
@@ -648,7 +668,7 @@ function recipe_block_view($delta = '') {
  * Implementation of hook_view().
  */
 function recipe_view($node, $teaser = FALSE, $page = FALSE) {
-
+print "recipe_view";
   drupal_add_css(drupal_get_path('module', 'recipe') . '/recipe.css');
 
   if ($page) {
@@ -867,9 +887,9 @@ function theme_recipe_summary($node = NULL, $options = array('show_title' => TRU
  */
 function recipe_unit_options() {
   static $options;
-  static $unit_rs;
+  static $result;
 
-  if (!isset($unit_rs)) {
+  if (!isset($result)) {
     $order_by = '';
     // US measure preferred.
     if ( variable_get('recipe_preferred_system_of_measure', 0) == 0 ) {
@@ -880,16 +900,16 @@ function recipe_unit_options() {
       $order_by = 'type asc, metric desc, name';
     }
     $options = array();
-    $unit_res = db_query("SELECT id, type, name, abbreviation FROM {recipe_unit} ORDER BY :order_by", array(':order_by' => $order_by));
-    foreach  ($unit_res as $r) {
-      if (isset($r->type)) {
-        if (!isset($options[$r->type])) {
-          $options[$r->type] = array();
+    $result = db_query("SELECT id, type, name, abbreviation FROM {recipe_unit} ORDER BY $order_by", array());
+    foreach ($result as $record) {
+      if (isset($record->type)) {
+        if (!isset($options[$record->type])) {
+          $options[$record->type] = array();
         }
-        $options[$r->type][$r->id] = t('@name (@abbreviation)', array('@name' => $r->name, '@abbreviation' => $r->abbreviation));
+        $options[$record->type][$record->id] = t('@name (@abbreviation)', array('@name' => $record->name, '@abbreviation' => $record->abbreviation));
       }
       else {
-        $options[$r->id] = t('@name (@abbreviation)', array('@name' => $r->name, '@abbreviation' => $r->abbreviation));
+        $options[$record->id] = t('@name (@abbreviation)', array('@name' => $record->name, '@abbreviation' => $record->abbreviation));
       }
     }
   }
@@ -1098,7 +1118,7 @@ function _in_array($ingredient_object, $ingredient_list) {
 /**
  * Loads the ingredients for a recipe
  */
-function recipe_load_ingredients($node) {
+function recipe_load_ingredients($nid) {
   $rs = db_query("
   SELECT
     ri.id as 'ri_id',
@@ -1119,7 +1139,7 @@ function recipe_load_ingredients($node) {
     AND ri.unit_id = u.id
     AND ri.nid = %d
   ORDER BY
-  ri.weight, ri.id", $node->nid);
+  ri.weight, ri.id", $nid);
 
   $ingredients = array();
   foreach ($rs as $ingredient) {
@@ -1198,11 +1218,11 @@ function recipe_export($type = 'html', $nid = NULL, $yield = NULL) {
  */
 function recipe_autocomplete_page($string = "", $limit = 10) {
   $matches = array();
-  $rs = db_query("SELECT name FROM {recipe_ingredient} WHERE LOWER(name) LIKE '%s%%' ORDER BY name LIMIT %d", strtolower($string), $limit);
-  foreach ($rs as $r) {
-    $matches[$r->name] = check_plain($r->name);
+  $result = db_query("SELECT name FROM {recipe_ingredient} WHERE LOWER(name) LIKE :name ORDER BY name LIMIT $limit", array(':name' => strtolower($string) . '%'));
+  foreach ($result as $record) {
+    $matches[$record->name] = check_plain($record->name);
   }
-  drupal_json($matches);
+  drupal_json_output($matches);
   exit();
 }
 

@@ -209,15 +209,19 @@ function recipe_disable() {
  * Load the recipe_units table.
  */
 function recipe_populate_units() {
-  $s = TRUE;
   $units = get_default_units();
   foreach ( $units as $u ) {
-    $s = $s && db_query(
-      "INSERT INTO {recipe_unit} (name, abbreviation, metric, type, aliases) VALUES ('%s', '%s', %d, '%s', '%s')",
-        $u['name'], $u['abbreviation'], $u['metric'], $u['type'], $u['aliases']
-    );
+		db_insert('recipe_unit')
+		  ->fields(array(
+		    'name' => $u['name'],
+		    'abbreviation' => $u['abbreviation'],
+		    'metric' => $u['metric'],
+		    'type' => $u['type'],
+		    'aliases' => $u['aliases'],
+		  ))
+		  ->execute();  	
   }
-  return $s;
+  return TRUE;
 }
 
 
