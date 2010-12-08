@@ -4,8 +4,8 @@
 /* Summary Box */
 .recipe-summary {
   float: right;
+  margin:0; padding:0;
   width: 20em;
-  margin: 0 0 1em 1em;
 }
 .recipe-summary table {
   border-collapse: collapse;
@@ -16,7 +16,13 @@
   padding: .2em;
 }
 .recipe-summary th {
-  background: #eee;
+  background: #E0E0E0;
+  color: black;
+  font-weight: bold;
+}
+.recipe-summary td {
+  background: white;
+  color: black;
 }
 #edit-custom-yield-wrapper {
   display: inline;
@@ -25,18 +31,22 @@
   width: 10em;
 }
 .recipe-summary p {
-  margin:0;
-  padding:0;
+  margin:0; padding:0;
 }
-
+.recipe-summary h2 {
+  margin:0; padding:0;
+}
 
 /* Ingredient List in Recipe view */
 .recipe-ingredients {
-  width:60%;
+  width:55%;
+}
+.recipe-ingredients table th,
+.recipe-ingredients table td {
+  background: #FFFFFF;
 }
 .recipe-ingredients table {
-  margin:0;
-  padding:0;
+  margin:0; padding:0;
 }
 .recipe-ingredients table tbody {
   border-style:none;

@@ -8,6 +8,32 @@
 
 
 /**
+ * Implementation of hook_install().
+ * Automatically creates tables in hook_schema.
+ */
+function recipe_install() {
+  // Add units to the units table.
+  _recipe_populate_units();
+}
+
+
+/**
+ * Implementation of hook_uninstall().
+ * Automatically drops tables in hook_schema.
+ */
+function recipe_uninstall() {
+
+  // remove node revisions
+  db_query('DELETE FROM {node_revision} WHERE nid in (select nid from {node} WHERE type = :type)', array(':type' => 'recipe'));
+  // remove recipe nodes
+  db_query('DELETE FROM {node} WHERE type = :type', array(':type' => 'recipe'));
+
+  // remove variables
+  db_query('DELETE FROM {variable} WHERE name like :type', array(':type' => 'recipe_%'));
+}
+
+
+/**
 * Implementation of hook_schema().
 */
 function recipe_schema() {
@@ -35,6 +61,9 @@ function recipe_schema() {
         'not null' => TRUE,
         'default' => '',
         'description' => 'The units for the yield field(servings, people, cans, cookies, etc).',
+      ),
+      'description' => array(
+        'type' => 'text',
       ),
       'instructions' => array(
         'type' => 'text',
@@ -162,19 +191,12 @@ function recipe_schema() {
 
 
 /**
- * Implementation of hook_install().
- */
-function recipe_install() {
-  drupal_install_schema('recipe');
-  recipe_populate_units();
-}
-
-
-/**
  * Implementation of hook_enable().
  * Remember last used recipe vocabs.
  */
+/*
 function recipe_enable() {
+
   $vocab_ids = variable_get('recipe_last_vocab_ids', FALSE);
   if ( $vocab_ids ) {
     foreach ($vocab_ids as $vid) {
@@ -187,13 +209,17 @@ function recipe_enable() {
       }
     }
   }
+
+
 }
+ */
 
 
 /**
  * Implementation of hook_disable().
  * Reinstate last used recipe vocabs.
  */
+ /*
 function recipe_disable() {
   if ($vocabs = taxonomy_get_vocabularies('recipe')) {
     $vocab_ids = array();
@@ -203,126 +229,34 @@ function recipe_disable() {
     variable_set('recipe_last_vocab_ids', $vocab_ids);
   }
 }
+*/
 
 
 /**
  * Load the recipe_units table.
  */
-function recipe_populate_units() {
-  $units = get_default_units();
+function _recipe_populate_units() {
+  $units = _recipe_get_default_units();
   foreach ( $units as $u ) {
-		db_insert('recipe_unit')
-		  ->fields(array(
-		    'name' => $u['name'],
-		    'abbreviation' => $u['abbreviation'],
-		    'metric' => $u['metric'],
-		    'type' => $u['type'],
-		    'aliases' => $u['aliases'],
-		  ))
-		  ->execute();  	
+    db_insert('recipe_unit')
+      ->fields(array(
+        'name' => $u['name'],
+        'abbreviation' => $u['abbreviation'],
+        'metric' => $u['metric'],
+        'type' => $u['type'],
+        'aliases' => $u['aliases'],
+      ))
+      ->execute();
   }
   return TRUE;
 }
 
 
 /**
-* Implementation of hook_uninstall().
-*/
-function recipe_uninstall() {
-  // remove db tables
-  drupal_uninstall_schema('recipe');
-
-  // remove node revisions
-  db_query("DELETE FROM {node_revision} WHERE nid in (select nid from {node} WHERE type = :type)", array(':type' => 'recipe'));
-  // remove recipe nodes
-  db_query("DELETE FROM {node} WHERE type = :type", array(':type' => 'recipe'));
-
-  // remove variables
-  db_query("DELETE FROM {variable} WHERE name like ':type%%'", array(':type' => 'recipe'));
-}
-
-
-/**
- * Takes schema from 5.x-1.0 version up to 6.x, pre 6100
- */
-function recipe_update_6000() {
-  $ret = array();
-  db_change_field($ret, 'recipe', 'nid', 'nid', array('type' => 'serial', 'not null' => TRUE, 'unsigned' => TRUE, 'size' => 'normal'));
-  db_change_field($ret, 'recipe', 'yield', 'yield', array('type' => 'int', 'not null' => TRUE, 'unsigned' => FALSE));
-  db_change_field($ret, 'recipe_node_ingredient', 'unit_id', 'unit_id', array('type' => 'int', 'not null' => TRUE, 'unsigned' => TRUE));
-  db_change_field($ret, 'recipe_node_ingredient', 'quantity', 'quantity', array('type' => 'float', 'not null' => FALSE));
-  db_change_field($ret, 'recipe_ingredient', 'link', 'link', array('type' => 'int', 'not null' => TRUE, 'unsigned' => TRUE));
-  db_change_field($ret, 'recipe_unit', 'id', 'id', array('type' => 'serial', 'not null' => TRUE, 'unsigned' => TRUE, 'size' => 'normal'));
-  db_change_field($ret, 'recipe_unit', 'name', 'name', array('type' => 'varchar', 'length' => 255, 'not null' => FALSE));
-  db_change_field($ret, 'recipe_unit', 'abbreviation', 'abbreviation', array('type' => 'varchar', 'length' => 8, 'not null' => FALSE));
-  db_change_field($ret, 'recipe_unit', 'metric', 'metric', array('type' => 'int', 'not null' => TRUE, 'unsigned' => TRUE, 'default' => 0));
-  db_change_field($ret, 'recipe_unit', 'type', 'type', array('type' => 'varchar', 'length' => 6, 'not null' => TRUE, 'default' => 'Mass'));
-  return $ret;
-}
-
-/**
- * Adds weight column to recipe_node_ingredient
- */
-function recipe_update_6100() {
-  $ret = array();
-  db_add_field($ret, 'recipe_node_ingredient', 'weight', array('type' => 'int', 'not null' => TRUE, 'default' => 0));
-  return $ret;
-}
-
-/**
- * Adds aliases column to recipe_unit
- */
-function recipe_update_6101() {
-  $ret = array();
-  db_add_field($ret, 'recipe_unit', 'aliases', array('type' => 'varchar', 'length' => 128, 'not null' => TRUE, 'default' => ''));
-  $units = get_default_units();
-  foreach ( $units as $u ) {
-    db_update('recipe_unit')
-      ->condition('name', $u['name'])
-      ->fields(array('aliases' => $u['aliases']))
-      ->execute();
-  }
-  return $ret;
-}
-
-/**
- * Adds note column to the recipe_node_ingredient table.
- */
-function recipe_update_6102() {
-  $ret = array();
-  db_add_field($ret, 'recipe_node_ingredient', 'note', array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''));
-  return $ret;
-}
-
-
-/**
- * Adds yield_unit column to the recipe table.
- */
-function recipe_update_6103() {
-  $ret = array();
-  db_add_field($ret, 'recipe', 'yield_unit',  array('type' => 'varchar', 'length' => 64, 'not null' => TRUE, 'default' => ''));
-  return $ret;
-}
-
-
-/**
- * Fixes bad index depth setting value from recipe-6.x-1.1
- */
-function recipe_update_6104() {
-  $ret = array();
-  $depth = variable_get('recipe_index_depth', 4);
-  if ( $depth <= 0 ) {
-    // Let the stock default value handle this.
-    variable_del('recipe_index_depth');
-  }
-  return $ret;
-}
-
-/**
  * Get an array of the default unit values.
  * Used to fill the recipe_unit table.
  */
-function get_default_units() {
+function _recipe_get_default_units() {
   $units = array(
     array('name' => 'Slice',               'abbreviation' => 'sli', 'metric' => 0, 'type' => 'Unit', 'aliases' => ''),
     array('name' => 'Unit',                'abbreviation' => '',    'metric' => 0, 'type' => 'Unit', 'aliases' => 'each,ea,whole'),
@@ -355,4 +289,81 @@ function get_default_units() {
     array('name' => 'Unknown',             'abbreviation' => 'Unknown', 'metric' => 0, 'type' => 'Unit', 'aliases' => '')
   );
   return $units;
+}
+
+/**
+ * Takes schema from 5.x-1.0 version up to 6.x, pre 6100
+ */
+function recipe_update_6000() {
+  $ret = array();
+  db_change_field($ret, 'recipe', 'nid', 'nid', array('type' => 'serial', 'not null' => TRUE, 'unsigned' => TRUE, 'size' => 'normal'));
+  db_change_field($ret, 'recipe', 'yield', 'yield', array('type' => 'int', 'not null' => TRUE, 'unsigned' => FALSE));
+  db_change_field($ret, 'recipe_node_ingredient', 'unit_id', 'unit_id', array('type' => 'int', 'not null' => TRUE, 'unsigned' => TRUE));
+  db_change_field($ret, 'recipe_node_ingredient', 'quantity', 'quantity', array('type' => 'float', 'not null' => FALSE));
+  db_change_field($ret, 'recipe_ingredient', 'link', 'link', array('type' => 'int', 'not null' => TRUE, 'unsigned' => TRUE));
+  db_change_field($ret, 'recipe_unit', 'id', 'id', array('type' => 'serial', 'not null' => TRUE, 'unsigned' => TRUE, 'size' => 'normal'));
+  db_change_field($ret, 'recipe_unit', 'name', 'name', array('type' => 'varchar', 'length' => 255, 'not null' => FALSE));
+  db_change_field($ret, 'recipe_unit', 'abbreviation', 'abbreviation', array('type' => 'varchar', 'length' => 8, 'not null' => FALSE));
+  db_change_field($ret, 'recipe_unit', 'metric', 'metric', array('type' => 'int', 'not null' => TRUE, 'unsigned' => TRUE, 'default' => 0));
+  db_change_field($ret, 'recipe_unit', 'type', 'type', array('type' => 'varchar', 'length' => 6, 'not null' => TRUE, 'default' => 'Mass'));
+  return $ret;
+}
+
+/**
+ * Adds weight column to recipe_node_ingredient
+ */
+function recipe_update_6100() {
+  db_add_field('recipe_node_ingredient', 'weight', array('type' => 'int', 'not null' => TRUE, 'default' => 0));
+}
+
+/**
+ * Adds aliases column to recipe_unit
+ */
+function recipe_update_6101() {
+  db_add_field('recipe_unit', 'aliases', array('type' => 'varchar', 'length' => 128, 'not null' => TRUE, 'default' => ''));
+  $units = _recipe_get_default_units();
+  foreach ( $units as $u ) {
+    db_update('recipe_unit')
+      ->condition('name', $u['name'])
+      ->fields(array('aliases' => $u['aliases']))
+      ->execute();
+  }
+}
+
+/**
+ * Adds note column to the recipe_node_ingredient table.
+ */
+function recipe_update_6102() {
+  db_add_field('recipe_node_ingredient', 'note', array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''));
+}
+
+
+/**
+ * Adds yield_unit column to the recipe table.
+ */
+function recipe_update_6103() {
+  db_add_field('recipe', 'yield_unit',  array('type' => 'varchar', 'length' => 64, 'not null' => TRUE, 'default' => ''));
+}
+
+
+/**
+ * Fixes bad index depth setting value from recipe-6.x-1.1
+ */
+function recipe_update_6104() {
+  $ret = array();
+  $depth = variable_get('recipe_index_depth', 4);
+  if ( $depth <= 0 ) {
+    // Let the stock default value handle this.
+    variable_del('recipe_index_depth');
+  }
+  return $ret;
+}
+
+
+/**
+ * Adds description column to the recipe table.
+ * TODO: Should also migrate old node body fields into description.
+ */
+function recipe_update_7000() {
+  db_add_field('recipe', 'description',  array('type' => 'text'));
 }

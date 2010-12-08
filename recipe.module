@@ -11,6 +11,7 @@
 define('RECIPE_BLOCK_RECENT', 0);
 define('RECIPE_BLOCK_SUMMARY', 1);
 
+
 /**
  * Implementation of hook_help().
  */
@@ -169,7 +170,6 @@ function recipe_link($type, $node = NULL, $teaser = FALSE) {
 
 /**
  * Implementation of hook_node_info().
- * Exposes link under create content.
  */
 function recipe_node_info() {
   return array(
@@ -178,6 +178,7 @@ function recipe_node_info() {
       'base' => 'recipe',
       'description' => t('Share your favorite recipes with your fellow cooks.'),
       'locked' => 1,
+      'has_title' => TRUE,
     )
   );
 }
@@ -186,8 +187,7 @@ function recipe_node_info() {
 /**
  * Implementation of hook_insert().
  *
- * As a new node is being inserted into the database, we need to do our own
- * database inserts.
+ * Insert a new recipe into the database.
  */
 function recipe_insert($node) {
 
@@ -197,6 +197,7 @@ function recipe_insert($node) {
       'source' => $node->source,
       'yield' => $node->yield,
       'yield_unit' => $node->yield_unit,
+      'description' => $node->description['value'],
       'instructions' => $node->instructions['value'],
       'notes' => $node->notes['value'],
       'preptime' => $node->preptime
@@ -214,11 +215,20 @@ function recipe_insert($node) {
  * database updates.
  */
 function recipe_update($node) {
-  db_query("UPDATE {recipe} SET source = '%s', yield = %d, yield_unit = '%s', notes = '%s', instructions = '%s', preptime = %d WHERE nid = %d", $node->source, $node->yield, $node->yield_unit, $node->notes, $node->instructions, $node->preptime, $node->nid);
-  if (!db_affected_rows()) {
-    recipe_insert($node);
-    return;
-  }
+
+  db_update('recipe')
+    ->fields(array(
+      'source' => $node->source,
+      'yield' => $node->yield,
+      'yield_unit' => $node->yield_unit,
+      'description' => $node->description['value'],
+      'instructions' => $node->instructions['value'],
+      'notes' => $node->notes['value'],
+      'preptime' => $node->preptime
+    ))
+    ->condition('nid', $node->nid)
+    ->execute();
+
   recipe_save_ingredients($node);
 }
 
@@ -234,7 +244,12 @@ function recipe_save_ingredients($node) {
     $node->ingredients = array();
   }
 
-  foreach ($node->ingredients as $ingredient) {
+  foreach ($node->ingredients as $key => $ingredient) {
+
+    // Skip the more ingredients button.
+    if ($key == 'recipe_more_ingredients') {
+      continue;
+    }
 
     // Delete, if you have a valid ri_id and the ingredient name is blank.
     if ( isset($ingredient['ri_id']) && $ingredient['name'] == '' ) {
@@ -299,20 +314,23 @@ function recipe_form(&$node, $form_state) {
   $type = node_type_get_type($node);
 
   // Title.
-  $form['title'] = array(
-    '#type' => 'textfield',
-    '#title' => check_plain($type->title_label),
-    '#default_value' => !empty($node->title) ? $node->title : '',
-    '#required' => TRUE,
-    '#weight' => -6,
-  );
+  if ($type->has_title) {
+    $form['title'] = array(
+      '#type' => 'textfield',
+      '#title' => check_plain($type->title_label),
+      '#required' => TRUE,
+      '#default_value' => $node->title,
+      '#maxlength' => 255,
+      '#weight' => -6,
+    );
+  }
 
   // WYSIWYG
-  $form['body'] = array(
+  $form['description'] = array(
     '#title' => t('Description'),
     '#type' => 'text_format',
     '#format' => isset($node->format) ? $node->format : NULL,
-    '#default_value' => !empty($node->body) ? $node->body : '',
+    '#default_value' => !empty($node->recipe->description) ? $node->recipe->description : '',
     '#cols' => 60,
     '#rows' => 1,
     '#description' => t('A short description or "teaser" for the recipe.'),
@@ -323,7 +341,7 @@ function recipe_form(&$node, $form_state) {
   $form['yield'] = array(
     '#type' => 'textfield',
     '#title' => t('Yield'),
-    '#default_value' => !empty($node->yield) ? $node->yield : '',
+    '#default_value' => !empty($node->recipe->yield) ? $node->recipe->yield : '',
     '#size' => 4,
     '#maxlength' => 4,
     '#description' => t('The number of servings the recipe will make (whole number integer, ie 5 or 6).'),
@@ -331,11 +349,10 @@ function recipe_form(&$node, $form_state) {
     '#weight' => -4,
   );
 
-
   $form['yield_unit'] = array(
     '#type' => 'textfield',
     '#title' => t('Yield Units'),
-    '#default_value' => empty($node->yield_unit) ? t('Servings') : $node->yield_unit,
+    '#default_value' => empty($node->recipe->yield_unit) ? t('Servings') : $node->recipe->yield_unit,
     '#size' => 16,
     '#maxlength' => 64,
     '#description' => t('The units for the yield field(ie servings, people, cans, cookies, etc).'),
@@ -355,23 +372,24 @@ function recipe_form(&$node, $form_state) {
   // This is the autocomplete callback url.
   $callback = 'recipe/ingredient/autocomplete';
 
-  if ( empty($node->ingredients) || !is_array($node->ingredients) ) {
-    $node->ingredients = array();
+  if ( empty($node->recipe->ingredients) || !is_array($node->recipe->ingredients) ) {
+    $node->recipe->ingredients = array();
   }
-  if (isset($form_state['add_ingredients']) || count($node->ingredients) == 0) {
+
+  if (isset($form_state['add_ingredients']) || count($node->recipe->ingredients) == 0) {
     unset($form_state['add_ingredients']);
     $add_count = variable_get('recipe_add_more_count', 5);
     for ($delta = 0; $delta < $add_count; $delta++) {
-      array_push($node->ingredients, array('ri_id' => NULL, 'quantity' => '', 'unit_id' => '', 'name' => '', 'note' => '', 'weight' => 0));
+      array_push($node->recipe->ingredients, array('ri_id' => NULL, 'quantity' => '', 'unit_id' => '', 'name' => '', 'note' => '', 'weight' => 0));
     }
   }
 
   // Weights range from -delta to +delta, so delta should be at least half
   // of the amount of blocks present. This makes sure all blocks in the same
   // region get an unique weight.
-  $weight_delta = count($node->ingredients);
+  $weight_delta = count($node->recipe->ingredients);
 
-  foreach ($node->ingredients as $id => $ingredient) {
+  foreach ($node->recipe->ingredients as $id => $ingredient) {
     // Sometimes $ingredient is an array.
     $ingredient = (object)$ingredient;
 
@@ -432,7 +450,7 @@ function recipe_form(&$node, $form_state) {
     '#title' => t('Instructions'),
     '#type' => 'text_format',
     '#format' => isset($node->format) ? $node->format : NULL,
-    '#default_value' => !empty($node->instructions) ? $node->instructions : '',
+    '#default_value' => !empty($node->recipe->instructions) ? $node->recipe->instructions : '',
     '#cols' => 60,
     '#rows' => 10,
     '#description' => t('Step by step instructions on how to prepare and cook the recipe.'),
@@ -442,7 +460,7 @@ function recipe_form(&$node, $form_state) {
   $form["source"] = array(
     '#type' => 'textfield',
     '#title' => t('Source'),
-    '#default_value' => !empty($node->source) ? $node->source : '',
+    '#default_value' => !empty($node->recipe->source) ? $node->recipe->source : '',
     '#size' => 60,
     '#maxlength' => 127,
     '#description' => t('Optional. Does anyone else deserve credit for this recipe?'),
@@ -455,7 +473,7 @@ function recipe_form(&$node, $form_state) {
     '#title' => t('Additional notes'),
     '#type' => 'text_format',
     '#format' => isset($node->format) ? $node->format : NULL,
-    '#default_value' => !empty($node->notes) ? $node->notes : '',
+    '#default_value' => !empty($node->recipe->notes) ? $node->recipe->notes : '',
     '#cols' => 60,
     '#rows' => 5,
     '#description' => t('Optional. Describe a great dining experience relating to this recipe, or note which wine or other dishes complement this recipe.'),
@@ -465,7 +483,7 @@ function recipe_form(&$node, $form_state) {
   $form['preptime'] = array(
     '#type' => 'select',
     '#title' => t('Preparation time'),
-    '#default_value' => !empty($node->preptime) ? $node->preptime : '',
+    '#default_value' => !empty($node->recipe->preptime) ? $node->recipe->preptime : '',
     '#options' => array(
       5 => t('5 minutes'),
       10 => t('10 minutes'),
@@ -540,14 +558,9 @@ function theme_ingredients_form($variables) {
  * entire form is rebuilt during the page reload.
  */
 function recipe_more_ingredients_submit($form, &$form_state) {
-  // Set the form to rebuild and run submit handlers.
-  node_form_submit_build_node($form, $form_state);
+  $form_state['rebuild'] = TRUE;
 
-  // Fake an empty preview.
-  // #341136: Taxonomy selection loses value on button click
-  $form_state['node_preview'] = '';
-
-  // Make the changes we want to the form state.
+  // If they clicked the more ingredients button, set a form_state signal.
   if ($form_state['values']['ingredients']['recipe_more_ingredients']) {
     $form_state['add_ingredients'] = 1;
   }
@@ -743,7 +756,6 @@ function recipe_block_view($delta = '') {
  * Implementation of hook_view().
  */
 function recipe_view($node, $view_mode) {
-print "recipe_view";
   drupal_add_css(drupal_get_path('module', 'recipe') . '/recipe.css');
 
   if ($view_mode == 'full' && node_is_page($node)) {
@@ -827,17 +839,12 @@ print "recipe_view";
     }
   }
 
-//print_r($node);
-
   // Begin filling the node->content array with with recipe items.
-/*
+
   $node->content['recipe_description'] = array(
-      '#value' => '<div class="recipe-description">' . theme('recipe_box', array('title' => t('Description'), 'content' => $node->body)) . '</div>',
-      '#weight' => recipe_content_extra_field_weight('body')
+      '#markup' => '<div class="recipe-description">' . theme('recipe_box', array('title' => t('Description'), 'content' => $node->recipe->description)) . '</div>',
+      '#weight' => recipe_content_extra_field_weight('description')
   );
-*/
-  // Clear the normal node body value.
-  //$node->content['body']['#value'] = '';
 
   $node->content['recipe_ingredients'] = array(
       '#markup' => '<div class="recipe-ingredients">' . theme('recipe_box', array('title' => t('Ingredients'), 'content' => theme('recipe_ingredients', array('node' => $node)))) . '</div>',
@@ -872,7 +879,7 @@ print "recipe_view";
 
 function hook_node_view_alter(&$build) {
 
-  //print_r($build);
+  print_r($build);
 
 }
 
@@ -933,7 +940,7 @@ function theme_recipe_ingredients($variables) {
 function theme_recipe_summary($variables) {
   $node = $variables['node'];
   $show_title = isset($variables['show_title']) ? $variables['show_title'] : FALSE;
-  $show_yield_form = isset($variables['show_yield_form']) ? $variables['show_title'] : FALSE;
+  $show_yield_form = isset($variables['show_yield_form']) ? $variables['show_yield_form'] : TRUE;
   // Construct the summary
   $output = '<table>';
 
@@ -1166,11 +1173,9 @@ function recipe_ingredient_quantity_from_fraction($ingredient_quantity) {
 }
 
 
-
-
 /**
  * $ingredient_list may be an array of objects or an array of array elements.
- */
+
 function _in_array($ingredient_object, $ingredient_list) {
   foreach ($ingredient_list as $i) {
     $i_name = '';
@@ -1186,6 +1191,8 @@ function _in_array($ingredient_object, $ingredient_list) {
   }
   return FALSE;
 }
+*/
+
 
 /**
  * Loads the ingredients for a recipe
@@ -1204,6 +1211,7 @@ function recipe_load_ingredients($nid) {
   $select->addField('u', 'abbreviation');
   $select->addField('ri', 'ingredient_id');
   $select->condition('ri.nid', $nid);
+  $select->orderBy('ri.weight', 'ASC');
 
   $ingredients = array();
   $result = $select->execute()->fetchAll(PDO::FETCH_ASSOC);
@@ -1822,8 +1830,8 @@ function strip_html_and_encode_entities($string) {
 
 
 /**
-* Implementation of hook_views_api for Views integration.
-*/
+ * Implementation of hook_views_api for Views integration.
+ */
 function recipe_views_api() {
  return array(
    'api' => 2,
@@ -1831,61 +1839,62 @@ function recipe_views_api() {
  );
 }
 
-/**
-* Implementation of hook_content_extra_fields().
-* Allow the meta tags fields to be sorted in the node edit forms.
-*/
-function recipe_content_extra_fields($type_name) {
 
-  if ( $type_name != 'recipe' ) {
-    return;
-  }
+/**
+ * Implementation of hook_field_extra_fields().
+ * This adds these fields to the manage fields UI for changing weights.
+ */
+function recipe_field_extra_fields() {
 
   $extra = array();
-  $extra['summary_box'] = array(
-    'label' => t('Summary Box'),
-    'description' => t('Recipe module form.'),
-    'weight' => -6,
-  );
-  $extra['body'] = array(
-    'label' => t('Description'),
-    'description' => t('Recipe module form.'),
-    'weight' => -5,
-  );
-  $extra['yield'] = array(
-    'label' => t('Yield'),
-    'description' => t('Recipe module form.'),
-    'weight' => -4,
-  );
-  $extra['yield_unit'] = array(
-    'label' => t('Yield units'),
-    'description' => t('Recipe module form.'),
-    'weight' => -4,
-  );
-  $extra['ingredients'] = array(
-    'label' => t('Ingredients'),
-    'description' => t('Recipe module form.'),
-    'weight' => -3,
-  );
-  $extra['instructions'] = array(
-    'label' => t('Instructions'),
-    'description' => t('Recipe module form.'),
-    'weight' => -2,
-  );
-  $extra['notes'] = array(
-    'label' => t('Additional notes'),
-    'description' => t('Recipe module form.'),
-    'weight' => -2,
-  );
-  $extra["source"] = array(
-    'label' => t('Source'),
-    'description' => t('Recipe module form.'),
-    'weight' => -2,
-  );
-  $extra['preptime'] = array(
-    'label' => t('Preparation time'),
-    'description' => t('Recipe module form.'),
-    'weight' => -1,
+  $extra['node']['recipe'] = array(
+    'form' => array(
+      'summary_box' => array(
+        'label' => t('Summary Box'),
+        'description' => t('Recipe module form.'),
+        'weight' => -6,
+      ),
+      'description' => array(
+        'label' => t('Description'),
+        'description' => t('Recipe module form.'),
+        'weight' => -5,
+      ),
+      'yield' => array(
+        'label' => t('Yield'),
+        'description' => t('Recipe module form.'),
+        'weight' => -4,
+      ),
+      'yield_unit' => array(
+        'label' => t('Yield units'),
+        'description' => t('Recipe module form.'),
+        'weight' => -4,
+      ),
+      'ingredients' => array(
+        'label' => t('Ingredients'),
+        'description' => t('Recipe module form.'),
+        'weight' => -3,
+      ),
+      'instructions' => array(
+        'label' => t('Instructions'),
+        'description' => t('Recipe module form.'),
+        'weight' => -2,
+      ),
+      'notes' => array(
+        'label' => t('Additional notes'),
+        'description' => t('Recipe module form.'),
+        'weight' => -2,
+      ),
+      "source" => array(
+        'label' => t('Source'),
+        'description' => t('Recipe module form.'),
+        'weight' => -2,
+      ),
+      'preptime' => array(
+        'label' => t('Preparation time'),
+        'description' => t('Recipe module form.'),
+        'weight' => -1,
+      ),
+    )
   );
 
   return $extra;
@@ -1897,15 +1906,16 @@ function recipe_content_extra_field_weight($pseudo_field_name) {
     return content_extra_field_weight('recipe', $pseudo_field_name);
   }
   else {
-    $recipe_fields = recipe_content_extra_fields('recipe');
-    if ( isset($recipe_fields[$pseudo_field_name]['weight']) ) {
-      return $recipe_fields[$pseudo_field_name]['weight'];
+    $recipe_fields = recipe_field_extra_fields();
+    if ( isset($recipe_fields['node']['recipe'][$pseudo_field_name]['weight']) ) {
+      return $recipe_fields['node']['recipe'][$pseudo_field_name]['weight'];
     }
     else {
       return 0;
     }
   }
 }
+
 
 function theme_recipe_box($variables) {
   $output = '<h2 class="title">' . $variables['title'] . '</h2><div>' . $variables['content'] . '</div>';
