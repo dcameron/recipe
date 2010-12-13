@@ -11,11 +11,14 @@ function recipe_name_index_page() {
 
   $node_list = recipe_get_alpha_nodes();
   $alpha_list = recipe_get_node_alpha_list($node_list);
-  return theme('recipe_name_index_page', $alpha_list, $node_list);
+  return theme('recipe_name_index_page', array('alpha_list' => $alpha_list, 'node_list' => $node_list));
 }
 
 
-function theme_recipe_name_index_page($alpha_list = NULL, $node_list = NULL) {
+function theme_recipe_name_index_page($variables) {
+
+  $alpha_list = $variables['alpha_list'];
+  $node_list = $variables['node_list'];
 
   // Render the alpha pager.
   $output = '<div class="recipe_name_alpha_list">';
@@ -50,20 +53,20 @@ function theme_recipe_name_index_page($alpha_list = NULL, $node_list = NULL) {
       $output1 = '';
       $last_alpha = '-';
       foreach ($node_list as $node) {
-        if ( $node->letter != $last_alpha ) {
+        if ( $node['letter'] != $last_alpha ) {
           if ( $last_alpha != '-' ) {
             $output1 .= "</p></fieldset>";
           }
-          $output1 .= '<fieldset><legend><a name="alpha_' . $node->letter . '">' . strtoupper($node->letter) . '</a></legend><p>';
-          $last_alpha = $node->letter;
+          $output1 .= '<fieldset><legend><a name="alpha_' . $node['letter'] . '">' . strtoupper($node['letter']) . '</a></legend><p>';
+          $last_alpha = $node['letter'];
         }
-        $output1 .= l($node->title, 'node/' . $node->nid) . '<br/>';
+        $output1 .= l($node['title'], 'node/' . $node['nid']) . '<br/>';
       }
       $output1 .= "</p></fieldset>";
       $output .= $output1;
     }
     else {
-      $output .= theme('box', t('No matching recipes'));
+      $output .= theme('recipe_box', array('content' => t('No matching recipes')));
     }
   }
 
@@ -81,31 +84,34 @@ function theme_recipe_name_index_page($alpha_list = NULL, $node_list = NULL) {
  *   A database query result suitable for use the node_title_list.
  */
 function recipe_get_alpha_nodes() {
-  $list = array();
-  $result = db_query("SELECT DISTINCT n.nid, n.title, n.sticky FROM {node} n WHERE n.type='recipe' AND n.status=1 ORDER BY n.title, n.sticky DESC");
-  foreach ($result as $node) {
-    $list[] = $node;
-  }
-  return $list;
+  $select = db_select('node', 'n');
+  $select->addField('n', 'nid');
+  $select->addField('n', 'title');
+  $select->addField('n', 'sticky');
+  $select->condition('n.type', 'recipe');
+  $select->condition('n.status', 1);
+  $select->orderBy('n.title', 'ASC');
+  $select->orderBy('n.sticky', 'DESC');
+  return $select->execute()->fetchAll(PDO::FETCH_ASSOC);
 }
 
 
 function recipe_get_node_alpha_list(&$node_list = NULL) {
   $alpha_list = array();
-  foreach ($node_list as $n) {
+  foreach ($node_list as &$n) {
     $letter = '';
-    if ( preg_match('/([A-Za-z0-9])/', $n->title, $matches) ) {
+    if ( preg_match('/([A-Za-z0-9])/', $n['title'], $matches) ) {
       $letter = strtolower($matches[1]);
     }
     else {
-      $letter = strtolower(substr($n->title, $i, 1));
+      $letter = strtolower(substr($n['title'], $i, 1));
     }
 
     if ( is_numeric($letter) ) {
       $letter = '0-9';
     }
 
-    $n->letter = $letter;
+    $n['letter'] = $letter;
     $alpha_list[$letter] = 1;
   }
 
@@ -116,13 +122,13 @@ function recipe_get_node_alpha_list(&$node_list = NULL) {
 
 function node_list_cmp($a, $b) {
   // Sort first by letter.
-  if ( $a->letter !=  $b->letter ) {
-    return ($a->letter < $b->letter) ? -1 : 1;
+  if ( $a['letter'] !=  $b['letter'] ) {
+    return ($a['letter'] < $b['letter']) ? -1 : 1;
   }
 
   // Next by title
-  if ( $a->title !=  $b->title ) {
-    return ($a->title < $b->title) ? -1 : 1;
+  if ( $a['title'] !=  $b['title'] ) {
+    return ($a['title'] < $b['title']) ? -1 : 1;
   }
 
   // They are the same.

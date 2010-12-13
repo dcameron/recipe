@@ -24,7 +24,7 @@ function recipe_ingredient_index_page() {
 
   // You have an ingredient id, build the node list.
   if ( $page_args['current_ingredient'] ) {
-    $page_args['node_list'] = recipe_get_nodes_for_ingredients(array($page_args['current_ingredient']->id));
+    $page_args['node_list'] = recipe_get_nodes_for_ingredients(array($page_args['current_ingredient']['id']));
   }
 
   return theme('recipe_ingredient_index_page', $page_args);
@@ -33,7 +33,6 @@ function recipe_ingredient_index_page() {
 
 function theme_recipe_ingredient_index_page($page_args = NULL) {
   $output = '';
-
 
   if (!$page_args['current_ingredient']) {
 
@@ -58,21 +57,21 @@ function theme_recipe_ingredient_index_page($page_args = NULL) {
         $output1 = '<div class="recipe-ingredient-list">';
         $last_alpha = '-';
         foreach ($page_args['ingredient_list'] as $ingredient) {
-          if ( $ingredient->letter != $last_alpha ) {
+          if ( $ingredient['letter'] != $last_alpha ) {
             if ( $last_alpha != '-' ) {
               $output1 .= "</p></fieldset>";
             }
-            $output1 .= '<fieldset><legend><a name="alpha_' . $ingredient->letter . '">' . strtoupper($ingredient->letter) . '</a></legend><p>';
-            $last_alpha = $ingredient->letter;
+            $output1 .= '<fieldset><legend><a name="alpha_' . $ingredient['letter'] . '">' . strtoupper($ingredient['letter']) . '</a></legend><p>';
+            $last_alpha = $ingredient['letter'];
           }
-          $output1 .= l($ingredient->name, 'recipe/bying/' . $ingredient->id) . '<br/>';
+          $output1 .= l($ingredient['name'], 'recipe/bying/' . $ingredient['id']) . '<br/>';
         }
         $output1 .= "</p></fieldset>";
         $output1 .= '</div>';
         $output .= $output1;
       }
       else {
-        $output .= theme('box', t('No matching ingredients'));
+        $output .= theme('recipe_box', array('content' => t('No matching ingredients')));
       }
     }
   }
@@ -81,9 +80,9 @@ function theme_recipe_ingredient_index_page($page_args = NULL) {
     // render the matching node list.
     if ($page_args['node_list']) {
       $output .= '<div class="recipe-ingredient-nodes">';
-      $output .= '<fieldset><legend>' . $page_args['current_ingredient']->name . '</legend><p>';
+      $output .= '<fieldset><legend>' . $page_args['current_ingredient']['name'] . '</legend><p>';
       foreach ($page_args['node_list'] as $node) {
-        $output .= l($node->title, 'node/' . $node->nid) . '<br/>';
+        $output .= l($node['title'], 'node/' . $node['nid']) . '<br/>';
       }
       $output .= '</p></fieldset>';
       $output .= "</div>";
@@ -110,31 +109,32 @@ function theme_recipe_ingredient_index_page($page_args = NULL) {
  * @return
  *   A database query result suitable for use the node_title_list.
  */
-function recipe_get_nodes_for_ingredients($ids = array()) {
-  if ( count($ids) == 0 ) {
+function recipe_get_nodes_for_ingredients($ingredient_ids = array()) {
+
+  if ( count($ingredient_ids) == 0 ) {
     return FALSE;
   }
-  $list = array();
-  $placeholders = implode(',', array_fill(0, count($ids), "%d"));
-  $sql = "SELECT DISTINCT n.nid, n.title, n.sticky FROM {node} n, {recipe_node_ingredient} rni WHERE n.nid=rni.nid AND rni.ingredient_id IN ($placeholders) AND n.type='recipe' AND n.status=1 ORDER BY n.sticky DESC, n.title";
-  $result = db_query($sql, $ids);
-  foreach ($result as $node) {
-    $list[] = $node;
-  }
-  return $list;
+
+  $select = db_select('node', 'n');
+  $select->join('recipe_node_ingredient', 'rni', 'rni.nid = n.nid');
+  $select->fields('n', array('nid', 'title', 'sticky'));
+  $select->condition('n.type', 'recipe');
+  $select->condition('n.status', 1);
+  $select->condition('rni.ingredient_id', $ingredient_ids, 'IN');
+  $select->orderBy('n.title', 'ASC');
+  $select->orderBy('n.sticky', 'DESC');
+  $select->distinct();
+  return $select->execute()->fetchAll(PDO::FETCH_ASSOC);
 }
 
 
 function recipe_get_ingredients($iid = NULL) {
+  $list = array();
   if ( $iid == NULL ) {
-    $result = db_query("SELECT DISTINCT ri.id, ri.name FROM {recipe_ingredient} ri, {recipe_node_ingredient} rni WHERE ri.id=rni.ingredient_id ORDER BY name");
+    $list = db_query("SELECT DISTINCT ri.id, ri.name FROM {recipe_ingredient} ri, {recipe_node_ingredient} rni WHERE ri.id=rni.ingredient_id ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
   }
   else {
-    $result = db_query("SELECT DISTINCT ri.id, ri.name FROM {recipe_ingredient} ri, {recipe_node_ingredient} rni  WHERE ri.id=rni.ingredient_id AND ri.id=%d ORDER BY name", $iid);
-  }
-  $list = array();
-  foreach ($result as $row) {
-    $list[] = $row;
+    $list = db_query("SELECT DISTINCT ri.id, ri.name FROM {recipe_ingredient} ri, {recipe_node_ingredient} rni  WHERE ri.id=rni.ingredient_id AND ri.id = :iid ORDER BY name", array(':iid' => $iid))->fetchAll(PDO::FETCH_ASSOC);
   }
   return $list;
 }
@@ -142,9 +142,9 @@ function recipe_get_ingredients($iid = NULL) {
 
 function recipe_get_ingredient_alpha_list(&$ingredient_list = NULL) {
   $alpha_list = array();
-  foreach ($ingredient_list as $i) {
-    $letter = strtolower(substr($i->name, 0, 1));
-    $i->letter = $letter;
+  foreach ($ingredient_list as &$i) {
+    $letter = strtolower(substr($i['name'], 0, 1));
+    $i['letter'] = $letter;
     $alpha_list[$letter] = 1;
   }
   return $alpha_list;

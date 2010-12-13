@@ -10,3 +10,7 @@
 .recipe_name_list legend {
   font-weight: bold;
 }
+
+.recipe_name_list fieldset p {
+  margin-top: 1.5em;
+}

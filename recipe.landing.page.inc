@@ -20,21 +20,25 @@ function theme_recipe_landing_page() {
   // Get a list of current sub-menus and render them as a list.
   $item = menu_get_item();
   $content = system_admin_menu_block($item);
-  $output = '<div class="recipe_index_list">';
-  $output .= theme('node_add_list', $content);
 
-  // Add create recipes link if user has perms.
   if (user_access('create recipes')) {
-    $output .= '<dl class="node-type-list"><dt>' . l(t('Add a new Recipe'), 'node/add/recipe') . '</dt><dd>' . t('Add a new recipe to the site.') . '</dd></dl>';
+    $content[] = array(
+      'title' => t('Add a new recipe'),
+      'description' => t('Add a new recipe to the site.'),
+      'href' => 'node/add/recipe',
+      'localized_options' => array('attributes' => array()),
+    );
   }
 
+  $output = '<div class="recipe_index_list">';
+  $output .= theme('node_add_list', array('content' => $content));
   $output .= '</div>';
 
   // Render the recent recipes list.
   if (variable_get('recipe_recent_box_enable', 1) == 1) {
     $node_list = recipe_get_latest(variable_get('recipe_recent_display', 5));
     $output .= '<div class="recipe_index_recent">';
-    $output .= theme('box', variable_get('recipe_recent_box_title', t('Latest recipes')), node_title_list($node_list));
+    $output .= theme('recipe_box', array('title' => variable_get('recipe_recent_box_title', t('Latest recipes')), 'content' => drupal_render(node_title_list($node_list))));
     $output .= '</div>';
   }
 
