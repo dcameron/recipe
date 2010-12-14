@@ -44,7 +44,7 @@ function recipe_html_export_single($nid = NULL, $yield = NULL) {
     return;
   }
 
-  $node = node_load(array('nid' => $nid, 'type' => 'recipe'));
+  $node = node_load(array('nid' => $nid));
 
   // Set the custom yield so we can scale up/down the recipe quantities.
   $node->custom_yield = $yield;
@@ -58,10 +58,10 @@ function recipe_html_export_single($nid = NULL, $yield = NULL) {
     return;
   }
 
-	// This calls other modules *_view hooks.
+  // This calls other modules *_view hooks.
   $node = node_build_content($node, FALSE, TRUE);
 
-	// Set the proper node part, then unset unused $node part so that a bad
+  // Set the proper node part, then unset unused $node part so that a bad
   // theme can not open a security hole.
   $content = drupal_render($node->content);
   if ($teaser) {
@@ -73,10 +73,7 @@ function recipe_html_export_single($nid = NULL, $yield = NULL) {
     unset($node->teaser);
   }
 
-	// Allow modules to modify the fully-built node.
-  node_invoke_nodeapi($node, 'alter', $teaser, $page);
-
-  $html = theme('recipe_export_html_page', $node);
+  $html = theme('recipe_export_html_page', array('node' => $node));
   return $html;
 }
 
@@ -88,12 +85,12 @@ function recipe_html_theme() {
   return array(
     'recipe_export_html_page' => array(
       'function' => 'theme_recipe_export_html_page',
-      'arguments' => array('node' => NULL),
+      'variables' => array('node' => NULL),
     ),
 
     'recipe_html_node' => array(
-      'arguments' => array('node' => NULL, 'teaser' => FALSE, 'page' => FALSE),
       'template' => 'recipe_html_node',
+      'variables' => array('node' => NULL, 'teaser' => FALSE, 'page' => FALSE),
     ),
 
   );
@@ -105,7 +102,8 @@ function recipe_html_theme() {
  *
  * @ingroup themeable
  */
-function theme_recipe_export_html_page($node = NULL) {
+function theme_recipe_export_html_page($variables) {
+  $node = $variables['node'];
   global $base_url;
   $html = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n";
   $html .= '<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">';
