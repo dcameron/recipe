@@ -43,14 +43,13 @@ function recipe_html_export_single($nid = NULL, $yield = NULL) {
     drupal_not_found();
     return;
   }
-
-  $node = node_load(array('nid' => $nid));
+  $node = node_load($nid);
 
   // Set the custom yield so we can scale up/down the recipe quantities.
-  $node->custom_yield = $yield;
+  $node->recipe->custom_yield = $yield;
 
-  // Set yield_form_off to remove buttons.
-  $node->yield_form_off = 1;
+  // Remove the yield buttons.
+  $node->recipe->show_yield_form = FALSE;
 
   // you should not be able to export unpublished recipes
   if ( $node->status == 0 ) {
@@ -58,23 +57,9 @@ function recipe_html_export_single($nid = NULL, $yield = NULL) {
     return;
   }
 
-  // This calls other modules *_view hooks.
-  $node = node_build_content($node, FALSE, TRUE);
+  $elements = node_view($node, 'full');
 
-  // Set the proper node part, then unset unused $node part so that a bad
-  // theme can not open a security hole.
-  $content = drupal_render($node->content);
-  if ($teaser) {
-    $node->teaser = $content;
-    unset($node->body);
-  }
-  else {
-    $node->body = $content;
-    unset($node->teaser);
-  }
-
-  $html = theme('recipe_export_html_page', array('node' => $node));
-  return $html;
+  return theme('recipe_export_html_page', array('elements' => $elements));
 }
 
 
@@ -85,15 +70,28 @@ function recipe_html_theme() {
   return array(
     'recipe_export_html_page' => array(
       'function' => 'theme_recipe_export_html_page',
-      'variables' => array('node' => NULL),
+      'variables' => array('variables' => NULL),
     ),
 
     'recipe_html_node' => array(
       'template' => 'recipe_html_node',
-      'variables' => array('node' => NULL, 'teaser' => FALSE, 'page' => FALSE),
+      'variables' => array('variables' => NULL),
     ),
 
   );
+}
+
+
+function recipe_html_preprocess_recipe_html_node(&$variables) {
+
+  // Return immediately if this node is not a recipe or if this is a teaser (teaser doesn't use special recipe fields).
+  // This gets called for all node types.
+  $type = $variables['elements']['#node']->type;
+  if ($type != 'recipe') {
+    return;
+  }
+
+  template_preprocess_node($variables);
 }
 
 
@@ -103,20 +101,15 @@ function recipe_html_theme() {
  * @ingroup themeable
  */
 function theme_recipe_export_html_page($variables) {
-  $node = $variables['node'];
+
   global $base_url;
   $html = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n";
   $html .= '<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">';
-  $html .= "<head>\n<title>". check_plain($node->title) ."</title>\n";
+  $html .= "<head>\n<title>". check_plain($variables['elements']['#node']->title) ."</title>\n";
   $html .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
   $html .= '<base href="'. $base_url .'/" />'."\n";
   $html .= "<style type=\"text/css\">\n@import url(". drupal_get_path('module', 'recipe') ."/recipe.css);\n</style>\n";
   # 'title' is exception to "all recipe titles in recipe CSS namespace" rule
-  $html .= "</head>\n<body>\n". theme('recipe_html_node', $node, FALSE, TRUE) ."\n</body>\n</html>\n";
+  $html .= "</head>\n<body>\n". theme('recipe_html_node', array('elements' => $variables['elements'])) ."\n</body>\n</html>\n";
   return $html;
-}
-
-
-function recipe_html_preprocess_recipe_html_node(&$variables) {
-  recipe_preprocess_node($variables);
 }
