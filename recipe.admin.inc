@@ -194,7 +194,8 @@ function recipe_export_multi($type = NULL) {
 
   // If callback exists, call it, otherwise error out.
   if (isset($formats[$type]) && function_exists($formats[$type]['callback'])) {
-    echo call_user_func($formats[$type]['callback']);
+    $o = call_user_func($formats[$type]['callback']);
+    return $o;
   }
   else {
     drupal_set_message(t('Unknown export format(%the_format).', array('%the_format' => $type)), 'error');
@@ -226,7 +227,8 @@ function recipe_import_multi($type = NULL) {
 
   // If callback exists, call it, otherwise error out.
   if (isset($formats[$type]) && function_exists($formats[$type]['callback'])) {
-    echo call_user_func($formats[$type]['callback']);
+    $o = call_user_func($formats[$type]['callback']);
+    return $o;
   }
   else {
     drupal_set_message(t('Unknown export format(%the_format).', array('%the_format' => $type)), 'error');

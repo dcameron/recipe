@@ -44,12 +44,12 @@ function recipe_mastercook4_recipeio($type) {
 
 function recipe_mastercook4_export_multi() {
   // you should not be able to export unpublished recipes
-  $rs = db_query("SELECT n.nid from {node} n WHERE n.type='recipe' and n.status>0 ORDER BY n.title");
+  $result = db_query("SELECT n.nid from {node} n WHERE n.type='recipe' and n.status>0 ORDER BY n.title");
   $o = '';
-  while ($row = db_fetch_object($rs)) {
-    $o .= recipe_mastercook4_export_single($row->nid);
+  foreach ($result as $record) {
+    $o .= recipe_mastercook4_export_single($record->nid);
   }
-  drupal_set_header('Content-type: text');
+  drupal_add_http_header('Content-type', 'text');
   return $o;
 }
 
@@ -58,29 +58,29 @@ function recipe_mastercook4_export_single($nid = NULL) {
     drupal_set_message(t('Recipe not found.'));
     drupal_not_found();
   }
-  $node = node_load(array('nid' => $nid, 'type' => 'recipe'));
+  $node = node_load($nid);
   // you should not be able to export unpublished recipes
   if ( $node->status == 0 ) {
     drupal_access_denied();
     return;
   }
 
-  drupal_set_header('Content-type: text');
+  drupal_add_http_header('Content-type', 'text');
   return merge_template($node);
 }
-
 
 
 function merge_template($node = NULL) {
 
   //prepare prepare time
-  $decimal_hours = $node->preptime/60;
+  $decimal_hours = $node->recipe->preptime/60;
   $hours = floor($decimal_hours);
   $minutes = sprintf("%02d", floor(($decimal_hours - $hours)*60));
   $preptime = "$hours:$minutes";
 
   //prepare categories
   $categories = '';
+/*
   $vocabs = taxonomy_get_vocabularies('recipe');
   foreach ($vocabs as $vocab) {
     $terms = taxonomy_node_get_terms_by_vocabulary($node, $vocab->vid);
@@ -90,10 +90,10 @@ function merge_template($node = NULL) {
     }
   }
   $categories = wordwrap($categories, 66, "\n                ");
-
+*/
   //prepare ingredients
   $ingredients = '';
-  foreach ( $node->ingredients as $key => $i ) {
+  foreach ( $node->recipe->ingredients as $key => $i ) {
     $ingredients .= format_mastercook4_ingredient($i);
   }
 
@@ -102,9 +102,9 @@ function merge_template($node = NULL) {
   // merge title
   $template = str_replace("<<title>>", $node->title, $template);
   // merge recipe by
-  $template = str_replace("<<recipeby>>", $node->source, $template);
+  $template = str_replace("<<recipeby>>", $node->recipe->source, $template);
   // merge serving size
-  $template = str_replace("<<servingsize>>", $node->yield, $template);
+  $template = str_replace("<<servingsize>>", $node->recipe->yield, $template);
   // merge preptime
   $template = str_replace("<<preptime>>", $preptime, $template);
   // merge categories
@@ -112,12 +112,12 @@ function merge_template($node = NULL) {
   // merge ingredients
   $template = str_replace("<<ingredients>>", $ingredients, $template);
   // merge instructions
-  $template = str_replace("<<instructions>>", strip_html_and_encode_entities($node->instructions), $template);
+  $template = str_replace("<<instructions>>", strip_html_and_encode_entities($node->recipe->instructions), $template);
   // merge notes
-  if ( $node->notes != '' ) {
-    $node->notes = "NOTES : " . strip_html_and_encode_entities($node->notes);
+  if ( $node->recipe->notes != '' ) {
+    $node->recipe->notes = "NOTES : " . strip_html_and_encode_entities($node->recipe->notes);
   }
-  $template = str_replace("<<notes>>", $node->notes, $template);
+  $template = str_replace("<<notes>>", $node->recipe->notes, $template);
 
   return $template;
 }
@@ -145,22 +145,23 @@ Categories    : <<categories>>
 return $template;
 }
 
+
 function format_mastercook4_ingredient($ingredient = NULL) {
-  $ingredient->quantity = recipe_ingredient_quantity_from_decimal($ingredient->quantity, TRUE);
+  $ingredient['quantity'] = recipe_ingredient_quantity_from_decimal($ingredient['quantity'], TRUE);
   // no html entities
-  $ingredient->quantity = str_replace('&frasl;', '/', $ingredient->quantity);
-  $ingredient->unit_name = recipe_unit_name($ingredient->unit_id);
-  $fullingredient = strlen($ingredient->note) > 0 ? $ingredient->name . ' -- ' . $ingredient->note : $ingredient->name;
+  $ingredient['quantity'] = str_replace('&frasl;', '/', $ingredient['quantity']);
+  $ingredient['unit_name'] = recipe_unit_name($ingredient['unit_id']);
+  $fullingredient = strlen($ingredient['note']) > 0 ? $ingredient['name'] . ' -- ' . $ingredient['note'] : $ingredient['name'];
   $fullingredient = strip_html_and_encode_entities($fullingredient);
   $fullingredient = wordwrap($fullingredient, 66, "\n                        ");
-  $o = sprintf("%8s  %-12s  %s\n", $ingredient->quantity, $ingredient->unit_name, $fullingredient);
+  $o = sprintf("%8s  %-12s  %s\n", $ingredient['quantity'], $ingredient['unit_name'], $fullingredient);
   return $o;
 }
 
 
 function recipe_mastercook4_import_multi() {
   $o = drupal_get_form('recipe_mastercook4_import_form');
-  return theme('page', $o);
+  return $o;
 }
 
 
@@ -170,7 +171,7 @@ function recipe_mastercook4_import_form($form_state) {
   $form['recipe_import_file'] = array(
     '#type' => 'file',
     '#title' => t('MasterCook(1-4 .mxp) File'),
-    '#default_value' => $object['foo'],
+    '#default_value' => '',
     '#size' => 64,
     '#description' => t("Note: This will add taxonomy terms to the lightest weight recipe taxonomy."),
   );
@@ -185,85 +186,85 @@ function recipe_mastercook4_import_form($form_state) {
 function recipe_mastercook4_import_form_submit($form, &$form_state) {
 
   // save to a temp files
-  if ($file = file_save_upload('recipe_import_file', array(), 'files', FILE_EXISTS_RENAME)) {
+  $data = array();
+  $validators = array('file_validate_extensions' => array('mxp xml'));
+  if ($file = file_save_upload('recipe_import_file', $validators, FALSE, FILE_EXISTS_RENAME)) {
     drupal_set_message(t('The attached file was successfully uploaded'));
+    $string = file_get_contents($file->uri);
+    $data = explode("\n", $string);
   }
   else {
     drupal_set_message(t('The attched file failed to upload.'), 'error');
     return;
   }
 
-  if ($file) {
-    // Load the file into a string.
-    $fp = fopen($file->filepath, "r");
-    if ($fp) {
-        $recipe_txt = '';
+  $recipe_txt = '';
 
-        // Get the vocabs first.
-        $vocabs = taxonomy_get_vocabularies('recipe');
-        list($lightest_vid, $vocab) = each($vocabs);
-        reset($vocabs);
-
-        while (!feof($fp)) {
-          $buf = fgets($fp);
-          if ( preg_match("/\* +Exported +from/i", $buf) ) {
-            $recipe_txt = trim($recipe_txt);
-            // Save recipe
-            if ( strlen($recipe_txt) > 0 ) {
-              $parsed_recipe_object = recipe_mastercook4_import_single($recipe_txt);
-              if ( strlen($parsed_recipe_object['title']) > 0 ) {
-                if ( ($node = recipe_import_get_node($parsed_recipe_object)) != FALSE ) {
-
-                  // Save the taxonomy.
-                  foreach ($parsed_recipe_object['categories'] as $category) {
-                    // Search the lightest weight recipe vocab for this term.
-                    $term = recipe_get_term_by_name($category, $lightest_vid);
-                    // You didn't find that term, so add it.
-                    if ( $term == FALSE && isset($lightest_vid) ) {
-                      $term = array('name' => $category, 'vid' => $lightest_vid);
-                      drupal_set_message(t('Adding term %term_name', array('%term_name' => $category)));
-                      taxonomy_save_term($term);
-                      // Cast back to object so it's like the return value from recipe_get_term_by_name().
-                      $term = (object)$term;
-                    }
-                    // You have the term now (existing or new), link it ink.
-                    if ( isset($term) ) {
-                      $node->taxonomy[] = $term->tid;
-                    }
-                  }
-
-                  // Save the recipe.
-                  node_save($node);
-                }
-              }
-            }
-            // Clear recipe buffer.
-            $recipe_txt = '';
-          }
-          $recipe_txt .= $buf;
-        }
-        fclose($fp);
-
-        // Handle the last one needed.
+  // Get the vocabs first.
+/*
+  $vocabs = taxonomy_get_vocabularies('recipe');
+  list($lightest_vid, $vocab) = each($vocabs);
+  reset($vocabs);
+*/
+  foreach ($data as $line) {
+    if ( preg_match("/\* +Exported +from/i", $line) ) {
+      $recipe_txt = trim($recipe_txt);
+      // Save recipe
+      if ( strlen($recipe_txt) > 0 ) {
         $parsed_recipe_object = recipe_mastercook4_import_single($recipe_txt);
         if ( strlen($parsed_recipe_object['title']) > 0 ) {
           if ( ($node = recipe_import_get_node($parsed_recipe_object)) != FALSE ) {
+
+            // Save the taxonomy.
+/*
+            foreach ($parsed_recipe_object['categories'] as $category) {
+              // Search the lightest weight recipe vocab for this term.
+              $term = recipe_get_term_by_name($category, $lightest_vid);
+              // You didn't find that term, so add it.
+              if ( $term == FALSE && isset($lightest_vid) ) {
+                $term = array('name' => $category, 'vid' => $lightest_vid);
+                drupal_set_message(t('Adding term %term_name', array('%term_name' => $category)));
+                taxonomy_save_term($term);
+                // Cast back to object so it's like the return value from recipe_get_term_by_name().
+                $term = (object)$term;
+              }
+              // You have the term now (existing or new), link it ink.
+              if ( isset($term) ) {
+                $node->taxonomy[] = $term->tid;
+              }
+            }
+*/
+            // Save the recipe.
             node_save($node);
           }
         }
+      }
+      // Clear recipe buffer.
+      $recipe_txt = '';
+    }
+    $recipe_txt .= $line;
+  }
+
+  // Handle the last one needed.
+  $parsed_recipe_object = recipe_mastercook4_import_single($recipe_txt);
+  if ( strlen($parsed_recipe_object['title']) > 0 ) {
+    if ( ($node = recipe_import_get_node($parsed_recipe_object)) != FALSE ) {
+      node_save($node);
     }
   }
 }
 
+
+// region constants
+define('HEAD', 0);
+define('TITLE', 1);
+define('META', 2);
+define('INGREDIENTS', 3);
+define('DIRECTIONS', 4);
+define('NOTES', 5);
+define('EOR', 6);
+
 function recipe_mastercook4_import_single($recipe_txt = NULL) {
-  // region constants
-  define('HEAD', 0);
-  define('TITLE', 1);
-  define('META', 2);
-  define('INGREDIENTS', 3);
-  define('DIRECTIONS', 4);
-  define('NOTES', 5);
-  define('EOR', 6);
 
   $recipe = array(
     'title' => '',

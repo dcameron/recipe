@@ -623,41 +623,20 @@ function recipe_menu() {
 
 
   // Admin menus below here.
-
   $items['admin/content/recipe'] = array(
     'title' => 'Recipes',
     'description' => 'Settings that control how the recipe module functions.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('recipe_admin_settings'),
     'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
     'file' => 'recipe.admin.inc',
   );
-
   $items['admin/content/recipe/settings'] = array(
     'title' => 'Settings',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -1,
   );
-
-  $items['admin/content/recipe/export_multi'] = array(
-    'title' => 'Bulk export',
-    'description' => 'Export all recipes from this site into a supported output format.  The data is returned directly to your web browser.  You can enable output formats on the modules screen.',
-    'page callback' => 'recipe_export_multi',
-    'access callback' => 'recipe_export_multi_myaccess',
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_NORMAL_ITEM,
-    'file' => 'recipe.admin.inc',
-  );
-  $items['admin/content/recipe/import_multi'] = array(
-    'title' => 'Bulk import',
-    'description' => 'Import recipes in a supported input format into this site.  The data is uploaded as a file to the server.  You can enable input formats on the modules screen.',
-    'page callback' => 'recipe_import_multi',
-    'access callback' => 'recipe_import_multi_myaccess',
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_NORMAL_ITEM,
-    'file' => 'recipe.admin.inc',
-  );
-
   $items['admin/content/recipe/recipe_index'] = array(
     'title' => 'Indexes',
     'description' => 'Configure settings for the recipe index page.',
@@ -667,6 +646,25 @@ function recipe_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'recipe.admin.inc',
   );
+  $items['admin/content/recipe/export_multi'] = array(
+    'title' => 'Bulk export',
+    'description' => 'Export all recipes from this site into a supported output format.  The data is returned directly to your web browser.  You can enable output formats on the modules screen.',
+    'page callback' => 'recipe_export_multi',
+    'access callback' => 'recipe_export_multi_myaccess',
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
+    'file' => 'recipe.admin.inc',
+  );
+  $items['admin/content/recipe/import_multi'] = array(
+    'title' => 'Bulk import',
+    'description' => 'Import recipes in a supported input format into this site.  The data is uploaded as a file to the server.  You can enable input formats on the modules screen.',
+    'page callback' => 'recipe_import_multi',
+    'access callback' => 'recipe_import_multi_myaccess',
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
+    'file' => 'recipe.admin.inc',
+  );
+
 
   return $items;
 }
@@ -1573,7 +1571,7 @@ function recipe_import_get_node($parsed_recipe_object = FALSE) {
     //node stuff
     $node = new stdClass();
     $node->title = $parsed_recipe_object['title'];
-    $node->body = $parsed_recipe_object['title'] . ' imported from Recipe Import';
+    $node->description = $parsed_recipe_object['title'] . ' imported from Recipe Import';
     $node->type = 'recipe';
     $node->uid = $user->uid;
     // Promote is usually handled by a moderator.
