@@ -1571,7 +1571,6 @@ function recipe_import_get_node($parsed_recipe_object = FALSE) {
     //node stuff
     $node = new stdClass();
     $node->title = $parsed_recipe_object['title'];
-    $node->description = $parsed_recipe_object['title'] . ' imported from Recipe Import';
     $node->type = 'recipe';
     $node->uid = $user->uid;
     // Promote is usually handled by a moderator.
@@ -1580,23 +1579,27 @@ function recipe_import_get_node($parsed_recipe_object = FALSE) {
     $node->comment = 2;
 
     //recipe stuff
+    $node->description = array('value' => $parsed_recipe_object['title'] . ' imported from Recipe Import');
+    $node->instructions = array('value' => $parsed_recipe_object['instructions']);
+    $node->notes = array('value' => isset($parsed_recipe_object['notes']) ? $parsed_recipe_object['notes'] : '');
+
     $node->source = $parsed_recipe_object['source'] != '' ? $parsed_recipe_object['source'] : $user->name;
-    $node->yield = 1;
-    $node->notes = $parsed_recipe_object['notes'];
-    $node->instructions = $parsed_recipe_object['instructions'];
+    $node->yield = $parsed_recipe_object['yield'];
+    $node->yield_unit = $parsed_recipe_object['yield_unit'];
     $node->preptime = 60;
 
     //ingredients, have to change them into node->ingredients format
     $ingredient_list = array();
+    $weight = 0;
     foreach ($parsed_recipe_object['ingredients'] as $i) {
-      $ingredient = new stdClass();
-      $ingredient->quantity = $i['quantity'];
+      $ingredient = array();
+      $ingredient['quantity'] = $i['quantity'];
       if ($i['unit_obj'] != FALSE) {
-        $ingredient->unit_id = $i['unit_obj']->id;
+        $ingredient['unit_id'] = $i['unit_obj']['id'];
       }
-      $ingredient->name = $i['ingredient_name'];
-      $ingredient->note = $i['ingredient_note'];
-
+      $ingredient['name'] = isset($i['ingredient_name']) ? $i['ingredient_name'] : '';
+      $ingredient['note'] = isset($i['ingredient_note']) ? $i['ingredient_note'] : '';
+      $ingredient['weight'] = $weight++;
       $ingredient_list[] = $ingredient;
     }
     $node->ingredients = $ingredient_list;
@@ -1660,17 +1663,22 @@ function recipe_unit_fuzzymatch($recipe_name_or_abbrev, $reset = FALSE) {
 
   if (!isset($units) || $reset) {
     // Get all units to prepare for fuzzy match.
-    $units = array();
-    $order_by = '';
-    // US measure preferred.
+
+    $select = db_select('recipe_unit', 'ru');
+    $select->addField('ru', 'id');
+    $select->addField('ru', 'name');
+    $select->addField('ru', 'abbreviation');
+    $select->addField('ru', 'aliases');
     if ( variable_get('recipe_preferred_system_of_measure', 0) == 0 ) {
-      $order_by = 'order by metric asc';
+      // US measure preferred.
+      $select->orderBy('ru.metric', 'ASC');
     }
     // Metric measure preferred.
     else {
-      $order_by = 'order by metric desc';
+      $select->orderBy('ru.metric', 'DESC');
     }
-    $result = db_query("SELECT id, name, abbreviation, aliases FROM {recipe_unit} :order_by", array(':order_by' => $order_by));
+    $result = $select->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $units = array();
     foreach ($result as $row) {
       $units[] = $row;
     }
@@ -1680,11 +1688,11 @@ function recipe_unit_fuzzymatch($recipe_name_or_abbrev, $reset = FALSE) {
   foreach ($units as $u) {
     $pats = array();
     // Add name pattern.
-    $pats[] = '^' . $u->name . 's{0,1}$';
+    $pats[] = '^' . $u['name'] . 's{0,1}$';
     // Add abbreviation pattern.
-    $pats[] = '^' . $u->abbreviation . 's{0,1}\.{0,1}$';
+    $pats[] = '^' . $u['abbreviation'] . 's{0,1}\.{0,1}$';
     // Add comma separated alias patterns.
-    $aliases = explode(',', $u->aliases);
+    $aliases = explode(',', $u['aliases']);
     foreach ($aliases as $alias) {
       $pats[] = '^' . trim($alias) . 's{0,1}\.{0,1}$';
     }
@@ -1698,11 +1706,11 @@ function recipe_unit_fuzzymatch($recipe_name_or_abbrev, $reset = FALSE) {
   foreach ($units as $u) {
     $pats = array();
     // Add name pattern.
-    $pats[] = '^' . $u->name . 's{0,1}$';
+    $pats[] = '^' . $u['name'] . 's{0,1}$';
     // Add abbreviation pattern.
-    $pats[] = '^' . $u->abbreviation . 's{0,1}\.{0,1}$';
+    $pats[] = '^' . $u['abbreviation'] . 's{0,1}\.{0,1}$';
     // Add comma separated alias patterns.
-    $aliases = explode(',', $u->aliases);
+    $aliases = explode(',', $u['aliases']);
     foreach ($aliases as $alias) {
       $pats[] = '^' . trim($alias) . 's{0,1}\.{0,1}$';
     }
@@ -1725,7 +1733,7 @@ function recipe_unit_fuzzymatch($recipe_name_or_abbrev, $reset = FALSE) {
  *   A recipe_ingredient array upon successful load or FALSE
  */
 function recipe_ingredient_match($recipe_ingredient_name) {
-  $result = db_query("SELECT id, name FROM {recipe_ingredient} where name='%s'", $recipe_ingredient_name);
+  $result = db_query("SELECT id, name FROM {recipe_ingredient} where name = :name", array(':name' => $recipe_ingredient_name));
   foreach ($result as $row) {
     return array(
       'id' => $row->id,
@@ -1904,21 +1912,19 @@ function theme_recipe_box($variables) {
 
 
 /**
- * $ingredient_list may be an array of objects or an array of array elements.
-
-function _in_array($ingredient_object, $ingredient_list) {
-  foreach ($ingredient_list as $i) {
-    $i_name = '';
-    if (is_array($i)) {
-      $i_name = trim(strtolower($i['name']));
-    }
-    else {
-      $i_name = trim(strtolower($i->name));
-    }
-    if (strtolower($ingredient_object->name) === $i_name) {
-      return TRUE;
-    }
+ * Check a string for ISO-8859-1 chars and encode them to UTF-8.
+ *
+ * @param $in_str
+ *   A string with possible ISO-8859-1 chars.
+ * @return
+ *   A UTF8 string representation of $in_str.
+ */
+function fixEncoding($in_str) {
+  $cur_encoding = mb_detect_encoding($in_str) ;
+  if ($cur_encoding == "UTF-8" && mb_check_encoding($in_str, "UTF-8")) {
+    return $in_str;
   }
-  return FALSE;
+  else {
+    return utf8_encode($in_str);
+  }
 }
-*/

@@ -189,9 +189,8 @@ function recipe_mastercook4_import_form_submit($form, &$form_state) {
   $data = array();
   $validators = array('file_validate_extensions' => array('mxp xml'));
   if ($file = file_save_upload('recipe_import_file', $validators, FALSE, FILE_EXISTS_RENAME)) {
+    $data = file($file->uri);
     drupal_set_message(t('The attached file was successfully uploaded'));
-    $string = file_get_contents($file->uri);
-    $data = explode("\n", $string);
   }
   else {
     drupal_set_message(t('The attched file failed to upload.'), 'error');
@@ -254,20 +253,26 @@ function recipe_mastercook4_import_form_submit($form, &$form_state) {
   }
 }
 
-
-// region constants
-define('HEAD', 0);
-define('TITLE', 1);
-define('META', 2);
-define('INGREDIENTS', 3);
-define('DIRECTIONS', 4);
-define('NOTES', 5);
-define('EOR', 6);
-
 function recipe_mastercook4_import_single($recipe_txt = NULL) {
+
+  // loose bad characters.
+  $recipe_txt = fixEncoding($recipe_txt);
+
+  // region constants
+  $reg = array(
+    'head' => 0,
+    'title' => 1,
+    'meta' => 2,
+    'ingredients' => 3,
+    'directions' => 4,
+    'notes' => 5,
+    'eor' => 6,
+  );
 
   $recipe = array(
     'title' => '',
+    'yield' => '1',
+    'yield_unit' => 'Servings',
     'categories' => array(),
     'ingredients' => array(),
     'instructions' => '',
@@ -277,14 +282,14 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
 
   // A reference to the last ingredient added.
   $last_ingred_key = NULL;
+  $region = $reg['head'];
 
-  $region = HEAD;
-  foreach (split("\n", $recipe_txt) as $line) {
+  $recipe_lines = explode("\n", $recipe_txt);
+  foreach ($recipe_lines as $line) {
     $trimmed_line = trim($line);
 
     // Head
-    if ( $region == HEAD) {
-
+    if ( $region == $reg['head']) {
       // blank line in head section, move to next section.
       if ( $trimmed_line == '' ) {
         $region++;
@@ -293,7 +298,7 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
     }
 
     // Title
-    if ( $region == TITLE ) {
+    if ( $region == $reg['title'] ) {
       // Capture title.
       if ( $trimmed_line != '' ) {
         $recipe['title'] = $trimmed_line;
@@ -305,7 +310,7 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
       }
     }
 
-    if ( $region == META ) {
+    if ( $region == $reg['meta'] ) {
 
       // Get the source.
       if ( preg_match('/Recipe +By *: *(.*)/i', $line, $matches) ) {
@@ -342,7 +347,7 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
       }
     }
 
-    if ( $region == INGREDIENTS ) {
+    if ( $region == $reg['ingredients'] ) {
 
       if ( preg_match('/Amount +Measure +Ingredient +-- +Preparation Method/i', $line) ) {
         // Do nothing.
@@ -363,7 +368,10 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
         // For non-ingredient continuation, add ingredient like normal.
         }
         else {
-          $ing = array();
+          $ing = array(
+            'ingredient_name' => '',
+            'ingredient_note' => '',
+          );
           $ing['quantity'] = $q;
           $ing['unit_name'] = $u;
 
@@ -375,10 +383,17 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
             $ing['ingredient_name'] = $i;
           }
 
-          // FALSE if no-match
+          // Look up units in the units table.
+          // If it is not found, use the generic 'unit' object and place the original in 'notes'.
           $ing['unit_obj'] = recipe_unit_fuzzymatch($ing['unit_name']);
+          if ( $ing['unit_obj'] == FALSE ) {
+            $ing['ingredient_note'] = $ing['unit_name'] . '! ' . $ing['ingredient_note'];
+            $ing['unit_name'] = 'Unit';
+            $ing['unit_obj'] = recipe_unit_fuzzymatch($ing['unit_name']);
+            drupal_set_message(t('Could not find the ingredient units in :recipe (:line)', array(':recipe' => $recipe['title'], ':line' => $line)), 'warning');
+          }
 
-          // FALSE if no-match
+          // Look up the ingredient, if it is not found it will be added later at node_save.
           $ing['ingred_obj'] = recipe_ingredient_match($ing['ingredient_name']);
 
           $recipe['ingredients'][] = $ing;
@@ -392,7 +407,7 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
         continue;
       }
     }
-    elseif ( $region == DIRECTIONS ) {
+    elseif ( $region == $reg['directions'] ) {
       if ( preg_match('/- - - - - - - - - - - - - - - - - -/', $line) ) {
         $region++;
         continue;
@@ -407,7 +422,7 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
         $recipe['instructions'] .= $line ."\n";
       }
     }
-    elseif ( $region == NOTES ) {
+    elseif ( $region == $reg['notes'] ) {
       $recipe['notes'] .= $line ."\n";
     }
 
