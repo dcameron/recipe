@@ -53,17 +53,23 @@ function recipe_mastercook4_export_multi() {
   return $o;
 }
 
-function recipe_mastercook4_export_single($nid = NULL) {
+function recipe_mastercook4_export_single($nid = NULL, $yield = NULL) {
   if ( $nid === NULL ) {
     drupal_set_message(t('Recipe not found.'));
     drupal_not_found();
+    return;
   }
   $node = node_load($nid);
+
   // you should not be able to export unpublished recipes
   if ( $node->status == 0 ) {
     drupal_access_denied();
     return;
   }
+
+  // Set the custom yield so we can scale up/down the recipe quantities.
+  $node->recipe->custom_yield = $yield;
+
 
   drupal_add_http_header('Content-type', 'text/plain; charset=utf-8');
   return merge_template($node);
@@ -92,8 +98,20 @@ function merge_template($node = NULL) {
   $categories = wordwrap($categories, 66, "\n                ");
 */
   //prepare ingredients
+  $factor = 1;
+  if (isset($node->recipe->custom_yield)) {
+    $factor = $node->recipe->custom_yield / $node->recipe->yield;
+    $node->recipe->yield = $node->recipe->custom_yield;
+  }
+
   $ingredients = '';
   foreach ( $node->recipe->ingredients as $key => $i ) {
+    if ($i['quantity'] > 0) {
+      $i['quantity'] *= $factor;
+    }
+    else {
+      $i['quantity'] = ' ';
+    }
     $ingredients .= format_mastercook4_ingredient($i);
   }
 
