@@ -861,7 +861,7 @@ function recipe_view($node, $view_mode) {
  * Implements hook_node_view().
  */
 function recipe_node_view($node, $view_mode) {
-  if ($node->type == 'recipe' && $view_mode != 'rss') {
+  if ($node->type == 'recipe' && $view_mode != 'rss' && $view_mode != 'teaser') {
     $formats = module_invoke_all('recipeio', 'export_single');
     $links = array();
     foreach ($formats as $key => $format) {
