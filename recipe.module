@@ -895,6 +895,10 @@ function recipe_view($node, $view_mode) {
  */
 function recipe_node_view($node, $view_mode) {
 
+  if ( isset($node->in_preview) && $node->in_preview == 1 ) {
+    return;
+  }
+
   if ($node->type == 'recipe' && $view_mode != 'rss' && $view_mode != 'teaser') {
     $formats = module_invoke_all('recipeio', 'export_single');
     $links = array();
@@ -1512,10 +1516,6 @@ function recipe_import_form($form, &$form_state) {
   // Some special stuff when previewing a node.
   if (isset($form_state['node_preview'])) {
     $form['#prefix'] = $form_state['node_preview'];
-    $node->in_preview = TRUE;
-  }
-  else {
-    unset($node->in_preview);
   }
 
   $form['recipe_format'] = array(
@@ -1567,6 +1567,7 @@ function recipe_import_form_build_preview($form, &$form_state) {
     //$node = node_form_submit_build_node($form, $form_state);
     $node = recipe_import_get_node($parsed_recipe_object);
     $cloned_node = clone($node);
+    $cloned_node->in_preview = 1;
     $form_state['node_preview'] = theme('node_preview', array('node' => $cloned_node));
     $form_state['rebuild'] = TRUE;
     drupal_set_title(t('Preview'));
