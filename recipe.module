@@ -216,6 +216,30 @@ function recipe_update($node) {
 
 
 /**
+ * Implementation of hook_node_update().
+ * This is for the ingredient node feature.
+ * If there is an ingredient with the same name as a node type ingredient, link them.
+ */
+function recipe_node_update($node) {
+  if ($node->type == 'ingredient') {
+    db_query("UPDATE {recipe_ingredient} SET link = :link WHERE LOWER(name) = :name", array(':link' => $node->nid, ':name' => trim(strtolower($node->title))));
+  }
+}
+
+
+/**
+ * Implementation of hook_node_insert().
+ * This is for the ingredient node feature.
+ * If there is an ingredient with the same name as a node type ingredient, link them.
+ */
+function recipe_node_insert($node) {
+  if ($node->type == 'ingredient') {
+    recipe_node_update($node);
+  }
+}
+
+
+/**
  * Saves the ingredients of a recipe node to the database.
  *
  * @param $node
@@ -1425,21 +1449,6 @@ function recipe_node_sanitize(&$node) {
 }
 
 
-/*
- * If there is an ingredient with the same name as a node type ingredient, link them.
- */
-function recipe_node_update($node) {
-  if ($node->type == 'ingredient') {
-    db_query("UPDATE {recipe_ingredient} SET link = :link WHERE LOWER(name) = :name", array(':link' => $node->nid, ':name' => trim(strtolower($node->title))));
-  }
-}
-function recipe_node_insert($node) {
-  if ($node->type == 'ingredient') {
-    recipe_node_update($node);
-  }
-}
-
-
 function recipe_yield_form($form, &$form_state, $node, $show_yield_form) {
   // Don't render the custom yield textbox and submit buttons if disabled or shown in a block.
 
@@ -1508,7 +1517,7 @@ function recipe_import_form($form_state) {
     '#type' => 'select',
     '#title' => t('Recipe format'),
     '#options' => $options,
-    '#default_value' => $form_state['values']['recipe_format'],
+    '#default_value' => !empty($form_state['values']['recipe_format']) ? $form_state['values']['recipe_format'] : '',
     '#size' => 1,
     '#description' => t('The recipe input format.'),
   );
@@ -1516,7 +1525,7 @@ function recipe_import_form($form_state) {
   $form['recipe_import_text'] = array(
     '#type' => 'textarea',
     '#title' => t('Paste import data here'),
-    '#default_value' => $form_state['values']['recipe_import_text'],
+    '#default_value' => !empty($form_state['values']['recipe_import_text']) ? $form_state['values']['recipe_import_text'] : '',
     '#cols' => 55,
     '#rows' => 8,
     '#required' => TRUE,
@@ -1547,15 +1556,32 @@ function recipe_import_form($form_state) {
 function recipe_import_form_build_preview($form, &$form_state) {
   drupal_add_css(drupal_get_path('module', 'recipe') . '/recipe.css');
 
+    drupal_set_message("hey", 'error');
+
   $parsed_recipe_object = recipe_import_parse($form, $form_state);
+
+    drupal_set_message("hey2", 'error');
+
   if ($parsed_recipe_object != FALSE) {
     //$node = node_form_submit_build_node($form, $form_state);
+
+    drupal_set_message("hey3", 'error');
+
     $node = recipe_import_get_node($parsed_recipe_object);
+
+    drupal_set_message("hey4", 'error');
+
     $cloned_node = clone($node);
+
+    drupal_set_message("hey5", 'error');
+
+print_r($cloned_node);
+
     $cloned_node->in_preview = TRUE;
     $form_state['node_preview'] = theme('node_preview', array('node' => $cloned_node));
     $form_state['rebuild'] = TRUE;
     drupal_set_title(t('Preview'));
+    drupal_set_message("hey6", 'error');
   }
 }
 
@@ -1604,14 +1630,17 @@ function recipe_import_get_node($parsed_recipe_object = FALSE) {
     $node->comment = 2;
 
     //recipe stuff
-    $node->description = array('value' => $parsed_recipe_object['title'] . ' imported from Recipe Import');
-    $node->instructions = array('value' => $parsed_recipe_object['instructions']);
-    $node->notes = array('value' => isset($parsed_recipe_object['notes']) ? $parsed_recipe_object['notes'] : '');
+    $node->recipe = array();
 
-    $node->source = $parsed_recipe_object['source'] != '' ? $parsed_recipe_object['source'] : $user->name;
-    $node->yield = $parsed_recipe_object['yield'];
-    $node->yield_unit = $parsed_recipe_object['yield_unit'];
-    $node->preptime = 60;
+    //WYSIWYG fields need an array with a 'value' key.
+    $node->recipe['description'] = array('value' => $parsed_recipe_object['title'] . ' imported from Recipe Import');
+    $node->recipe['instructions'] = array('value' => $parsed_recipe_object['instructions']);
+    $node->recipe['notes'] = array('value' => isset($parsed_recipe_object['notes']) ? $parsed_recipe_object['notes'] : '');
+
+    $node->recipe['source'] = $parsed_recipe_object['source'] != '' ? $parsed_recipe_object['source'] : $user->name;
+    $node->recipe['yield'] = $parsed_recipe_object['yield'];
+    $node->recipe['yield_unit'] = $parsed_recipe_object['yield_unit'];
+    $node->recipe['preptime'] = 60;
 
     //ingredients, have to change them into node->ingredients format
     $ingredient_list = array();
@@ -1627,7 +1656,7 @@ function recipe_import_get_node($parsed_recipe_object = FALSE) {
       $ingredient['weight'] = $weight++;
       $ingredient_list[] = $ingredient;
     }
-    $node->ingredients = $ingredient_list;
+    $node->recipe['ingredients'] = $ingredient_list;
     return $node;
   }
   return FALSE;
@@ -1642,7 +1671,7 @@ function recipe_import_get_node($parsed_recipe_object = FALSE) {
  * $recipe = array(
  *   'title' => 'recipe title string',
  *   'ingredients' => array of ingredients items(below);
- *   'instuctions' => 'string of instructions'
+ *   'instructions' => 'string of instructions'
  * );
  *
  * ingredients items = array(
