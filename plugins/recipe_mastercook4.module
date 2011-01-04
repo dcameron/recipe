@@ -390,7 +390,8 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
             'ingredient_name' => '',
             'ingredient_note' => '',
           );
-          $ing['quantity'] = $q;
+
+          $ing['quantity'] = recipe_ingredient_quantity_from_fraction($q);
           $ing['unit_name'] = $u;
 
           if ( preg_match('/(.*?) ?-- ?(.*)/', $i, $matches) ) {

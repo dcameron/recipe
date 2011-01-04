@@ -110,3 +110,8 @@
   float: left;
   width: 40%;
 }
+
+
+.recipe-import-text {
+  font-family: monospace;
+}

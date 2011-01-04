@@ -1500,7 +1500,7 @@ function recipe_yield_form($form, &$form_state, $node, $show_yield_form) {
 /**
  * Form recipe_import_form
  */
-function recipe_import_form($form_state) {
+function recipe_import_form($form, &$form_state) {
 
   $formats = module_invoke_all('recipeio', 'import_single');
 
@@ -1509,8 +1509,13 @@ function recipe_import_form($form_state) {
     $options[$format['callback']] = $format['format_name'];
   }
 
+  // Some special stuff when previewing a node.
   if (isset($form_state['node_preview'])) {
     $form['#prefix'] = $form_state['node_preview'];
+    $node->in_preview = TRUE;
+  }
+  else {
+    unset($node->in_preview);
   }
 
   $form['recipe_format'] = array(
@@ -1530,6 +1535,7 @@ function recipe_import_form($form_state) {
     '#rows' => 8,
     '#required' => TRUE,
     '#description' => t('Use 1 blank line between sections: Description, Ingredients, Instructions, Notes. Always use preview first to avoid unintended consequences.'),
+    '#attributes' => array('class' => array('recipe-import-text')),
   );
 
   $form['buttons']['preview'] = array(
@@ -1556,32 +1562,14 @@ function recipe_import_form($form_state) {
 function recipe_import_form_build_preview($form, &$form_state) {
   drupal_add_css(drupal_get_path('module', 'recipe') . '/recipe.css');
 
-    drupal_set_message("hey", 'error');
-
   $parsed_recipe_object = recipe_import_parse($form, $form_state);
-
-    drupal_set_message("hey2", 'error');
-
   if ($parsed_recipe_object != FALSE) {
     //$node = node_form_submit_build_node($form, $form_state);
-
-    drupal_set_message("hey3", 'error');
-
     $node = recipe_import_get_node($parsed_recipe_object);
-
-    drupal_set_message("hey4", 'error');
-
     $cloned_node = clone($node);
-
-    drupal_set_message("hey5", 'error');
-
-print_r($cloned_node);
-
-    $cloned_node->in_preview = TRUE;
     $form_state['node_preview'] = theme('node_preview', array('node' => $cloned_node));
     $form_state['rebuild'] = TRUE;
     drupal_set_title(t('Preview'));
-    drupal_set_message("hey6", 'error');
   }
 }
 
@@ -1621,13 +1609,10 @@ function recipe_import_get_node($parsed_recipe_object = FALSE) {
   if ($parsed_recipe_object) {
     //node stuff
     $node = new stdClass();
-    $node->title = $parsed_recipe_object['title'];
     $node->type = 'recipe';
-    $node->uid = $user->uid;
-    // Promote is usually handled by a moderator.
-    $node->promote = 0;
-    // Let's allow comments by default.
-    $node->comment = 2;
+    $node->nid = NULL;
+    node_object_prepare($node);
+    $node->title = $parsed_recipe_object['title'];
 
     //recipe stuff
     $node->recipe = array();
@@ -1657,6 +1642,7 @@ function recipe_import_get_node($parsed_recipe_object = FALSE) {
       $ingredient_list[] = $ingredient;
     }
     $node->recipe['ingredients'] = $ingredient_list;
+
     return $node;
   }
   return FALSE;
