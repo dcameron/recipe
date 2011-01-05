@@ -1366,10 +1366,14 @@ function recipe_parse_ingredient_string($ingredient_string) {
  * Returns information about a unit based on a unit abbreviation or name
  */
 function recipe_unit_from_name($name) {
-  if (strlen($name) > 1)
+  static $units_array;
+
+  if (strlen($name) > 1) {
     $string = strtolower($name);
-  else
+  }
+  else {
     $string = $name;
+  }
   $ending = substr($string, -1, 1);
   if ($ending == 's'  && $string != 'ds' || $ending == '.') {
     $string = substr($string, 0, strlen($string) -1);
@@ -1379,13 +1383,11 @@ function recipe_unit_from_name($name) {
     $string = substr($string, 0, strlen($string) -1);
   }
 
-  static $units_array;
-
-  if (!$units_array) {
-    $rs = db_query("SELECT id, name, abbreviation FROM {recipe_unit}");
-    foreach ($rs as $unit) {
-      $units_array[strtolower($unit->name)] = $unit;
-      $units_array[$unit->abbreviation] = $unit;
+  if (!isset($units_array)) {
+    $result = db_query("SELECT id, name, abbreviation FROM {recipe_unit}");
+    foreach ($result as $record) {
+      $units_array[strtolower($record->name)] = $record;
+      $units_array[$record->abbreviation] = $record;
     }
   }
 
@@ -1635,7 +1637,7 @@ function recipe_import_get_node($parsed_recipe_object = FALSE) {
       $ingredient = array();
       $ingredient['quantity'] = $i['quantity'];
       if ($i['unit_obj'] != FALSE) {
-        $ingredient['unit_id'] = $i['unit_obj']['id'];
+        $ingredient['unit_id'] = $i['unit_obj']->id;
       }
       $ingredient['name'] = isset($i['ingredient_name']) ? $i['ingredient_name'] : '';
       $ingredient['note'] = isset($i['ingredient_note']) ? $i['ingredient_note'] : '';
@@ -1718,7 +1720,7 @@ function recipe_unit_fuzzymatch($recipe_name_or_abbrev, $reset = FALSE) {
     else {
       $select->orderBy('ru.metric', 'DESC');
     }
-    $result = $select->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $result = $select->execute()->fetchAll();
     $units = array();
     foreach ($result as $row) {
       $units[] = $row;
@@ -1729,11 +1731,11 @@ function recipe_unit_fuzzymatch($recipe_name_or_abbrev, $reset = FALSE) {
   foreach ($units as $u) {
     $pats = array();
     // Add name pattern.
-    $pats[] = '^' . $u['name'] . 's{0,1}$';
+    $pats[] = '^' . $u->name . 's{0,1}$';
     // Add abbreviation pattern.
-    $pats[] = '^' . $u['abbreviation'] . 's{0,1}\.{0,1}$';
+    $pats[] = '^' . $u->abbreviation . 's{0,1}\.{0,1}$';
     // Add comma separated alias patterns.
-    $aliases = explode(',', $u['aliases']);
+    $aliases = explode(',', $u->aliases);
     foreach ($aliases as $alias) {
       $pats[] = '^' . trim($alias) . 's{0,1}\.{0,1}$';
     }
@@ -1747,11 +1749,11 @@ function recipe_unit_fuzzymatch($recipe_name_or_abbrev, $reset = FALSE) {
   foreach ($units as $u) {
     $pats = array();
     // Add name pattern.
-    $pats[] = '^' . $u['name'] . 's{0,1}$';
+    $pats[] = '^' . $u->name . 's{0,1}$';
     // Add abbreviation pattern.
-    $pats[] = '^' . $u['abbreviation'] . 's{0,1}\.{0,1}$';
+    $pats[] = '^' . $u->abbreviation . 's{0,1}\.{0,1}$';
     // Add comma separated alias patterns.
-    $aliases = explode(',', $u['aliases']);
+    $aliases = explode(',', $u->aliases);
     foreach ($aliases as $alias) {
       $pats[] = '^' . trim($alias) . 's{0,1}\.{0,1}$';
     }

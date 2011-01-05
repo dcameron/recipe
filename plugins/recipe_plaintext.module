@@ -154,11 +154,11 @@ function recipe_plaintext_export_multi() {
   $result = db_query("SELECT n.nid from {node} n WHERE n.type='recipe' and n.status>0 ORDER BY n.title");
   $o = '';
   foreach ($result as $record) {
-    $o .= recipe_plaintext_export($row->nid);
+    $o .= recipe_plaintext_export($record->nid);
     $o .= "\n====\n";
   }
   drupal_add_http_header('Content-type', 'text/plain; charset=utf-8');
-  return $o;
+  print $o;
 }
 
 

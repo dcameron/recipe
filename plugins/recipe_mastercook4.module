@@ -50,7 +50,7 @@ function recipe_mastercook4_export_multi() {
     $o .= recipe_mastercook4_export_single($record->nid);
   }
   drupal_add_http_header('Content-type', 'text/plain; charset=utf-8');
-  return $o;
+  print $o;
 }
 
 function recipe_mastercook4_export_single($nid = NULL, $yield = NULL) {
