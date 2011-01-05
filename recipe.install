@@ -362,8 +362,36 @@ function recipe_update_6104() {
 
 /**
  * Adds description column to the recipe table.
- * TODO: Should also migrate old node body fields into description.
  */
 function recipe_update_7000() {
+
+  // Add the new description property to the recipe table.
   db_add_field('recipe', 'description',  array('type' => 'text'));
+
+  // Copy the value from the body field created by drupal7 conversion.
+  $query = db_select('field_data_body', 'fdb');
+  $query->innerJoin('node', 'n', 'n.vid = fdb.revision_id');
+  $query
+    ->fields('fdb', array('entity_type', 'bundle', 'entity_id', 'revision_id', 'body_value'))
+    ->fields('n', array('nid', 'type', 'status', 'comment', 'promote', 'sticky', 'language'))
+    ->condition('n.type', 'recipe')
+    ->orderBy('fdb.revision_id', 'ASC');
+  $recipes = $query->execute();
+  foreach ($recipes as $recipe) {
+    db_update('recipe')
+      ->fields(array(
+        'description' => $recipe->body_value
+      ))
+      ->condition('nid', $recipe->nid)
+      ->execute();
+  }
+
+  // Unbind body field from the recipe node type.
+  $field = field_info_field('body');
+  $instance = field_info_instance('node', 'body', 'recipe');
+  if (!empty($field)) {
+    field_delete_instance($instance, FALSE);
+  }
+
 }
+

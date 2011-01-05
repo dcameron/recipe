@@ -1400,7 +1400,7 @@ function recipe_unit_from_name($name) {
  */
 function recipe_node_sanitize(&$node) {
 
-  $node->format = 'filtered_html';
+  $node->format = '1'; // machine name for filtered_html.
 
   # preview uses an array, and the WYSIWYG fields are arrays, not just values.
   if (isset($node->in_preview) && $node->in_preview == 1) {
@@ -1412,15 +1412,15 @@ function recipe_node_sanitize(&$node) {
 
   // Handle WYSIWYG fields first.
   if (!empty($node->recipe->description)) {
-    $node->recipe->description = check_markup($node->recipe->description, $node->format, FALSE);
+    $node->recipe->description = check_markup($node->recipe->description, $node->format);
   }
 
   if (!empty($node->recipe->instructions)) {
-    $node->recipe->instructions = check_markup($node->recipe->instructions, $node->format, FALSE);
+    $node->recipe->instructions = check_markup($node->recipe->instructions, $node->format);
   }
 
   if (!empty($node->recipe->notes)) {
-    $node->recipe->notes = check_markup($node->recipe->notes, $node->format, FALSE);
+    $node->recipe->notes = check_markup($node->recipe->notes, $node->format);
   }
 
   // Handle other fields.
