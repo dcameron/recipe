@@ -29,19 +29,22 @@ function recipe_pdf35_recipeio($type) {
   }
 }
 
-function recipe_pdf35_export_single($nid = NULL) {
+function recipe_pdf35_export_single($nid = NULL, $yield = NULL) {
   if ( $nid === NULL ) {
     drupal_set_message(t('Recipe not found.'));
     drupal_not_found();
+    return;
   }
-
-  $node = node_load(array('nid' => $nid, 'type' => 'recipe'));
+  $node = node_load($nid);
 
   // you should not be able to export unpublished recipes
   if ( $node->status == 0 ) {
     drupal_access_denied();
     return;
   }
+
+  // Set the custom yield so we can scale up/down the recipe quantities.
+  $node->recipe->custom_yield = $yield;
 
   $recipe_data = prepare_receipe_data($node);
 
@@ -208,9 +211,9 @@ $pdf_index['root'] = count($objects) - 1;
 
   $file_name = strtolower($node->title) . '.pdf';
   $file_name = str_replace(' ', '_', $file_name);
-  drupal_set_header('Content-type: application/pdf');
-  drupal_set_header($header = "Content-Disposition: attachment; filename=$file_name");
-  return $pdf;
+  drupal_add_http_header("Content-type", "application/pdf");
+  drupal_add_http_header("Content-Disposition", "attachment; filename=$file_name");
+  print $pdf;
 }
 
 
@@ -224,15 +227,15 @@ function prepare_receipe_data($node) {
 
   // Preprocess the ingredients.
   $ingredients = array();
-  foreach ( $node->ingredients as $key => $i ) {
-    $fullingredient = strlen($i->note) > 0 ? $i->name . ' (' . $i->note .')' : $i->name;
-    $quantity = recipe_ingredient_quantity_from_decimal($i->quantity, TRUE);
+  foreach ( $node->recipe->ingredients as $key => $i ) {
+    $fullingredient = !empty($i['note']) ? $i['name'] . ' (' . $i['note'] .')' : $i['name'];
+    $quantity = recipe_ingredient_quantity_from_decimal($i['quantity'], TRUE);
     $quantity = trim(str_replace('&frasl;', '/', $quantity));
-    $ingredients[] = $quantity . ' ' . $i->abbreviation . ' ' . $fullingredient;
+    $ingredients[] = $quantity . ' ' . $i['abbreviation'] . ' ' . $fullingredient;
   }
 
   // Preprocess the instructions.
-  $instructions_str = str_replace("&deg;", "\xB0", $node->instructions);
+  $instructions_str = str_replace("&deg;", "\xB0", $node->recipe->instructions);
 
   $data = array(
     'recipe_title' => $node->title,
