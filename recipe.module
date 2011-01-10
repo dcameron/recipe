@@ -268,7 +268,8 @@ function recipe_save_ingredients($node) {
     // Update, if you have a valid ri_id and the ingredient has a name.
     elseif ( isset($ingredient['ri_id']) && $ingredient['name'] != '' ) {
       $ingredient['id'] = recipe_ingredient_id_from_name($ingredient['name']);
-      $ingredient['quantity'] = recipe_ingredient_quantity_from_fraction($ingredient['quantity']);
+      // You have to round it because an indefinite remainder will overflow the normal mysql float type.
+      $ingredient['quantity'] = round(recipe_ingredient_quantity_from_fraction($ingredient['quantity']), 6);
 
       db_update('recipe_node_ingredient')
         ->fields(array(
@@ -286,7 +287,8 @@ function recipe_save_ingredients($node) {
     // Add, if you don't have a valid ri_id and the ingredient has a name.
     elseif (!isset($ingredient['ri_id']) && $ingredient['name'] != '' ) {
       $ingredient['id'] = recipe_ingredient_id_from_name($ingredient['name']);
-      $ingredient['quantity'] = recipe_ingredient_quantity_from_fraction($ingredient['quantity']);
+      // You have to round it because an indefinite remainder will overflow the normal mysql float type.
+      $ingredient['quantity'] = round(recipe_ingredient_quantity_from_fraction($ingredient['quantity']), 6);
 
       db_insert('recipe_node_ingredient')
         ->fields(array(
