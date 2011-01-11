@@ -620,15 +620,19 @@ function recipe_menu() {
     'file' => 'recipe_name_index.inc',
     'weight' => -1
   );
-/*
-  $items['recipe/bycat'] = array(
-    'title' => 'By category',
-    'description' => 'Find individual recipes by using the category list.',
-    'page callback' => 'recipe_category_index_page',
-    'access arguments' => array('access content'),
-    'file' => 'recipe_category_index.inc'
-  );
-*/
+
+/**
+  * Drupal7 implemented a whole new taxo system.  This page needs to be rebuilt if it is to return.
+  * 
+  * $items['recipe/bycat'] = array(
+  *  'title' => 'By category',
+  *  'description' => 'Find individual recipes by using the category list.',
+  *  'page callback' => 'recipe_category_index_page',
+  *  'access arguments' => array('access content'),
+  *  'file' => 'recipe_category_index.inc'
+  *);
+  */
+
   $items['recipe/bying'] = array(
     'title' => 'By ingredient',
     'description' => 'Find individual recipes by their ingredients.',
@@ -779,38 +783,8 @@ function recipe_view($node, $view_mode) {
     $breadcrumb = array();
     $breadcrumb[] = l(t('Home'), NULL);
     $breadcrumb[] = l(t('Recipes'), 'recipe');
-
-/*
-    if ($vocabs = taxonomy_get_vocabularies('recipe')) {
-      $vocab = array_shift($vocabs);
-      if ($terms = taxonomy_node_get_terms_by_vocabulary($node, $vocab->vid)) {
-        $term = array_shift($terms);
-        if ($parents = taxonomy_get_parents_all($term->tid)) {
-          $parents = array_reverse($parents);
-          foreach ($parents as $p) {
-            $breadcrumb[] = l($p->name, 'recipe/bycat/' . $p->tid);
-          }
-        }
-      }
-    }
-*/
     drupal_set_breadcrumb($breadcrumb);
-
-/*
-    // Remove taxo links if you are showing the summary.
-    if (variable_get('recipe_summary_location', 0) < 2) {
-      // Remove each node term that is from a recipe vocab.
-      $recipe_vocabs = taxonomy_get_vocabularies('recipe');
-      foreach ($node->taxonomy as $tid => $term) {
-        if (isset($recipe_vocabs[$term->vid])) {
-          unset($node->taxonomy[$tid]);
-        }
-      }
-    }
-*/
-
   }
-
 
   // Prepare and sanitize node fields.
   recipe_node_sanitize($node);
@@ -1005,21 +979,6 @@ function theme_recipe_summary($variables) {
     }
     $output .= '<tr><th>' . t('Prep time') . '</th><td>' . $node->recipe->preptime . '</td></tr>';
   }
-
-/*
-  $vocabs = taxonomy_get_vocabularies('recipe');
-  if (count($vocabs) > 0) {
-    foreach ($vocabs as $vocab) {
-      $output .= '<tr><th>' . $vocab->name . '</th><td>';
-      $terms = taxonomy_node_get_terms_by_vocabulary($node, $vocab->vid);
-      foreach ($terms as $term) {
-        $term = array_shift($terms);
-        $output .= l($term->name, 'taxonomy/term/' . $term->tid) . ' ';
-      }
-      $output .= '</td></tr>';
-    }
-  }
-*/
 
   $output .= '</table>';
   if ( $show_title ) {
@@ -1402,9 +1361,19 @@ function recipe_unit_from_name($name) {
  */
 function recipe_node_sanitize(&$node) {
 
-  $node->format = '1'; // machine name for filtered_html.
+  // NOTE: This is a kludge because we should be saving each field's format is a table.
+  // Drupal7 no longer does this for us.
+  $filter_formats = filter_formats();
+  $filter_format_id = NULL;
+  if ( isset($filter_formats['filtered_html']) ) {
+    $filter_format_id = 'filtered_html';
+  }
+  elseif ( isset($filter_formats['1']) ) {
+    // Sites converted from Drupal6 will have a '1' instead of 'filtered_html'.
+    $filter_format_id = '1';
+  }
 
-  # preview uses an array, and the WYSIWYG fields are arrays, not just values.
+  // Preview uses an array, and the WYSIWYG fields are arrays, not just values.
   if (isset($node->in_preview) && $node->in_preview == 1) {
     $node->recipe = (object) $node->recipe;
     $node->recipe->description = $node->recipe->description['value'];
@@ -1414,15 +1383,15 @@ function recipe_node_sanitize(&$node) {
 
   // Handle WYSIWYG fields first.
   if (!empty($node->recipe->description)) {
-    $node->recipe->description = check_markup($node->recipe->description, $node->format);
+    $node->recipe->description = check_markup($node->recipe->description, $filter_format_id);
   }
 
   if (!empty($node->recipe->instructions)) {
-    $node->recipe->instructions = check_markup($node->recipe->instructions, $node->format);
+    $node->recipe->instructions = check_markup($node->recipe->instructions, $filter_format_id);
   }
 
   if (!empty($node->recipe->notes)) {
-    $node->recipe->notes = check_markup($node->recipe->notes, $node->format);
+    $node->recipe->notes = check_markup($node->recipe->notes, $filter_format_id);
   }
 
   // Handle other fields.
