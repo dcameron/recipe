@@ -308,7 +308,6 @@ function recipe_import_element_end($parser, $name) {
         if (empty($recipe['notes'])) {
           $recipe['notes'] = "Imported from RecipeML file";
         }
-        dpm($recipe);
         $recipes[] = $recipe;
         break;
       case 'YIELD':

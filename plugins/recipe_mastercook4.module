@@ -83,20 +83,7 @@ function merge_template($node = NULL) {
   $hours = floor($decimal_hours);
   $minutes = sprintf("%02d", floor(($decimal_hours - $hours)*60));
   $preptime = "$hours:$minutes";
-
-  //prepare categories
   $categories = '';
-/*
-  $vocabs = taxonomy_get_vocabularies('recipe');
-  foreach ($vocabs as $vocab) {
-    $terms = taxonomy_node_get_terms_by_vocabulary($node, $vocab->vid);
-    foreach ( $terms as $term ) {
-      $term = array_shift($terms);
-      $categories .= sprintf("%-33s", $term->name);
-    }
-  }
-  $categories = wordwrap($categories, 66, "\n                ");
-*/
   //prepare ingredients
   $factor = 1;
   if (isset($node->recipe->custom_yield)) {
@@ -191,7 +178,6 @@ function recipe_mastercook4_import_form($form_state) {
     '#title' => t('MasterCook(1-4 .mxp) File'),
     '#default_value' => '',
     '#size' => 64,
-    '#description' => t("Note: This will add taxonomy terms to the lightest weight recipe taxonomy."),
   );
   $form['submit'] = array(
     '#type' => 'submit',
@@ -217,12 +203,6 @@ function recipe_mastercook4_import_form_submit($form, &$form_state) {
 
   $recipe_txt = '';
 
-  // Get the vocabs first.
-/*
-  $vocabs = taxonomy_get_vocabularies('recipe');
-  list($lightest_vid, $vocab) = each($vocabs);
-  reset($vocabs);
-*/
   foreach ($data as $line) {
     if ( preg_match("/\* +Exported +from/i", $line) ) {
       $recipe_txt = trim($recipe_txt);
@@ -231,26 +211,6 @@ function recipe_mastercook4_import_form_submit($form, &$form_state) {
         $parsed_recipe_object = recipe_mastercook4_import_single($recipe_txt);
         if ( strlen($parsed_recipe_object['title']) > 0 ) {
           if ( ($node = recipe_import_get_node($parsed_recipe_object)) != FALSE ) {
-
-            // Save the taxonomy.
-/*
-            foreach ($parsed_recipe_object['categories'] as $category) {
-              // Search the lightest weight recipe vocab for this term.
-              $term = recipe_get_term_by_name($category, $lightest_vid);
-              // You didn't find that term, so add it.
-              if ( $term == FALSE && isset($lightest_vid) ) {
-                $term = array('name' => $category, 'vid' => $lightest_vid);
-                drupal_set_message(t('Adding term %term_name', array('%term_name' => $category)));
-                taxonomy_save_term($term);
-                // Cast back to object so it's like the return value from recipe_get_term_by_name().
-                $term = (object)$term;
-              }
-              // You have the term now (existing or new), link it ink.
-              if ( isset($term) ) {
-                $node->taxonomy[] = $term->tid;
-              }
-            }
-*/
             // Save the recipe.
             node_save($node);
           }
