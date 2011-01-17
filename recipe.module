@@ -53,10 +53,6 @@ function recipe_theme($existing, $type, $theme, $path) {
       'function' => 'theme_recipe_ingredients',
       'variables' => array('node' => NULL),
     ),
-    'recipe_category_index_page' => array(
-      'variables' => array('tree' => NULL),
-      'file' => 'recipe_category_index.inc',
-    ),
     'recipe_ingredient_index_page' => array(
       'variables' => array('tree' => NULL),
       'file' => 'recipe_ingredient_index.inc',
@@ -620,18 +616,6 @@ function recipe_menu() {
     'file' => 'recipe_name_index.inc',
     'weight' => -1
   );
-
-/**
-  * Drupal7 implemented a whole new taxo system.  This page needs to be rebuilt if it is to return.
-  * 
-  * $items['recipe/bycat'] = array(
-  *  'title' => 'By category',
-  *  'description' => 'Find individual recipes by using the category list.',
-  *  'page callback' => 'recipe_category_index_page',
-  *  'access arguments' => array('access content'),
-  *  'file' => 'recipe_category_index.inc'
-  *);
-  */
 
   $items['recipe/bying'] = array(
     'title' => 'By ingredient',
