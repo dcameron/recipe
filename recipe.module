@@ -568,9 +568,8 @@ function theme_ingredients_form($variables) {
  */
 function recipe_more_ingredients_submit($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
-
   // If they clicked the more ingredients button, set a form_state signal.
-  if ($form_state['values']['ingredients']['recipe_more_ingredients']) {
+  if ($form_state['values']['recipe']['ingredients']['recipe_more_ingredients']) {
     $form_state['add_ingredients'] = 1;
   }
 }
