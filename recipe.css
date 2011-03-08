@@ -36,37 +36,19 @@
   margin:0; padding:0;
 }
 
-/* Ingredient List in Recipe view */
-.recipe-ingredients {
-  width:55%;
+.recipe-section {
+	padding-left: 1.5em;
 }
-.recipe-ingredients table th,
-.recipe-ingredients table td {
-  background: #FFFFFF;
+.recipe-description {
+	width: 50%;
 }
-.recipe-ingredients table {
-  margin:0; padding:0;
+.region-content .recipe-ingredients ul {
+	margin: 0;
 }
-.recipe-ingredients table tbody {
-  border-style:none;
-}
-.recipe-ingredients .qty {
-  vertical-align:top;
-  text-align:right;
-  white-space:nowrap;
-  padding: 0 0.2em;
-}
-.recipe-ingredients .units {
-  vertical-align:top;
-  text-align:left;
-  padding: 0 0.5em;
-  /* cursor: help;  WHY?*/
-}
-.recipe-ingredients .ingredient {
-  vertical-align:top;
-  text-align:left;
-  padding: 0 0.5em;
-  /* cursor: help;  WHY?*/
+
+.quantity-unit {
+	float: left;
+	width: 7em;
 }
 
 #recipe_custom_yield fieldset .form-item {

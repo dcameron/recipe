@@ -10,7 +10,6 @@
 define('RECIPE_BLOCK_RECENT', 0);
 define('RECIPE_BLOCK_SUMMARY', 1);
 
-
 /**
  * Implementation of hook_help().
  */
@@ -43,9 +42,24 @@ function recipe_theme($existing, $type, $theme, $path) {
       'render element' => 'form',
     ),
 
+    'recipe_description' => array(
+      'function' => 'theme_recipe_description',
+      'variables' => array('node' => NULL),
+    ),
+
     'recipe_summary' => array(
       'function' => 'theme_recipe_summary',
       'variables' => array('node' => NULL, 'show_title' => TRUE),
+    ),
+
+    'recipe_notes' => array(
+      'function' => 'theme_recipe_notes',
+      'variables' => array('node' => NULL),
+    ),
+
+    'recipe_instructions' => array(
+      'function' => 'theme_recipe_instructions',
+      'variables' => array('node' => NULL),
     ),
 
     'recipe_ingredients' => array(
@@ -101,6 +115,7 @@ function recipe_permission() {
  * Implementation of hook_load().
  */
 function recipe_load($nodes) {
+
   $result = db_query('SELECT * FROM {recipe} WHERE nid IN (:nids)', array(':nids' => array_keys($nodes)));
   foreach ($result as $record) {
     $nodes[$record->nid]->recipe = $record;
@@ -816,24 +831,24 @@ function recipe_view($node, $view_mode) {
 
   // Begin filling the node->content array with with recipe items.
   $node->content['recipe_description'] = array(
-      '#markup' => '<div class="recipe-description">' . theme('recipe_box', array('title' => t('Description'), 'content' => $node->recipe->description)) . '</div>',
+      '#markup' => theme('recipe_description', array('node' => $node)),
       '#weight' => recipe_content_extra_field_weight('description')
   );
 
   $node->content['recipe_ingredients'] = array(
-      '#markup' => '<div class="recipe-ingredients">' . theme('recipe_box', array('title' => t('Ingredients'), 'content' => theme('recipe_ingredients', array('node' => $node)))) . '</div>',
+      '#markup' => theme('recipe_ingredients', array('node' => $node)),
       '#weight' => recipe_content_extra_field_weight('ingredients')
   );
 
   $node->content['recipe_instructions'] = array(
-      '#markup' => '<div class="recipe-instructions">' . theme('recipe_box', array('title' => t('Instructions'), 'content' => $node->recipe->instructions)) . '</div>',
+      '#markup' => theme('recipe_instructions', array('node' => $node)),
       '#weight' => recipe_content_extra_field_weight('instructions')
   );
 
   // Don't show the notes box at all it there are no notes.
   if ( $node->recipe->notes ) {
     $node->content['recipe_notes'] = array(
-        '#markup' => '<div class="recipe-notes">' . theme('recipe_box', array('title' => t('Notes'), 'content' => $node->recipe->notes)) . '</div>',
+        '#markup' => theme('recipe_notes', array('node' => $node)),
         '#weight' => recipe_content_extra_field_weight('notes')
     );
   }
@@ -844,7 +859,7 @@ function recipe_view($node, $view_mode) {
       $node->recipe->show_yield_form = FALSE;
     }
     $node->content['recipe_summary_box'] = array(
-        '#markup' => '<div class="recipe-summary">' . theme('recipe_summary', array('node' => $node, 'show_yield_form' => isset($node->recipe->show_yield_form) ? $node->recipe->show_yield_form : TRUE)) . '</div>',
+        '#markup' => theme('recipe_summary', array('node' => $node, 'show_yield_form' => isset($node->recipe->show_yield_form) ? $node->recipe->show_yield_form : TRUE)) . '</div>',
         '#weight' => recipe_content_extra_field_weight('summary_box')
     );
   }
@@ -891,11 +906,12 @@ function recipe_node_view($node, $view_mode) {
 
 function theme_recipe_ingredients($variables) {
   $node = $variables['node'];
-  $output = '';
+  $output = '<div class="recipe-ingredients">';
+  $output .= '<h2 class="title">' . t('Ingredients') . '</h2>';
 
   // Construct the $ingredients[] array.
   if ($node->recipe->ingredients != NULL) {
-    $output .= '<table>';
+    $output .= '<ul>';
     foreach ($node->recipe->ingredients as $ingredient) {
       if (isset($ingredient['quantity']) && $ingredient['name']) {
         if (!isset($ingredient['abbreviation'])) {
@@ -932,21 +948,88 @@ function theme_recipe_ingredients($variables) {
           $units = recipe_unit_name($ingredient['unit_id']);
         }
         $fullingredient = strlen($ingredient['note']) > 0 ? $ingredient['name'] . ' (' . $ingredient['note'] . ')' : $ingredient['name'];
-        $output .= '<tr><td class="qty">' . $ingredient['quantity'] . '</td><td class="units">' . $units . '</td><td class="ingredient">' . $fullingredient . '</td></tr>';
+
+
+        $output .= '<li><span rel="v:ingredient"><span typeof="v:Ingredient"><div class="quantity-unit" property="v:amount">' . $ingredient['quantity'] . ' ' . $units . '</div> <span property="v:name">' . $fullingredient . '</span></span></span></li>';
       }
     }
-    $output .= '</table>';
+    $output .= '</ul>';
   }
+  $output .= '</div>';
   return $output;
 }
 
 
+/**
+ * Default theme implementation for the recipe description field.
+ */
+function theme_recipe_description($variables) {
+  $node = $variables['node'];
+
+  // Wrap description in RDFa markup.
+  if ( !empty($node->rdf_mapping['recipe_description']) ) {
+    $attributes = rdf_rdfa_attributes($node->rdf_mapping['recipe_description']);
+    $attributes['class'] = array('recipe-section');
+    $node->recipe->description = theme('rdf_template_variable_wrapper', array('content' => $node->recipe->description, 'attributes' => $attributes, 'inline' => FALSE));
+  }
+
+  $output = '<div class="recipe-description">';
+  $output .= '<h2 class="title">' . t('Description') . '</h2>';
+  $output .= $node->recipe->description;
+  $output .= '</div>';
+  return $output;
+}
+
+
+/**
+ * Default theme implementation for the recipe notes field.
+ */
+function theme_recipe_notes($variables) {
+  $node = $variables['node'];
+  $output = '<div class="recipe-notes">';
+  $output .= '<h2 class="title">' . t('Notes') . '</h2>';
+  $output .= '<div class="recipe-section">' . $node->recipe->notes . '</div>';
+  $output .= '</div>';
+  return $output;
+}
+
+
+/**
+ * Default theme implementation for the recipe instructions field.
+ */
+function theme_recipe_instructions($variables) {
+  $node = $variables['node'];
+
+  // Wrap instructions in RDFa markup.
+  if ( !empty($node->rdf_mapping['recipe_instructions']) ) {
+    $attributes = rdf_rdfa_attributes($node->rdf_mapping['recipe_instructions']);
+    $attributes['class'] = array('recipe-section');
+    $node->recipe->instructions = theme('rdf_template_variable_wrapper', array('content' => $node->recipe->instructions, 'attributes' => $attributes, 'inline' => FALSE));
+  }
+
+  $output = '<div class="recipe-instructions">';
+  $output .= '<h2 class="title">' . t('Instructions') . '</h2>';
+  $output .= $node->recipe->instructions;
+  $output .= '</div>';
+  return $output;
+}
+
+
+/**
+ * Default theme implementation for the recipe summary box.
+ */
 function theme_recipe_summary($variables) {
   $node = $variables['node'];
   $show_title = isset($variables['show_title']) ? $variables['show_title'] : FALSE;
   $show_yield_form = isset($variables['show_yield_form']) ? $variables['show_yield_form'] : TRUE;
   // Construct the summary
-  $output = '<table>';
+  $output = '<div class="recipe-summary">';
+
+  if ( $show_title ) {
+    $output .= '<h2 class="title">' . t('Summary') . '</h2>';
+  }
+
+  $output .= '<div><table>';
 
   // Render the yield.
   $output .= '<tr><th class="summary-title">' . t('Yield') . '</th><td class="summary-data">' . drupal_render(drupal_get_form('recipe_yield_form', $node, $show_yield_form)) . '</td></tr>';
@@ -955,25 +1038,31 @@ function theme_recipe_summary($variables) {
     $output .= '<tr><th>' . t('Source') . '</th><td>' . $node->recipe->source . '</td></tr>';
   }
   if ($node->recipe->preptime) {
+    $preptime_minutes = $node->recipe->preptime;
+    $preptime_display_text = '';
     if ($node->recipe->preptime < 60) {
-      $node->recipe->preptime = format_plural($node->recipe->preptime, '1 minute', '@count minutes');
+      $preptime_display_text = format_plural($node->recipe->preptime, '1 minute', '@count minutes');
     }
     elseif ($node->recipe->preptime % 60 == 0) {
-      $node->recipe->preptime = format_plural($node->recipe->preptime / 60, '1 hour', '@count hours');
+      $preptime_display_text = format_plural($node->recipe->preptime / 60, '1 hour', '@count hours');
     }
     else {
-      $node->recipe->preptime = t('!time hours', array('!time' => recipe_ingredient_quantity_from_decimal($node->recipe->preptime / 60)));
+      $preptime_display_text = t('!time hours', array('!time' => recipe_ingredient_quantity_from_decimal($node->recipe->preptime / 60)));
     }
+
+    // Wrap description in RDFa markup.
+    if ( !empty($node->rdf_mapping['preptime']) ) {
+      $attributes = rdf_rdfa_attributes($node->rdf_mapping['preptime']);
+      $attributes['content'] = array(recipe_duration_iso8601($preptime_minutes));
+      $node->recipe->preptime = theme('rdf_template_variable_wrapper', array('content' => $preptime_display_text, 'attributes' => $attributes, 'inline' => FALSE));
+    }
+
     $output .= '<tr><th>' . t('Prep time') . '</th><td>' . $node->recipe->preptime . '</td></tr>';
   }
 
   $output .= '</table>';
-  if ( $show_title ) {
-    return theme('recipe_box', array('title' => variable_get('recipe_summary_title', t('Summary')), 'content' => $output));
-  }
-  else {
-    return $output;
-  }
+  $output .= '</div></div>';
+  return $output;
 }
 
 
@@ -1928,4 +2017,46 @@ function fixEncoding($in_str) {
   else {
     return utf8_encode($in_str);
   }
+}
+
+
+/**
+ * Implements hook_rdf_namespaces().
+ */
+function recipe_rdf_namespaces() {
+  return array(
+    'v' => 'http://rdf.data-vocabulary.org/#',
+  );
+}
+
+
+/**
+ * Implements hook_rdf_mapping().
+ */
+function recipe_rdf_mapping() {
+  return array(
+    array(
+      'type' => 'node',
+      'bundle' => 'recipe',
+      'mapping' => array(
+        'rdftype' => array('v:Recipe'),
+        'title' => array(
+          'predicates' => array('v:name'),
+        ),
+        'recipe_instructions' => array(
+          'predicates' => array('v:instructions'),
+        ),
+        'recipe_description' => array(
+          'predicates' => array('v:summary'),
+        ),
+        'preptime' => array(
+          'predicates' => array('v:preptime'),
+        ),
+      ),
+    ),
+  );
+}
+
+function recipe_duration_iso8601($data = '') {
+  return 'PT' . $data . 'M';
 }
