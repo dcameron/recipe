@@ -83,22 +83,10 @@ function recipe_theme($existing, $type, $theme, $path) {
 
 
 /**
- * Implementation of hook_perm().
+ * Implementation of hook_permission().
  */
 function recipe_permission() {
   return array(
-    'create recipes' => array(
-      'title' => t('Create recipes'),
-      'description' => t('Create new recipes and add them to the site.'),
-    ),
-    'edit own recipes' => array(
-      'title' => t('Edit own recipes'),
-      'description' => t('Edit recipes that the user has created.'),
-    ),
-    'edit any recipes' => array(
-      'title' => t('Edit any recipes'),
-      'description' => t('Edit recipes created by anyone.'),
-    ),
     'export recipes' => array(
       'title' => t('Export recipes'),
       'description' => t('Export recipes in various formats.'),
@@ -703,20 +691,20 @@ function recipe_menu() {
 
 /**
  * Implementation of hook_node_access().
- */
+ 
 function recipe_node_access($node, $op, $account) {
 
   if ($op == 'create') {
-    return user_access('create recipes', $account);
+    return user_access('create recipe content', $account);
   }
 
   if ($op == 'update' || $op == 'delete') {
-    if ( (user_access('edit own recipes', $account) && ($account->uid == $node->uid)) || user_access('edit any recipes', $account)) {
+    if ( (user_access('edit own recipe content', $account) && ($account->uid == $node->uid)) || user_access('edit any recipe content', $account)) {
       return TRUE;
     }
   }
 }
-
+*/
 
 /*
  * Block API

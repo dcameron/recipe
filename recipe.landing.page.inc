@@ -20,7 +20,7 @@ function theme_recipe_landing_page() {
   $item = menu_get_item();
   $content = system_admin_menu_block($item);
 
-  if (user_access('create recipes')) {
+  if (user_access('create recipe content')) {
     $content[] = array(
       'title' => t('Add a new recipe'),
       'description' => t('Add a new recipe to the site.'),
