@@ -309,8 +309,8 @@ function recipe_save_ingredients($node) {
  * When a node is deleted, we need to clean up related tables.
  */
 function recipe_delete($node) {
-  db_query("DELETE FROM {recipe} WHERE nid = %d", $node->nid);
-  db_query("DELETE FROM {recipe_node_ingredient} WHERE nid = %d", $node->nid);
+  db_query("DELETE FROM {recipe} WHERE nid = :nid", array(':nid' => $node->nid));
+  db_query("DELETE FROM {recipe_node_ingredient} WHERE nid = :nid", array(':nid' => $node->nid));
 }
 
 /**
@@ -691,7 +691,7 @@ function recipe_menu() {
 
 /**
  * Implementation of hook_node_access().
- 
+
 function recipe_node_access($node, $op, $account) {
 
   if ($op == 'create') {
