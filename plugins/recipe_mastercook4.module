@@ -67,7 +67,7 @@ function recipe_mastercook4_export_single($nid = NULL, $yield = NULL) {
   }
 
   // Set the custom yield so we can scale up/down the recipe quantities.
-  $node->recipe->custom_yield = $yield;
+  $node->recipe['custom_yield'] = $yield;
 
 
   drupal_add_http_header('Content-type', 'text/plain; charset=utf-8');
@@ -78,20 +78,20 @@ function recipe_mastercook4_export_single($nid = NULL, $yield = NULL) {
 function merge_template($node = NULL) {
 
   //prepare prepare time
-  $decimal_hours = $node->recipe->preptime/60;
+  $decimal_hours = $node->recipe['preptime']/60;
   $hours = floor($decimal_hours);
   $minutes = sprintf("%02d", floor(($decimal_hours - $hours)*60));
   $preptime = "$hours:$minutes";
   $categories = '';
   //prepare ingredients
   $factor = 1;
-  if (isset($node->recipe->custom_yield)) {
-    $factor = $node->recipe->custom_yield / $node->recipe->yield;
-    $node->recipe->yield = $node->recipe->custom_yield;
+  if (isset($node->recipe['custom_yield'])) {
+    $factor = $node->recipe['custom_yield'] / $node->recipe['yield'];
+    $node->recipe['yield'] = $node->recipe['custom_yield'];
   }
 
   $ingredients = '';
-  foreach ( $node->recipe->ingredients as $key => $i ) {
+  foreach ( $node->recipe['ingredients'] as $key => $i ) {
     if ($i['quantity'] > 0) {
       $i['quantity'] *= $factor;
     }
@@ -106,9 +106,9 @@ function merge_template($node = NULL) {
   // merge title
   $template = str_replace("<<title>>", $node->title, $template);
   // merge recipe by
-  $template = str_replace("<<recipeby>>", $node->recipe->source, $template);
+  $template = str_replace("<<recipeby>>", $node->recipe['source'], $template);
   // merge serving size
-  $template = str_replace("<<servingsize>>", $node->recipe->yield, $template);
+  $template = str_replace("<<servingsize>>", $node->recipe['yield'], $template);
   // merge preptime
   $template = str_replace("<<preptime>>", $preptime, $template);
   // merge categories
@@ -116,12 +116,12 @@ function merge_template($node = NULL) {
   // merge ingredients
   $template = str_replace("<<ingredients>>", $ingredients, $template);
   // merge instructions
-  $template = str_replace("<<instructions>>", strip_html_and_encode_entities($node->recipe->instructions), $template);
+  $template = str_replace("<<instructions>>", strip_html_and_encode_entities($node->recipe['instructions']), $template);
   // merge notes
-  if ( $node->recipe->notes != '' ) {
-    $node->recipe->notes = "NOTES : " . strip_html_and_encode_entities($node->recipe->notes);
+  if ( $node->recipe['notes'] != '' ) {
+    $node->recipe['notes'] = "NOTES : " . strip_html_and_encode_entities($node->recipe['notes']);
   }
-  $template = str_replace("<<notes>>", $node->recipe->notes, $template);
+  $template = str_replace("<<notes>>", $node->recipe['notes'], $template);
 
   return $template;
 }

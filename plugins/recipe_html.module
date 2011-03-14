@@ -45,10 +45,10 @@ function recipe_html_export_single($nid = NULL, $yield = NULL) {
   $node = node_load($nid);
 
   // Set the custom yield so we can scale up/down the recipe quantities.
-  $node->recipe->custom_yield = $yield;
+  $node->recipe['custom_yield'] = $yield;
 
   // Remove the yield buttons.
-  $node->recipe->show_yield_form = FALSE;
+  $node->recipe['show_yield_form'] = FALSE;
 
   // you should not be able to export unpublished recipes
   if ( $node->status == 0 ) {
