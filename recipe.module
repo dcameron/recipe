@@ -889,7 +889,7 @@ function recipe_node_view($node, $view_mode) {
 
 function theme_recipe_ingredients($variables) {
   $node = $variables['node'];
-  $output = '<div class="recipe-ingredients">';
+  $output = '<div class="recipe-ingredients recipe-section">';
   $output .= '<h2 class="title">' . t('Ingredients') . '</h2>';
 
   // Construct the $ingredients[] array.
@@ -933,7 +933,7 @@ function theme_recipe_ingredients($variables) {
         $fullingredient = strlen($ingredient['note']) > 0 ? $ingredient['name'] . ' (' . $ingredient['note'] . ')' : $ingredient['name'];
 
 
-        $output .= '<li><span rel="v:ingredient"><span typeof="v:Ingredient"><div class="quantity-unit" property="v:amount">' . $ingredient['quantity'] . ' ' . $units . '</div> <span property="v:name">' . $fullingredient . '</span></span></span></li>';
+        $output .= '<li><div rel="v:ingredient"><div typeof="v:Ingredient"><div class="quantity-unit" property="v:amount">' . $ingredient['quantity'] . ' ' . $units . '</div> <span property="v:name">' . $fullingredient . '</span></div></div></li>';
       }
     }
     $output .= '</ul>';
@@ -956,7 +956,7 @@ function theme_recipe_description($variables) {
     $node->recipe['description'] = theme('rdf_template_variable_wrapper', array('content' => $node->recipe['description'], 'attributes' => $attributes, 'inline' => FALSE));
   }
 
-  $output = '<div class="recipe-description">';
+  $output = '<div class="recipe-description recipe-section">';
   $output .= '<h2 class="title">' . t('Description') . '</h2>';
   $output .= $node->recipe['description'];
   $output .= '</div>';
@@ -969,9 +969,9 @@ function theme_recipe_description($variables) {
  */
 function theme_recipe_notes($variables) {
   $node = $variables['node'];
-  $output = '<div class="recipe-notes">';
+  $output = '<div class="recipe-notes recipe-section">';
   $output .= '<h2 class="title">' . t('Notes') . '</h2>';
-  $output .= '<div class="recipe-section">' . $node->recipe['notes'] . '</div>';
+  $output .= '<p>' . $node->recipe['notes'] . '</p>';
   $output .= '</div>';
   return $output;
 }
@@ -990,9 +990,9 @@ function theme_recipe_instructions($variables) {
     $node->recipe['instructions'] = theme('rdf_template_variable_wrapper', array('content' => $node->recipe['instructions'], 'attributes' => $attributes, 'inline' => FALSE));
   }
 
-  $output = '<div class="recipe-instructions">';
+  $output = '<div class="recipe-instructions recipe-section">';
   $output .= '<h2 class="title">' . t('Instructions') . '</h2>';
-  $output .= $node->recipe['instructions'];
+  $output .= '<p>' . $node->recipe['instructions'] . '</p>';
   $output .= '</div>';
   return $output;
 }
