@@ -107,7 +107,7 @@ function recipe_load($nodes) {
   $result = db_query('SELECT * FROM {recipe} WHERE nid IN (:nids)', array(':nids' => array_keys($nodes)), array('fetch' => PDO::FETCH_ASSOC));
   foreach ($result as $record) {
     $nodes[$record['nid']]->recipe = $record;
-    $nodes[$record['nid']]->recipe['ingredients'] = recipe_load_ingredients($record['nid']);
+    $nodes[$record['nid']]->recipe['ingredients']['ing'] = recipe_load_ingredients($record['nid']);
   }
 }
 
@@ -195,7 +195,6 @@ function recipe_insert($node) {
  * database updates.
  */
 function recipe_update($node) {
-
   db_update('recipe')
     ->fields(array(
       'source' => $node->recipe['source'],
@@ -245,16 +244,11 @@ function recipe_node_insert($node) {
  */
 function recipe_save_ingredients($node) {
 
-  if (!$node->recipe['ingredients']) {
-    $node->recipe['ingredients'] = array();
+  if (!$node->recipe['ingredients']['ing']) {
+    $node->recipe['ingredients']['ing'] = array();
   }
 
-  foreach ($node->recipe['ingredients'] as $key => $ingredient) {
-
-    // Skip the more ingredients button.  Normal ingredients have a numeric key.
-    if (!is_numeric($key)) {
-      continue;
-    }
+  foreach ($node->recipe['ingredients']['ing'] as $key => $ingredient) {
 
     // Delete, if you have a valid ri_id and the ingredient name is blank.
     if ( isset($ingredient['ri_id']) && $ingredient['name'] == '' ) {
@@ -312,6 +306,7 @@ function recipe_delete($node) {
   db_query("DELETE FROM {recipe} WHERE nid = :nid", array(':nid' => $node->nid));
   db_query("DELETE FROM {recipe_node_ingredient} WHERE nid = :nid", array(':nid' => $node->nid));
 }
+
 
 /**
 * Implementation of hook_form().
@@ -394,57 +389,63 @@ function recipe_form($node, &$form_state) {
     '#collapsible' => FALSE,
     '#title' => t('Ingredients'),
     '#tree' => TRUE,
-    '#theme' => 'ingredients_form',
     '#weight' => -3,
   );
 
   // This is the autocomplete callback url.
   $callback = 'recipe/ingredient/autocomplete';
 
-  if ( empty($node->recipe['ingredients']) || !is_array($node->recipe['ingredients']) ) {
-    $node->recipe['ingredients'] = array();
+  if ( empty($node->recipe['ingredients']['ing']) || !is_array($node->recipe['ingredients']['ing']) ) {
+    $node->recipe['ingredients']['ing'] = array();
   }
 
-  if (isset($form_state['add_ingredients']) || count($node->recipe['ingredients']) == 0) {
+  if (isset($form_state['add_ingredients']) || count($node->recipe['ingredients']['ing']) == 0) {
     unset($form_state['add_ingredients']);
     $add_count = variable_get('recipe_add_more_count', 5);
     for ($delta = 0; $delta < $add_count; $delta++) {
-      array_push($node->recipe['ingredients'], array('ri_id' => NULL, 'quantity' => '', 'unit_id' => '', 'name' => '', 'note' => '', 'weight' => 0));
+      array_push($node->recipe['ingredients']['ing'], array('ri_id' => NULL, 'quantity' => '', 'unit_id' => '', 'name' => '', 'note' => '', 'weight' => 0));
     }
   }
 
   // Weights range from -delta to +delta, so delta should be at least half
   // of the amount of blocks present. This makes sure all blocks in the same
   // region get an unique weight.
-  $weight_delta = count($node->recipe['ingredients']);
+  $weight_delta = count($node->recipe['ingredients']['ing']);
 
-  foreach ($node->recipe['ingredients'] as $id => $ingredient) {
+  // Container for just the ingredients.
+  $form['recipe']['ingredients']['ing'] = array(
+    '#prefix' => '<div id="ingredients-wrapper">',
+    '#suffix' => '</div>',
+    '#theme' => 'ingredients_form',
+  );
+
+  foreach ($node->recipe['ingredients']['ing'] as $id => $ingredient) {
 
     // Skip the more ingredients button which shows up during the node rebuild in preview.
-    if (is_scalar($ingredient)) {
-      continue;
-    }
+    //if (is_scalar($ingredient)) {
+    //  continue;
+    //}
 
-    $form['recipe']['ingredients'][$id]['ri_id'] = array(
+    $form['recipe']['ingredients']['ing'][$id]['ri_id'] = array(
       '#type' => 'hidden',
       '#value' => $ingredient['ri_id'],
     );
 
     // Strange, but html_entity_decode() doesn't handle &frasl;
-    $form['recipe']['ingredients'][$id]['quantity'] = array(
+    $form['recipe']['ingredients']['ing'][$id]['quantity'] = array(
       '#type' => 'textfield',
       '#title' => t('Quantity'),
       '#default_value' => preg_replace('/\&frasl;/', '/', recipe_ingredient_quantity_from_decimal($ingredient['quantity'], TRUE)),
       '#size' => 8,
       '#maxlength' => 8,
     );
-    $form['recipe']['ingredients'][$id]['unit_id'] = array(
+    $form['recipe']['ingredients']['ing'][$id]['unit_id'] = array(
       '#type' => 'select',
       '#title' => t('Unit'),
       '#default_value' => $ingredient['unit_id'],
       '#options' => recipe_unit_options(),
     );
-    $form['recipe']['ingredients'][$id]['name'] = array(
+    $form['recipe']['ingredients']['ing'][$id]['name'] = array(
       '#type' => 'textfield',
       '#title' => t('Name'),
       '#default_value' => $ingredient['name'],
@@ -452,14 +453,14 @@ function recipe_form($node, &$form_state) {
       '#maxlength' => 128,
       '#autocomplete_path' => $callback,
     );
-    $form['recipe']['ingredients'][$id]['note'] = array(
+    $form['recipe']['ingredients']['ing'][$id]['note'] = array(
       '#type' => 'textfield',
       '#title' => t('Note'),
       '#default_value' => $ingredient['note'],
       '#size' => 40,
       '#maxlength' => 256
     );
-    $form['recipe']['ingredients'][$id]['weight'] = array(
+    $form['recipe']['ingredients']['ing'][$id]['weight'] = array(
       '#type' => 'weight',
       '#title' => t('Weight'),
       '#default_value' => $ingredient['weight'],
@@ -467,16 +468,23 @@ function recipe_form($node, &$form_state) {
     );
   }
 
+  // We name our button 'recipe_more_ingredients' to avoid conflicts with other modules using
+  // Ajax-enabled buttons with the id 'more'.
   $form['recipe']['ingredients']['recipe_more_ingredients'] = array(
     '#type' => 'submit',
     '#value' => t('More ingredients'),
     '#description' => t("If the amount of boxes above isn't enough, click here to add more ingredients."),
     '#weight' => 1,
     '#submit' => array('recipe_more_ingredients_submit'),
+    '#limit_validation_errors' => array(array('choice')),
+    '#ajax' => array(
+      'callback' => 'recipe_more_ingredients_js',
+      'wrapper' => 'ingredients-wrapper',
+      'effect' => 'fade',
+    ),
   );
 
-
-  $form['recipe']["source"] = array(
+  $form['recipe']['source'] = array(
     '#type' => 'textfield',
     '#title' => t('Source'),
     '#default_value' => !empty($node->recipe['source']) ? $node->recipe['source'] : '',
@@ -572,6 +580,20 @@ function recipe_more_ingredients_submit($form, &$form_state) {
     $form_state['add_ingredients'] = 1;
   }
 }
+
+
+/**
+ * Ajax callback in response to new ingredients being added to the form.
+ *
+ * This returns the new page content to replace the page content made obsolete
+ * by the form submission.
+ *
+ * @see poll_more_choices_submit()
+ */
+function recipe_more_ingredients_js($form, $form_state) {
+  return $form['recipe']['ingredients']['ing'];
+}
+
 
 /**
  * Implementation of hook_menu().
@@ -886,16 +908,15 @@ function recipe_node_view($node, $view_mode) {
 }
 
 
-
 function theme_recipe_ingredients($variables) {
   $node = $variables['node'];
   $output = '<div class="recipe-ingredients recipe-section">';
   $output .= '<h2 class="title">' . t('Ingredients') . '</h2>';
 
   // Construct the $ingredients[] array.
-  if ($node->recipe['ingredients'] != NULL) {
+  if ($node->recipe['ingredients']['ing'] != NULL) {
     $output .= '<p>';
-    foreach ($node->recipe['ingredients'] as $ingredient) {
+    foreach ($node->recipe['ingredients']['ing'] as $ingredient) {
       if (isset($ingredient['quantity']) && $ingredient['name']) {
         if (!isset($ingredient['abbreviation'])) {
           $ingredient['abbreviation'] = recipe_unit_abbreviation($ingredient['unit_id']);
@@ -1458,9 +1479,9 @@ function recipe_node_sanitize(&$node) {
     $node->recipe['source'] = filter_xss($node->recipe['source'], array());
   }
 
-  if (isset($node->recipe['ingredients'])) {
-    $tmp = $node->recipe['ingredients'];
-    $node->recipe['ingredients'] = array();
+  if (isset($node->recipe['ingredients']['ing'])) {
+    $tmp = $node->recipe['ingredients']['ing'];
+    $node->recipe['ingredients']['ing'] = array();
     foreach ($tmp as $ingredient) {
 
       // Skip the more ingredients button which shows up during the node rebuild in preview.
@@ -1474,7 +1495,7 @@ function recipe_node_sanitize(&$node) {
       if (isset($ingredient['note'])) {
         $ingredient['note'] = filter_xss($ingredient['note'], array());
       }
-      $node->recipe['ingredients'][] = $ingredient;
+      $node->recipe['ingredients']['ing'][] = $ingredient;
     }
   }
 }
@@ -1669,7 +1690,7 @@ function recipe_import_get_node($parsed_recipe_object = FALSE) {
       $ingredient['weight'] = $weight++;
       $ingredient_list[] = $ingredient;
     }
-    $node->recipe['ingredients'] = $ingredient_list;
+    $node->recipe['ingredients']['ing'] = $ingredient_list;
 
     return $node;
   }

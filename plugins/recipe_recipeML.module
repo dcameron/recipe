@@ -107,7 +107,7 @@ function recipe_recipeML_export_single($nid = NULL, $yield = NULL, $add_content_
     '<description>'. my_xml_escape($node->recipe['description']) .'</description>'."\n".
     '<ingredients>';
 
-  foreach ($node->recipe['ingredients'] as $ingredient) {
+  foreach ($node->recipe['ingredients']['ing'] as $ingredient) {
     $prep = '';
     if (strlen($ingredient['note']) > 0) {
       $prep = '<prep>'. $ingredient['note'] .'</prep>';

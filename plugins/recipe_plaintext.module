@@ -97,6 +97,7 @@ function recipe_plaintext_import($recipe_txt = NULL) {
         $i['quantity'] = recipe_ingredient_quantity_from_fraction($matches[1]);
         $i['unit_name'] = $matches[2];
         $i['ingredient_name'] = $matches[3];
+        $i['ingredient_note'] = '';
 
         // Look up units in the units table.
         // If it is not found, use the generic 'unit' object and place the original in 'notes'.
@@ -204,7 +205,7 @@ function format_plaintext_ingredients($node = NULL) {
     $node->recipe['yield'] = $node->recipe['custom_yield'];
   }
 
-  foreach ( $node->recipe['ingredients'] as $key => &$i ) {
+  foreach ( $node->recipe['ingredients']['ing'] as $key => &$i ) {
     // Translate decimal quantity to text fraction.
     if ($i['quantity'] > 0) {
       $i['quantity'] *= $factor;
@@ -239,7 +240,7 @@ function format_plaintext_ingredients($node = NULL) {
   // Render output with the correct column padding.
   $output = '';
   $wrap_pad = str_repeat(" ", $col_widths['unit'] + $col_widths['quantity'] + 2);
-  foreach ( $node->recipe['ingredients'] as $key => $i ) {
+  foreach ( $node->recipe['ingredients']['ing'] as $key => $i ) {
     $output .= wordwrap(sprintf("%". $col_widths['quantity'] ."s %-". $col_widths['unit'] . "s %s\n", $i['str_quantity'], $i['str_unit'], $i['str_ingredient']), 75, "\n$wrap_pad");
   }
 

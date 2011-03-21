@@ -91,7 +91,7 @@ function merge_template($node = NULL) {
   }
 
   $ingredients = '';
-  foreach ( $node->recipe['ingredients'] as $key => $i ) {
+  foreach ( $node->recipe['ingredients']['ing'] as $key => $i ) {
     if ($i['quantity'] > 0) {
       $i['quantity'] *= $factor;
     }

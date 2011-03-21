@@ -226,7 +226,7 @@ function prepare_receipe_data($node) {
 
   // Preprocess the ingredients.
   $ingredients = array();
-  foreach ( $node->recipe['ingredients'] as $key => $i ) {
+  foreach ( $node->recipe['ingredients']['ing'] as $key => $i ) {
     $fullingredient = !empty($i['note']) ? $i['name'] . ' (' . $i['note'] .')' : $i['name'];
     $quantity = recipe_ingredient_quantity_from_decimal($i['quantity'], TRUE);
     $quantity = trim(str_replace('&frasl;', '/', $quantity));
