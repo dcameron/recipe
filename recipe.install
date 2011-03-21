@@ -356,7 +356,8 @@ function recipe_update_7000() {
  * Rebuilds the rdf mapping table.
  */
 function recipe_update_7001() {
-  // get rid of this after debug.
-  $modules = module_implements('rdf_mapping');
-  rdf_modules_installed($modules);
+  if (module_exists("rdf")) {
+    $modules = module_implements('rdf_mapping');
+    rdf_modules_installed($modules);
+  }
 }
