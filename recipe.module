@@ -894,7 +894,7 @@ function theme_recipe_ingredients($variables) {
 
   // Construct the $ingredients[] array.
   if ($node->recipe['ingredients'] != NULL) {
-    $output .= '<ul>';
+    $output .= '<p>';
     foreach ($node->recipe['ingredients'] as $ingredient) {
       if (isset($ingredient['quantity']) && $ingredient['name']) {
         if (!isset($ingredient['abbreviation'])) {
@@ -933,10 +933,10 @@ function theme_recipe_ingredients($variables) {
         $fullingredient = strlen($ingredient['note']) > 0 ? $ingredient['name'] . ' (' . $ingredient['note'] . ')' : $ingredient['name'];
 
 
-        $output .= '<li><div rel="v:ingredient"><div typeof="v:Ingredient"><div class="quantity-unit" property="v:amount">' . $ingredient['quantity'] . ' ' . $units . '</div> <span property="v:name">' . $fullingredient . '</span></div></div></li>';
+        $output .= '<div rel="v:ingredient"><div typeof="v:Ingredient"><div class="quantity-unit" property="v:amount"> ' . $ingredient['quantity'] . ' ' . $units . '</div> <span property="v:name">' . $fullingredient . '</span></div></div>';
       }
     }
-    $output .= '</ul>';
+    $output .= '</p>';
   }
   $output .= '</div>';
   return $output;

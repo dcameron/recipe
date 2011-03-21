@@ -37,19 +37,18 @@
 }
 
 .recipe-section p {
-	margin: 0;
-	padding: 0 0 0 1.5em;
-}
-.recipe-description {
-	width: 50%;
-}
-.region-content .recipe-ingredients ul {
-	margin: 0;
+  margin: 0;
+  padding: 0 0 0 1.5em;
 }
 
-.quantity-unit {
-	float: left;
-	width: 7em;
+.recipe-description {
+  width: 50%;
+}
+
+.recipe-ingredients .quantity-unit {
+  float: left;
+  width: 7em;
+  padding: 0 0 0 1.5em;
 }
 
 #recipe_custom_yield fieldset .form-item {
