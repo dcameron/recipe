@@ -910,12 +910,12 @@ function recipe_node_view($node, $view_mode) {
 
 function theme_recipe_ingredients($variables) {
   $node = $variables['node'];
-  $output = '<div class="recipe-ingredients recipe-section">';
+  $output = "\n" . '<div class="recipe-ingredients recipe-section">';
   $output .= '<h2 class="title">' . t('Ingredients') . '</h2>';
 
   // Construct the $ingredients[] array.
   if ($node->recipe['ingredients']['ing'] != NULL) {
-    $output .= '<p>';
+    $output .= '<div class="section">';
     foreach ($node->recipe['ingredients']['ing'] as $ingredient) {
       if (isset($ingredient['quantity']) && $ingredient['name']) {
         if (!isset($ingredient['abbreviation'])) {
@@ -954,10 +954,10 @@ function theme_recipe_ingredients($variables) {
         $fullingredient = strlen($ingredient['note']) > 0 ? $ingredient['name'] . ' (' . $ingredient['note'] . ')' : $ingredient['name'];
 
 
-        $output .= '<div rel="v:ingredient"><div typeof="v:Ingredient"><div class="quantity-unit" property="v:amount"> ' . $ingredient['quantity'] . ' ' . $units . '</div> <span property="v:name">' . $fullingredient . '</span></div></div>';
+        $output .= "\n" . '<div rel="v:ingredient"><div typeof="v:Ingredient"><div class="quantity-unit" property="v:amount"> ' . $ingredient['quantity'] . ' ' . $units . '</div> <span property="v:name">' . $fullingredient . '</span></div></div>';
       }
     }
-    $output .= '</p>';
+    $output .= '</div>';
   }
   $output .= '</div>';
   return $output;
@@ -979,7 +979,7 @@ function theme_recipe_description($variables) {
 
   $output = '<div class="recipe-description recipe-section">';
   $output .= '<h2 class="title">' . t('Description') . '</h2>';
-  $output .= $node->recipe['description'];
+  $output .= '<div class="section">' . $node->recipe['description'] . '</div>';
   $output .= '</div>';
   return $output;
 }
@@ -992,7 +992,7 @@ function theme_recipe_notes($variables) {
   $node = $variables['node'];
   $output = '<div class="recipe-notes recipe-section">';
   $output .= '<h2 class="title">' . t('Notes') . '</h2>';
-  $output .= '<p>' . $node->recipe['notes'] . '</p>';
+  $output .= '<div class="section">' . $node->recipe['notes'] . '</div>';
   $output .= '</div>';
   return $output;
 }
@@ -1013,7 +1013,7 @@ function theme_recipe_instructions($variables) {
 
   $output = '<div class="recipe-instructions recipe-section">';
   $output .= '<h2 class="title">' . t('Instructions') . '</h2>';
-  $output .= '<p>' . $node->recipe['instructions'] . '</p>';
+  $output .= '<div class="section">' . $node->recipe['instructions'] . '</div>';
   $output .= '</div>';
   return $output;
 }
@@ -1065,7 +1065,7 @@ function theme_recipe_summary($variables) {
   }
 
   $output .= '</table>';
-  $output .= '</div></div>';
+  $output .= '</div>';
   return $output;
 }
 
@@ -1527,6 +1527,7 @@ function recipe_yield_form($form, &$form_state, $node, $show_yield_form) {
     );
     $form['yield_unit'] = array(
       '#markup' => ($node->recipe['yield_unit'] == '')?t('Servings'):$node->recipe['yield_unit'],
+      '#suffix' => '<br/>',
     );
     $form['submit'] = array(
       '#type' => 'submit',
