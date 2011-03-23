@@ -476,7 +476,7 @@ function recipe_form($node, &$form_state) {
     '#description' => t("If the amount of boxes above isn't enough, click here to add more ingredients."),
     '#weight' => 1,
     '#submit' => array('recipe_more_ingredients_submit'),
-    '#limit_validation_errors' => array(array('choice')),
+    '#limit_validation_errors' => array(),
     '#ajax' => array(
       'callback' => 'recipe_more_ingredients_js',
       'wrapper' => 'ingredients-wrapper',
