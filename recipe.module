@@ -181,6 +181,7 @@ function recipe_insert($node) {
       'instructions' => $node->recipe['instructions']['value'],
       'notes' => $node->recipe['notes']['value'],
       'preptime' => $node->recipe['preptime'],
+      'cooktime' => $node->recipe['cooktime'],
     ))
     ->execute();
 
@@ -204,6 +205,7 @@ function recipe_update($node) {
       'instructions' => $node->recipe['instructions']['value'],
       'notes' => $node->recipe['notes']['value'],
       'preptime' => $node->recipe['preptime'],
+      'cooktime' => $node->recipe['cooktime'],
     ))
     ->condition('nid', $node->nid)
     ->execute();
@@ -518,6 +520,31 @@ function recipe_form($node, &$form_state) {
       360 => t('6 hours'),
     ),
     '#description' => t('How long does this recipe take to prepare (i.e. elapsed time)'),
+    '#weight' => -1,
+  );
+
+  $form['recipe']['cooktime'] = array(
+    '#type' => 'select',
+    '#title' => t('Cooking time'),
+    '#default_value' => !empty($node->recipe['cooktime']) ? $node->recipe['cooktime'] : '',
+    '#options' => array(
+      5 => t('5 minutes'),
+      10 => t('10 minutes'),
+      15 => t('15 minutes'),
+      20 => t('20 minutes'),
+      30 => t('30 minutes'),
+      45 => t('45 minutes'),
+      60 => t('1 hour'),
+      90 => t('1 1/2 hours'),
+      120 => t('2 hours'),
+      150 => t('2 1/2 hours'),
+      180 => t('3 hours'),
+      210 => t('3 1/2 hours'),
+      240 => t('4 hours'),
+      300 => t('5 hours'),
+      360 => t('6 hours'),
+    ),
+    '#description' => t('How long does this recipe take to cook'),
     '#weight' => -1,
   );
 
@@ -1058,10 +1085,33 @@ function theme_recipe_summary($variables) {
     if ( !empty($node->rdf_mapping['preptime']) ) {
       $attributes = rdf_rdfa_attributes($node->rdf_mapping['preptime']);
       $attributes['content'] = array(recipe_duration_iso8601($preptime_minutes));
-      $node->recipe['preptime'] = theme('rdf_template_variable_wrapper', array('content' => $preptime_display_text, 'attributes' => $attributes, 'inline' => FALSE));
+      $preptime_display_text = theme('rdf_template_variable_wrapper', array('content' => $preptime_display_text, 'attributes' => $attributes, 'inline' => FALSE));
     }
 
-    $output .= '<tr><th>' . t('Prep time') . '</th><td>' . $node->recipe['preptime'] . '</td></tr>';
+    $output .= '<tr><th>' . t('Prep time') . '</th><td>' . $preptime_display_text . '</td></tr>';
+  }
+
+  if ($node->recipe['cooktime']) {
+    $cooktime_minutes = $node->recipe['cooktime'];
+    $cooktime_display_text = '';
+    if ($node->recipe['cooktime'] < 60) {
+      $cooktime_display_text = format_plural($node->recipe['cooktime'], '1 minute', '@count minutes');
+    }
+    elseif ($node->recipe['cooktime'] % 60 == 0) {
+      $cooktime_display_text = format_plural($node->recipe['cooktime'] / 60, '1 hour', '@count hours');
+    }
+    else {
+      $cooktime_display_text = t('!time hours', array('!time' => recipe_ingredient_quantity_from_decimal($node->recipe['cooktime'] / 60)));
+    }
+
+    // Wrap description in RDFa markup.
+    if ( !empty($node->rdf_mapping['cooktime']) ) {
+      $attributes = rdf_rdfa_attributes($node->rdf_mapping['cooktime']);
+      $attributes['content'] = array(recipe_duration_iso8601($cooktime_minutes));
+      $cooktime_display_text = theme('rdf_template_variable_wrapper', array('content' => $cooktime_display_text, 'attributes' => $attributes, 'inline' => FALSE));
+    } 
+
+	  $output .= '<tr><th>' . t('Cooking time') . '</th><td>' . $cooktime_display_text . '</td></tr>';
   }
 
   $output .= '</table>';
@@ -1675,7 +1725,8 @@ function recipe_import_get_node($parsed_recipe_object = FALSE) {
     $node->recipe['source'] = $parsed_recipe_object['source'] != '' ? $parsed_recipe_object['source'] : $user->name;
     $node->recipe['yield'] = $parsed_recipe_object['yield'];
     $node->recipe['yield_unit'] = $parsed_recipe_object['yield_unit'];
-    $node->recipe['preptime'] = 60;
+    $node->recipe['preptime'] = 30;
+    $node->recipe['cooktime'] = 30;
 
     //ingredients, have to change them into node->ingredients format
     $ingredient_list = array();
@@ -1972,6 +2023,11 @@ function recipe_field_extra_fields() {
         'description' => t('Recipe module form.'),
         'weight' => -1,
       ),
+      'cooktime' => array(
+        'label' => t('Cooking time'),
+        'description' => t('Recipe module form.'),
+        'weight' => -1,
+      ),
     ),
   );
 
@@ -2051,6 +2107,9 @@ function recipe_rdf_mapping() {
         ),
         'preptime' => array(
           'predicates' => array('v:preptime'),
+        ),
+        'cooktime' => array(
+          'predicates' => array('v:cooktime'),
         ),
       ),
     ),

@@ -75,6 +75,11 @@ function recipe_schema() {
         'unsigned' => TRUE,
         'default' => 0,
       ),
+      'cooktime' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'default' => 0,
+      ),
     ),
     'primary key' => array('nid'),
   );
@@ -360,4 +365,24 @@ function recipe_update_7001() {
     $modules = module_implements('rdf_mapping');
     rdf_modules_installed($modules);
   }
+}
+
+
+/**
+ * Adds cooktime column to the recipe table.
+ */
+function recipe_update_7002() {
+  // Add the new cooktime field to the recipe table.
+  db_add_field('recipe', 'cooktime',  array(
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'default' => 0,
+  ));
+
+  // Refresh RDF mapping to pick up new field.
+  if (module_exists("rdf")) {
+    $modules = module_implements('rdf_mapping');
+    rdf_modules_installed($modules);
+  }
+
 }
