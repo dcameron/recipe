@@ -1069,49 +1069,72 @@ function theme_recipe_summary($variables) {
     $output .= '<tr><th>' . t('Source') . '</th><td>' . $node->recipe['source'] . '</td></tr>';
   }
   if ($node->recipe['preptime']) {
-    $preptime_minutes = $node->recipe['preptime'];
-    $preptime_display_text = '';
+    $_minutes = $node->recipe['preptime'];
+    $_text = '';
     if ($node->recipe['preptime'] < 60) {
-      $preptime_display_text = format_plural($node->recipe['preptime'], '1 minute', '@count minutes');
+      $_text = format_plural($_minutes, '1 minute', '@count minutes');
     }
     elseif ($node->recipe['preptime'] % 60 == 0) {
-      $preptime_display_text = format_plural($node->recipe['preptime'] / 60, '1 hour', '@count hours');
+      $_text = format_plural($_minutes / 60, '1 hour', '@count hours');
     }
     else {
-      $preptime_display_text = t('!time hours', array('!time' => recipe_ingredient_quantity_from_decimal($node->recipe['preptime'] / 60)));
+      $_text = t('!time hours', array('!time' => recipe_ingredient_quantity_from_decimal($_minutes / 60)));
     }
 
     // Wrap description in RDFa markup.
-    if ( !empty($node->rdf_mapping['preptime']) ) {
-      $attributes = rdf_rdfa_attributes($node->rdf_mapping['preptime']);
-      $attributes['content'] = array(recipe_duration_iso8601($preptime_minutes));
-      $preptime_display_text = theme('rdf_template_variable_wrapper', array('content' => $preptime_display_text, 'attributes' => $attributes, 'inline' => FALSE));
+    if ( !empty($node->rdf_mapping['recipe_preptime']) ) {
+      $attributes = rdf_rdfa_attributes($node->rdf_mapping['recipe_preptime']);
+      $attributes['content'] = array(recipe_duration_iso8601($_minutes));
+      $_text = theme('rdf_template_variable_wrapper', array('content' => $_text, 'attributes' => $attributes, 'inline' => FALSE));
     }
 
-    $output .= '<tr><th>' . t('Prep time') . '</th><td>' . $preptime_display_text . '</td></tr>';
+    $output .= '<tr><th>' . t('Prep time') . '</th><td>' . $_text . '</td></tr>';
   }
 
   if ($node->recipe['cooktime']) {
-    $cooktime_minutes = $node->recipe['cooktime'];
-    $cooktime_display_text = '';
+    $_minutes = $node->recipe['cooktime'];
+    $_text = '';
     if ($node->recipe['cooktime'] < 60) {
-      $cooktime_display_text = format_plural($node->recipe['cooktime'], '1 minute', '@count minutes');
+      $_text = format_plural($_minutes, '1 minute', '@count minutes');
     }
     elseif ($node->recipe['cooktime'] % 60 == 0) {
-      $cooktime_display_text = format_plural($node->recipe['cooktime'] / 60, '1 hour', '@count hours');
+      $_text = format_plural($_minutes / 60, '1 hour', '@count hours');
     }
     else {
-      $cooktime_display_text = t('!time hours', array('!time' => recipe_ingredient_quantity_from_decimal($node->recipe['cooktime'] / 60)));
+      $_text = t('!time hours', array('!time' => recipe_ingredient_quantity_from_decimal($_minutes / 60)));
     }
 
     // Wrap description in RDFa markup.
-    if ( !empty($node->rdf_mapping['cooktime']) ) {
-      $attributes = rdf_rdfa_attributes($node->rdf_mapping['cooktime']);
-      $attributes['content'] = array(recipe_duration_iso8601($cooktime_minutes));
-      $cooktime_display_text = theme('rdf_template_variable_wrapper', array('content' => $cooktime_display_text, 'attributes' => $attributes, 'inline' => FALSE));
-    } 
+    if ( !empty($node->rdf_mapping['recipe_cooktime']) ) {
+      $attributes = rdf_rdfa_attributes($node->rdf_mapping['recipe_cooktime']);
+      $attributes['content'] = array(recipe_duration_iso8601($_minutes));
+      $_text = theme('rdf_template_variable_wrapper', array('content' => $_text, 'attributes' => $attributes, 'inline' => FALSE));
+    }
 
-	  $output .= '<tr><th>' . t('Cooking time') . '</th><td>' . $cooktime_display_text . '</td></tr>';
+    $output .= '<tr><th>' . t('Cooking time') . '</th><td>' . $_text . '</td></tr>';
+  }
+
+  if (!empty($node->recipe['cooktime']) && !empty($node->recipe['preptime'])) {
+    $_minutes = $node->recipe['cooktime'] + $node->recipe['preptime'];
+    $_text = '';
+    if ($_minutes < 60) {
+      $_text = format_plural($_minutes, '1 minute', '@count minutes');
+    }
+    elseif ($_minutes % 60 == 0) {
+      $_text = format_plural($_minutes / 60, '1 hour', '@count hours');
+    }
+    else {
+      $_text = t('!time hours', array('!time' => recipe_ingredient_quantity_from_decimal($_minutes / 60)));
+    }
+
+    // Wrap description in RDFa markup.
+    if ( !empty($node->rdf_mapping['recipe_totaltime']) ) {
+      $attributes = rdf_rdfa_attributes($node->rdf_mapping['recipe_totaltime']);
+      $attributes['content'] = array(recipe_duration_iso8601($_minutes));
+      $_text = theme('rdf_template_variable_wrapper', array('content' => $_text, 'attributes' => $attributes, 'inline' => FALSE));
+    }
+
+    $output .= '<tr><th>' . t('Total time') . '</th><td>' . $_text . '</td></tr>';
   }
 
   $output .= '</table>';
@@ -2105,11 +2128,17 @@ function recipe_rdf_mapping() {
         'recipe_description' => array(
           'predicates' => array('v:summary'),
         ),
-        'preptime' => array(
-          'predicates' => array('v:preptime'),
+        'recipe_preptime' => array(
+          'predicates' => array('v:prepTime'),
         ),
-        'cooktime' => array(
-          'predicates' => array('v:cooktime'),
+        'recipe_cooktime' => array(
+          'predicates' => array('v:cookTime'),
+        ),
+        'recipe_totaltime' => array(
+          'predicates' => array('v:totalTime'),
+        ),
+        'recipe_yield' => array(
+          'predicates' => array('v:yield'),
         ),
       ),
     ),
