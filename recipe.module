@@ -115,7 +115,7 @@ function recipe_load($nodes) {
  * Implementation of hook_link().
  */
 function recipe_link($type, $node = NULL, $teaser = FALSE) {
-dsm("recipe_link");
+
   $links = array();
 
   if ($type == 'node' && $node->type == 'recipe') {
@@ -269,7 +269,7 @@ function recipe_save_ingredients($node) {
         ->fields(array(
           'ingredient_id' => $ingredient['id'],
           'quantity' => $ingredient['quantity'],
-          'unit_id' => $ingredient['unit_id'],
+          'unit_key' => $ingredient['unit_key'],
           'weight' => $ingredient['weight'],
           'note' => $ingredient['note'],
         ))
@@ -289,7 +289,7 @@ function recipe_save_ingredients($node) {
           'nid' => $node->nid,
           'ingredient_id' => $ingredient['id'],
           'quantity' => $ingredient['quantity'],
-          'unit_id' => $ingredient['unit_id'],
+          'unit_key' => $ingredient['unit_key'],
           'weight' => $ingredient['weight'],
           'note' => $ingredient['note'],
         ))
@@ -405,7 +405,7 @@ function recipe_form($node, &$form_state) {
     unset($form_state['add_ingredients']);
     $add_count = variable_get('recipe_add_more_count', 5);
     for ($delta = 0; $delta < $add_count; $delta++) {
-      array_push($node->recipe['ingredients']['ing'], array('ri_id' => NULL, 'quantity' => '', 'unit_id' => '', 'name' => '', 'note' => '', 'weight' => 0));
+      array_push($node->recipe['ingredients']['ing'], array('ri_id' => NULL, 'quantity' => '', 'unit_key' => '', 'name' => '', 'note' => '', 'weight' => 0));
     }
   }
 
@@ -441,10 +441,10 @@ function recipe_form($node, &$form_state) {
       '#size' => 8,
       '#maxlength' => 8,
     );
-    $form['recipe']['ingredients']['ing'][$id]['unit_id'] = array(
+    $form['recipe']['ingredients']['ing'][$id]['unit_key'] = array(
       '#type' => 'select',
       '#title' => t('Unit'),
-      '#default_value' => $ingredient['unit_id'],
+      '#default_value' => $ingredient['unit_key'],
       '#options' => recipe_unit_options(),
     );
     $form['recipe']['ingredients']['ing'][$id]['name'] = array(
@@ -581,7 +581,7 @@ function theme_ingredients_form($variables) {
         ),
         'class' => array('draggable'),
       );
-      $row['data'][] = drupal_render($form[$key]['unit_id']);
+      $row['data'][] = drupal_render($form[$key]['unit_key']);
       $row['data'][] = drupal_render($form[$key]['name']);
       $row['data'][] = drupal_render($form[$key]['note']);
       $row['data'][] = drupal_render($form[$key]['weight']);
@@ -940,13 +940,15 @@ function theme_recipe_ingredients($variables) {
   $output = "\n" . '<div class="recipe-ingredients recipe-section">';
   $output .= '<h2 class="title">' . t('Ingredients') . '</h2>';
 
+  $unit_list = recipe_get_units();
+
   // Construct the $ingredients[] array.
   if ($node->recipe['ingredients']['ing'] != NULL) {
     $output .= '<div class="section">';
     foreach ($node->recipe['ingredients']['ing'] as $ingredient) {
       if (isset($ingredient['quantity']) && $ingredient['name']) {
-        if (!isset($ingredient['abbreviation'])) {
-          $ingredient['abbreviation'] = recipe_unit_abbreviation($ingredient['unit_id']);
+        if (!isset($ingredient['abbreviation']) && isset($unit_list[$ingredient['unit_key']])) {
+          $ingredient['abbreviation'] = $unit_list[$ingredient['unit_key']]['abbreviation'];
         }
         if ($ingredient['abbreviation'] == '') {
           $ingredient['abbreviation'] = '&nbsp;';
@@ -973,10 +975,11 @@ function theme_recipe_ingredients($variables) {
         $units = '';
         // Print the abbreviation if recipe_unit_display says too or the abbreviation is blank (ie = Unit, which we don't print).
         if ( variable_get('recipe_unit_display', 0) == 0 || $ingredient['abbreviation'] == '&nbsp;') {
-          $units = '<acronym ' . drupal_attributes(array('title' => recipe_unit_name($ingredient['unit_id']))) . '>' . $ingredient['abbreviation'] . '</acronym>';
+          $title = isset($unit_list[$ingredient['unit_key']]) ? $unit_list[$ingredient['unit_key']]['name'] : $ingredient['unit_key'];
+          $units = '<acronym ' . drupal_attributes(array('title' => $title)) . '>' . $ingredient['abbreviation'] . '</acronym>';
         }
         else {
-          $units = recipe_unit_name($ingredient['unit_id']);
+          $units = isset($unit_list[$ingredient['unit_key']]) ? $unit_list[$ingredient['unit_key']]['name'] : $ingredient['unit_key'];
         }
         $fullingredient = strlen($ingredient['note']) > 0 ? $ingredient['name'] . ' (' . $ingredient['note'] . ')' : $ingredient['name'];
 
@@ -1148,30 +1151,19 @@ function theme_recipe_summary($variables) {
  */
 function recipe_unit_options() {
   static $options;
-  static $result;
 
-  if (!isset($result)) {
-    $order_by = '';
-    // US measure preferred.
-    if ( variable_get('recipe_preferred_system_of_measure', 0) == 0 ) {
-      $order_by = 'type asc, metric asc, name';
-    }
-    // Metric measure preferred.
-    else {
-      $order_by = 'type asc, metric desc, name';
-    }
-    $options = array();
-    $result = db_query("SELECT id, type, name, abbreviation FROM {recipe_unit} ORDER BY $order_by", array());
-    foreach ($result as $record) {
-      if (isset($record->type)) {
-        if (!isset($options[$record->type])) {
-          $options[$record->type] = array();
-        }
-        $options[$record->type][$record->id] = t('@name (@abbreviation)', array('@name' => $record->name, '@abbreviation' => $record->abbreviation));
+  if (!isset($options)) {
+    $units = recipe_get_units(variable_get('recipe_preferred_system_of_measure_limit', 0));
+
+    // Put in a blank so non-matching units will not validate and save.
+    $options = array(''=>'');
+
+    foreach ($units as $unit_key => $unit) {
+      $text = $unit['name'];
+      if (!empty($unit['abbreviation'])) {
+        $text .= ' (' . $unit['abbreviation'] . ')';
       }
-      else {
-        $options[$record->id] = t('@name (@abbreviation)', array('@name' => $record->name, '@abbreviation' => $record->abbreviation));
-      }
+      $options[$unit_key] = $text;
     }
   }
 
@@ -1334,15 +1326,13 @@ function recipe_ingredient_quantity_from_fraction($ingredient_quantity) {
 function recipe_load_ingredients($nid) {
   $select = db_select('recipe_node_ingredient', 'ri');
   $select->join('recipe_ingredient', 'i', 'ri.ingredient_id = i.id');
-  $select->join('recipe_unit', 'u', 'ri.unit_id = u.id');
   $select->addField('ri', 'id', 'ri_id');
   $select->addField('i', 'name');
   $select->addField('ri', 'note');
   $select->addField('i', 'link');
   $select->addField('ri', 'quantity');
-  $select->addField('ri', 'unit_id');
+  $select->addField('ri', 'unit_key');
   $select->addField('ri', 'weight');
-  $select->addField('u', 'abbreviation');
   $select->addField('ri', 'ingredient_id');
   $select->condition('ri.nid', $nid);
   $select->orderBy('ri.weight', 'ASC');
@@ -1354,37 +1344,6 @@ function recipe_load_ingredients($nid) {
   }
 
   return $ingredients;
-}
-
-/**
- * Converts a recipe unit ID to it's abbreviation
- */
-function recipe_unit_abbreviation($unit_id) {
-  static $abbreviations;
-
-  if (!$abbreviations) {
-    $rs = db_query("SELECT id, abbreviation FROM {recipe_unit}");
-    foreach ($rs as $unit) {
-      $abbreviations[$unit->id] = $unit->abbreviation;
-    }
-  }
-
-  return $abbreviations[$unit_id];
-}
-
-/**
- * Converts a recipe unit ID to it's name */
-function recipe_unit_name($unit_id) {
-  static $unit_names;
-
-  if (!isset($unit_names)) {
-    $rs = db_query("SELECT id, name FROM {recipe_unit}");
-    foreach ($rs as $unit) {
-      $unit_names[$unit->id] = $unit->name;
-    }
-  }
-
-  return isset($unit_names[$unit_id]) ? $unit_names[$unit_id] : FALSE;
 }
 
 
@@ -1439,75 +1398,23 @@ function recipe_autocomplete_page($string = "", $limit = 10) {
  * Errors should be signaled with form_set_error().
  */
 function recipe_validate($node, $form, &$form_state) {
+  $return = TRUE;
   if (!is_numeric($node->recipe['yield']) || $node->recipe['yield'] <=0) {
-    form_set_error('yield', t('Yield must be a valid positive integer.'));
+    form_set_error('recipe[yield', t('Yield must be a valid positive integer.'));
+    $return = FALSE;
   }
+
+  foreach ($form_state['values']['recipe']['ingredients']['ing'] as $key => $ingredient) {
+    if (empty($ingredient['unit_key']['#value'])) {
+      form_set_error("ingredients][ing][$key][unit_key", t("You must choose a valid unit."));
+      $return = FALSE;
+    }
+  }
+  return $return;
 }
 
-/**
- * Converts an ingredients name string to an ingredient array.
- */
-function recipe_parse_ingredient_string($ingredient_string) {
-  $ingredient = array();
-  if (preg_match('#([0-9.]+(?:\s?\d*/\d*)?\s?)?(?:([a-zA-Z.]*)\s)?(.*)#', trim($ingredient_string), $matches)) {
-    $ingredient['name'] = $matches[3];
-    $ingredient['quantity'] = trim($matches[1]);
-    if ($ingredient['quantity'] == 0) {
-      $ingredient['quantity'] = 0;
-    }
-    $t_unit = $matches[2];
-    $unit = recipe_unit_from_name($t_unit);
 
-    if ($unit) {
-      $ingredient['unit_id'] = $unit->id;
-      $ingredient['abbreviation'] = $unit->abbreviation;
-    }
-    else {
-      $ingredient['unit_id'] = 29;
-      $ingredient['abbreviation'] = '';
-      $ingredient['name'] = $t_unit . ' ' . $ingredient['name'];
-    }
 
-    $ingredient['name'] = trim($ingredient['name']);
-
-    return $ingredient;
-  }
-  else {
-    return FALSE;
-  }
-}
-
-/**
- * Returns information about a unit based on a unit abbreviation or name
- */
-function recipe_unit_from_name($name) {
-  static $units_array;
-
-  if (strlen($name) > 1) {
-    $string = strtolower($name);
-  }
-  else {
-    $string = $name;
-  }
-  $ending = substr($string, -1, 1);
-  if ($ending == 's'  && $string != 'ds' || $ending == '.') {
-    $string = substr($string, 0, strlen($string) -1);
-  }
-  $ending = substr($string, -1, 1);
-  if ($ending == 's'  && $string != 'ds'|| $ending == '.') {
-    $string = substr($string, 0, strlen($string) -1);
-  }
-
-  if (!isset($units_array)) {
-    $result = db_query("SELECT id, name, abbreviation FROM {recipe_unit}");
-    foreach ($result as $record) {
-      $units_array[strtolower($record->name)] = $record;
-      $units_array[$record->abbreviation] = $record;
-    }
-  }
-
-  return $units_array[$string];
-}
 
 
 /**
@@ -1757,9 +1664,7 @@ function recipe_import_get_node($parsed_recipe_object = FALSE) {
     foreach ($parsed_recipe_object['ingredients'] as $i) {
       $ingredient = array();
       $ingredient['quantity'] = $i['quantity'];
-      if ($i['unit_obj'] != FALSE) {
-        $ingredient['unit_id'] = $i['unit_obj']->id;
-      }
+      $ingredient['unit_key'] = $i['unit_key'];
       $ingredient['name'] = isset($i['ingredient_name']) ? $i['ingredient_name'] : '';
       $ingredient['note'] = isset($i['ingredient_note']) ? $i['ingredient_note'] : '';
       $ingredient['weight'] = $weight++;
@@ -1788,7 +1693,7 @@ function recipe_import_get_node($parsed_recipe_object = FALSE) {
  *    'quantity' =>
  *    'ingredient_name' =>
  *    'unit_name' =>
- *    'unit_obj' => stdClass, comes from database lookup: see recipe_unit_fuzzymatch().  ==FALSE if no-match
+ *    'unit_key' => see recipe_unit_fuzzymatch().  ==FALSE if no-match
  *    'ingre_obj' => comes from database lookup: see recipe_ingredient_match().  ==FALSE if no-match
  * );
  *
@@ -1810,77 +1715,58 @@ function recipe_import_parse($form, &$form_state) {
 
 
 /**
- * Fetch a recipe_unit.
+ * Fetch a recipe unit.
+ * Used by the various import plugins.
  *
  * @param $recipe_name_or_abbrev
  *   A string representing a unit of measure abbreviation or a unit name.
  * @return
- *   A recipe_unit stdClass upon successful load or FALSE
+ *   A recipe unit key as from recipe_get_units or FALSE if no match.
  */
-function recipe_unit_fuzzymatch($recipe_name_or_abbrev, $reset = FALSE) {
-  static $units;
+function recipe_unit_fuzzymatch($unit_name_or_abbrev) {
 
-  // Empty strings should use the default non-printing 'Unit'.
-  if ( $recipe_name_or_abbrev == '' ) {
-    $recipe_name_or_abbrev = 'Unit';
-  }
+  $units = recipe_get_units();
 
-  if (!isset($units) || $reset) {
-    // Get all units to prepare for fuzzy match.
-
-    $select = db_select('recipe_unit', 'ru');
-    $select->addField('ru', 'id');
-    $select->addField('ru', 'name');
-    $select->addField('ru', 'abbreviation');
-    $select->addField('ru', 'aliases');
-    if ( variable_get('recipe_preferred_system_of_measure', 0) == 0 ) {
-      // US measure preferred.
-      $select->orderBy('ru.metric', 'ASC');
-    }
-    // Metric measure preferred.
-    else {
-      $select->orderBy('ru.metric', 'DESC');
-    }
-    $result = $select->execute()->fetchAll();
-    $units = array();
-    foreach ($result as $row) {
-      $units[] = $row;
-    }
+  // Empty strings should use the default non-printing 'unit'.
+  if ( $unit_name_or_abbrev == '' ) {
+    $unit_name_or_abbrev = 'unit';
   }
 
   // First pass unit case must match exactly( T=Tbsp, t=tsp ).
-  foreach ($units as $u) {
+  foreach ($units as $unit_key => $u) {
     $pats = array();
     // Add name pattern.
-    $pats[] = '^' . $u->name . 's{0,1}$';
+    $pats[] = '^' . $u['name'] . 's{0,1}$';
+    // Add plural name pattern.
+    $pats[] = '^' . $u['plural'] . 's{0,1}$';
     // Add abbreviation pattern.
-    $pats[] = '^' . $u->abbreviation . 's{0,1}\.{0,1}$';
-    // Add comma separated alias patterns.
-    $aliases = explode(',', $u->aliases);
-    foreach ($aliases as $alias) {
+    $pats[] = '^' . $u['abbreviation'] . 's{0,1}\.{0,1}$';
+
+    foreach ($u['aliases'] as $alias) {
       $pats[] = '^' . trim($alias) . 's{0,1}\.{0,1}$';
     }
     $search_pat = implode('|', $pats);
-    if (preg_match("/$search_pat/", $recipe_name_or_abbrev)) {
-      return $u;
+    if (preg_match("/$search_pat/", $unit_name_or_abbrev)) {
+      return $unit_key;
     }
   }
 
   // Second pass unit case doesn't matter.
-  foreach ($units as $u) {
+  foreach ($units as $unit_key => $u) {
     $pats = array();
     // Add name pattern.
-    $pats[] = '^' . $u->name . 's{0,1}$';
+    $pats[] = '^' . $u['name'] . 's{0,1}$';
+    // Add plural name pattern.
+    $pats[] = '^' . $u['plural'] . 's{0,1}$';
     // Add abbreviation pattern.
-    $pats[] = '^' . $u->abbreviation . 's{0,1}\.{0,1}$';
-    // Add comma separated alias patterns.
-    $aliases = explode(',', $u->aliases);
-    foreach ($aliases as $alias) {
+    $pats[] = '^' . $u['abbreviation'] . 's{0,1}\.{0,1}$';
+
+    foreach ($u['aliases'] as $alias) {
       $pats[] = '^' . trim($alias) . 's{0,1}\.{0,1}$';
     }
     $search_pat = implode('|', $pats);
-    if (preg_match("/$search_pat/i", $recipe_name_or_abbrev)) {
-      return $u;
+    if (preg_match("/$search_pat/i", $unit_name_or_abbrev)) {
+      return $unit_key;
     }
   }
 
@@ -2145,6 +2031,197 @@ function recipe_rdf_mapping() {
   );
 }
 
+
+/*
+ * Wrap a duration string in iso8601 format.
+ * Used for RDFa duration elements.
+ */
 function recipe_duration_iso8601($data = '') {
   return 'PT' . $data . 'M';
+}
+
+
+/**
+ * WARNING:  Do not change keys once they are released without a migration path.
+ *
+ * Get an array of units.
+ *
+ * This allows for unit string translations and the possibility of
+ *   allowing for unit level integration with other modules.
+ * For new units, use the same unit keys as the unitsapi module keys
+ *   found in units.xml.  NOTE:  This is not possible for all units.
+ * @return
+ *   An array of units.  $units = array('unit key'=> array(name=>, plural=>, abbreviation=>, system=>, type=>, aliases=>))
+ */
+function recipe_get_units($limit_to_preferred = 0) {
+
+  $us_units = array(
+    'cup' =>             array('name' => t('cup'),         'plural' => t('cups'),         'abbreviation' => t('c'),     'system' => 'us customary', 'type' => t('volume'), 'aliases' => array()),
+    'us liquid pint' =>  array('name' => t('pint'),        'plural' => t('pints'),        'abbreviation' => t('pt'),    'system' => 'us customary', 'type' => t('volume'), 'aliases' => array()),
+    'us liquid quart' => array('name' => t('quart'),       'plural' => t('quarts'),       'abbreviation' => t('q'),     'system' => 'us customary', 'type' => t('volume'), 'aliases' => array()),
+    'us gallon' =>       array('name' => t('gallon'),      'plural' => t('gallons'),      'abbreviation' => t('gal'),   'system' => 'us customary', 'type' => t('volume'), 'aliases' => array()),
+    'pound' =>           array('name' => t('pound'),       'plural' => t('pounds'),       'abbreviation' => t('lb'),    'system' => 'us customary', 'type' => t('weight'), 'aliases' => array()),
+    'ounce' =>           array('name' => t('ounce'),       'plural' => t('ounces'),       'abbreviation' => t('oz'),    'system' => 'us customary', 'type' => t('weight'), 'aliases' => array()),
+    'us fluid ounce' =>  array('name' => t('fluid ounce'), 'plural' => t('fluid ounces'), 'abbreviation' => t('fl oz'), 'system' => 'us customary', 'type' => t('volume'), 'aliases' => array()),
+  );
+
+  $si_units = array(
+    'milliliter' => array('name' => t('milliliter'), 'plural' => t('milliliters'), 'abbreviation' => t('ml'),  'system' => 'si', 'type' => t('volume'), 'aliases' =>  array()),
+    'centiliter' => array('name' => t('centiliter'), 'plural' => t('centiliters'), 'abbreviation' => t('cl'),  'system' => 'si', 'type' => t('volume'), 'aliases' =>  array()),
+    'liter' =>      array('name' => t('liter'),      'plural' => t('liters'),      'abbreviation' => t('l'),   'system' => 'si', 'type' => t('volume'), 'aliases' =>  array()),
+    'deciliter' =>  array('name' => t('deciliter'),  'plural' => t('deciliters'),  'abbreviation' => t('dl'),  'system' => 'si', 'type' => t('volume'), 'aliases' =>  array()),
+    'milligram' =>  array('name' => t('milligram'),  'plural' => t('milligrams'),  'abbreviation' => t('mg'),  'system' => 'si', 'type' => t('weight'), 'aliases' =>  array()),
+    'gram' =>       array('name' => t('gram'),       'plural' => t('grams'),       'abbreviation' => t('g'),   'system' => 'si', 'type' => t('weight'), 'aliases' =>  array()),
+    'centigram' =>  array('name' => t('centigram'),  'plural' => t('centigrams'),  'abbreviation' => t('cg'),  'system' => 'si', 'type' => t('weight'), 'aliases' =>  array()),
+    'kilogram' =>   array('name' => t('kilogram'),   'plural' => t('kilograms'),   'abbreviation' => t('kg'),  'system' => 'si', 'type' => t('weight'), 'aliases' =>  array()),
+  );
+
+  $common_units = array(
+    'tablespoon' => array('name' => t('tablespoon'), 'plural' => t('tablespoons'), 'abbreviation' => t('T'),   'system' => 'common', 'type' => t('volume'), 'aliases' => array('tbsp','tb')),
+    'teaspoon' =>   array('name' => t('teaspoon'),   'plural' => t('teaspoons'),   'abbreviation' => t('t'),   'system' => 'common', 'type' => t('volume'), 'aliases' => array('tsp')),
+
+    'slice' =>    array('name' => t('slice'),   'plural' => t('slices'),   'abbreviation' => t('sli'), 'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
+    'clove' =>    array('name' => t('clove'),   'plural' => t('cloves'),   'abbreviation' => t('clv'), 'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
+    'load' =>     array('name' => t('loaf'),    'plural' => t('loaves'),   'abbreviation' => t('lf'),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
+    'pinch' =>    array('name' => t('pinch'),   'plural' => t('pinches'),  'abbreviation' => t('pn'),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
+    'package' =>  array('name' => t('package'), 'plural' => t('packages'), 'abbreviation' => t('pk'),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array('pack')),
+    'can' =>      array('name' => t('can'),     'plural' => t('cans'),     'abbreviation' => t('cn'),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array('jar')),
+    'drop' =>     array('name' => t('drop'),    'plural' => t('drops'),    'abbreviation' => t('dr'),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
+    'bunch' =>    array('name' => t('bunch'),   'plural' => t('bunches'),  'abbreviation' => t('bn'),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
+    'dash' =>     array('name' => t('dash'),    'plural' => t('dashes'),   'abbreviation' => t('ds'),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
+    'carton' =>   array('name' => t('carton'),  'plural' => t('cartons'),  'abbreviation' => t('ct'),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
+
+    'unit' =>     array('name' => t('unit'),    'plural' => t('units'),    'abbreviation' => '', 'system' => 'common', 'type' => t('indefinite'), 'aliases' => array('each', 'ea', 'whole')),
+    'unknown' =>  array('name' => t('unknown'), 'plural' => t('unknown'),  'abbreviation' => '', 'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array())
+  );
+
+
+  if ( variable_get('recipe_preferred_system_of_measure', 0) == 0 ) {
+    // US system preferred.
+    $units = array_merge($us_units, $common_units);
+    if ($limit_to_preferred == 0) {
+      $units = array_merge($units, $si_units);
+    }
+    uasort($units, 'unit_sort');
+  } else {
+    // SI system preferred.
+    $units = array_merge($si_units, $common_units);
+    if ($limit_to_preferred == 0) {
+      $units = array_merge($units, $us_units);
+    }
+    uasort($units, 'unit_sort');
+  }
+
+  return $units;
+}
+
+function unit_sort($a, $b) {
+    return strcmp($a['name'], $b['name']);
+}
+
+
+
+
+
+
+
+
+
+/**
+ * Returns information about a unit based on a unit abbreviation or name
+ */
+function recipe_unit_from_name_OLD($name) {
+  static $units_array;
+
+  if (strlen($name) > 1) {
+    $string = strtolower($name);
+  }
+  else {
+    $string = $name;
+  }
+  $ending = substr($string, -1, 1);
+  if ($ending == 's'  && $string != 'ds' || $ending == '.') {
+    $string = substr($string, 0, strlen($string) -1);
+  }
+  $ending = substr($string, -1, 1);
+  if ($ending == 's'  && $string != 'ds'|| $ending == '.') {
+    $string = substr($string, 0, strlen($string) -1);
+  }
+
+  if (!isset($units_array)) {
+    $result = db_query("SELECT id, name, abbreviation FROM {recipe_unit}");
+    foreach ($result as $record) {
+      $units_array[strtolower($record->name)] = $record;
+      $units_array[$record->abbreviation] = $record;
+    }
+  }
+
+  return $units_array[$string];
+}
+
+
+/**
+ * Converts an ingredients name string to an ingredient array.
+ */
+function recipe_parse_ingredient_string_OLD($ingredient_string) {
+  $ingredient = array();
+  if (preg_match('#([0-9.]+(?:\s?\d*/\d*)?\s?)?(?:([a-zA-Z.]*)\s)?(.*)#', trim($ingredient_string), $matches)) {
+    $ingredient['name'] = $matches[3];
+    $ingredient['quantity'] = trim($matches[1]);
+    if ($ingredient['quantity'] == 0) {
+      $ingredient['quantity'] = 0;
+    }
+    $t_unit = $matches[2];
+
+    $unit = recipe_unit_from_name($t_unit);
+
+    if ($unit) {
+      $ingredient['unit_id'] = $unit->id;
+      $ingredient['abbreviation'] = $unit->abbreviation;
+    }
+    else {
+      $ingredient['unit_id'] = 29;
+      $ingredient['abbreviation'] = '';
+      $ingredient['name'] = $t_unit . ' ' . $ingredient['name'];
+    }
+
+    $ingredient['name'] = trim($ingredient['name']);
+
+    return $ingredient;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+
+/**
+ * Converts a recipe unit ID to it's abbreviation
+ */
+function recipe_unit_abbreviation_OLD($unit_id) {
+  static $abbreviations;
+
+  if (!$abbreviations) {
+    $rs = db_query("SELECT id, abbreviation FROM {recipe_unit}");
+    foreach ($rs as $unit) {
+      $abbreviations[$unit->id] = $unit->abbreviation;
+    }
+  }
+
+  return $abbreviations[$unit_id];
+}
+
+/**
+ * Converts a recipe unit ID to it's name */
+function recipe_unit_name_OLD($unit_id) {
+  static $unit_names;
+
+  if (!isset($unit_names)) {
+    $rs = db_query("SELECT id, name FROM {recipe_unit}");
+    foreach ($rs as $unit) {
+      $unit_names[$unit->id] = $unit->name;
+    }
+  }
+
+  return isset($unit_names[$unit_id]) ? $unit_names[$unit_id] : FALSE;
 }

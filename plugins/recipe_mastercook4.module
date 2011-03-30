@@ -77,6 +77,8 @@ function recipe_mastercook4_export_single($nid = NULL, $yield = NULL) {
 
 function merge_template($node = NULL) {
 
+  $units = recipe_get_units();
+
   //prepare prepare time
   $decimal_hours = $node->recipe['preptime']/60;
   $hours = floor($decimal_hours);
@@ -98,6 +100,16 @@ function merge_template($node = NULL) {
     else {
       $i['quantity'] = ' ';
     }
+
+    // Display units or abbreviation.
+    // Print the abbreviation if recipe_unit_display says too or the abbreviation is blank (ie = Unit, which we don't print).
+    if ( variable_get('recipe_unit_display', 0) == 0 || $i->abbreviation == '&nbsp;') {
+      $i['str_unit'] = $units[$i['unit_key']]['abbreviation'];
+    }
+    else {
+      $i['str_unit'] = $units[$i['unit_key']]['name'];
+    }
+
     $ingredients .= format_mastercook4_ingredient($i);
   }
 
@@ -154,11 +166,10 @@ function format_mastercook4_ingredient($ingredient = NULL) {
   $ingredient['quantity'] = recipe_ingredient_quantity_from_decimal($ingredient['quantity'], TRUE);
   // no html entities
   $ingredient['quantity'] = str_replace('&frasl;', '/', $ingredient['quantity']);
-  $ingredient['unit_name'] = recipe_unit_name($ingredient['unit_id']);
   $fullingredient = strlen($ingredient['note']) > 0 ? $ingredient['name'] . ' -- ' . $ingredient['note'] : $ingredient['name'];
   $fullingredient = strip_html_and_encode_entities($fullingredient);
   $fullingredient = wordwrap($fullingredient, 66, "\n                        ");
-  $o = sprintf("%8s  %-12s  %s\n", $ingredient['quantity'], $ingredient['unit_name'], $fullingredient);
+  $o = sprintf("%8s  %-12s  %s\n", $ingredient['quantity'], $ingredient['str_unit'], $fullingredient);
   return $o;
 }
 
@@ -318,7 +329,7 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
       }
 
       // blank line in meta section, move to next section.
-      if ( $trimmed_line == '' ) {
+      if ($trimmed_line == '' || preg_match('/Amount +Measure +Ingredient +-- +Preparation Method/i', $line)) {
         $region++;
         continue;
       }
@@ -339,15 +350,17 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
         $i = trim(substr($line, 24));
 
         // If you have an ingredient continuation, add note to previous ingredient.
-        if ($q == '' && $u == '' && $last_ingred_key != NULL) {
+        // Ingredient line continuation must start with a -- in the ingredient name position.
+        if ($q == '' && $u == '' && $last_ingred_key != NULL && preg_match('/^ *--/i', $i)) {
           $recipe['ingredients'][$last_ingred_key]['ingredient_note'] .= ' ' . $i;
 
-        // For non-ingredient continuation, add ingredient like normal.
         }
         else {
           $ing = array(
             'ingredient_name' => '',
             'ingredient_note' => '',
+            'quantity' => '',
+            'unit_key' => '',
           );
 
           $ing['quantity'] = recipe_ingredient_quantity_from_fraction($q);
@@ -361,13 +374,10 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
             $ing['ingredient_name'] = $i;
           }
 
-          // Look up units in the units table.
-          // If it is not found, use the generic 'unit' object and place the original in 'notes'.
-          $ing['unit_obj'] = recipe_unit_fuzzymatch($ing['unit_name']);
-          if ( $ing['unit_obj'] == FALSE ) {
-            $ing['ingredient_note'] = $ing['unit_name'] . '! ' . $ing['ingredient_note'];
-            $ing['unit_name'] = 'Unit';
-            $ing['unit_obj'] = recipe_unit_fuzzymatch($ing['unit_name']);
+          $ing['unit_key'] = recipe_unit_fuzzymatch($ing['unit_name']);
+          if ( $ing['unit_key'] == FALSE ) {
+            $ing['ingredient_note'] = '!' . $ing['unit_name'] . ' ' . $ing['ingredient_note'];
+            $ing['unit_key'] = 'unit';
             drupal_set_message(t('Could not find the ingredient units in :recipe (:line)', array(':recipe' => $recipe['title'], ':line' => $line)), 'warning');
           }
 

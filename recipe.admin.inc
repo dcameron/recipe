@@ -47,10 +47,18 @@ function recipe_admin_settings() {
     '#type' => 'radios',
     '#title' => t('Preferred system of measure'),
     '#default_value' => variable_get('recipe_preferred_system_of_measure', 0),
-    '#options' => array(t('U.S. customary units'), t('Metric')),
+    '#options' => array(t('U.S. customary units'), t('SI/Metric')),
     '#description' => t('Which system of measure should be preferred where it is ambiguous.'),
     '#required' => TRUE,
   );
+  $form['recipe_ingredients']['recipe_preferred_system_of_measure_limit'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Limit UI to the preferred system of measure'),
+    '#default_value' => variable_get('recipe_preferred_system_of_measure_limit', 0),
+    '#return_value' => 1,
+    '#description' => t('Limit unit selectbox to only preferred system of measure.  Does not affect import routines.'),
+  );
+
   $form['recipe_ingredients']['recipe_ingredient_name_normalize'] = array(
     '#type' => 'radios',
     '#title' => t('Ingredient name normalization'),

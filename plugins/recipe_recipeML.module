@@ -107,17 +107,29 @@ function recipe_recipeML_export_single($nid = NULL, $yield = NULL, $add_content_
     '<description>'. my_xml_escape($node->recipe['description']) .'</description>'."\n".
     '<ingredients>';
 
+  $units = recipe_get_units();
   foreach ($node->recipe['ingredients']['ing'] as $ingredient) {
     $prep = '';
     if (strlen($ingredient['note']) > 0) {
-      $prep = '<prep>'. $ingredient['note'] .'</prep>';
+      $prep = '<prep>'. my_xml_escape($ingredient['note']) .'</prep>';
     }
 
     if ( $ingredient['quantity'] > 0 ) {
       $ingredient['quantity'] *= $factor;
     }
 
-    $output .= "\n".'<ing><amt><qty>'. $ingredient['quantity'] .'</qty><unit>'. $ingredient['abbreviation'] .'</unit></amt><item>'. $ingredient['name'] ."</item>$prep</ing>";
+    // Display units or abbreviation.
+    // Print the abbreviation if recipe_unit_display says too or the abbreviation is blank (ie = Unit, which we don't print).
+    if ( variable_get('recipe_unit_display', 0) == 0 || $i->abbreviation == '&nbsp;') {
+      $ingredient['str_unit'] = $units[$ingredient['unit_key']]['abbreviation'];
+    }
+    else {
+      $ingredient['str_unit'] = $units[$ingredient['unit_key']]['name'];
+    }
+
+
+
+    $output .= "\n".'<ing><amt><qty>'. $ingredient['quantity'] .'</qty><unit>'. $ingredient['str_unit'] .'</unit></amt><item>'. my_xml_escape($ingredient['name']) ."</item>$prep</ing>";
   }
 
   $output .= "\n".
@@ -272,7 +284,7 @@ function recipe_import_element_start($parser, $name, $attributes) {
         'ingredient_note' => '',
         'quantity' => '',
         'unit_name' => '',
-        'unit_obj' => FALSE,
+        'unit_key' => FALSE,
         'ingredient_note' => '',
       );
       $recipe['ingredients'][] = $ingredient;
@@ -343,19 +355,17 @@ function recipe_import_element_end($parser, $name) {
         if ($recipe['__region'] == 'ING') {
           $ing = array_pop($recipe['ingredients']);
           $ing['unit_name'] = trim($data_string);
-          // Try to match unit in the units table.
-          if ($unit = recipe_unit_fuzzymatch(trim($data_string))) {
-            $ing['unit_obj'] = $unit;
+          // Try to match unit.
+          if ($unit_key = recipe_unit_fuzzymatch(trim($data_string))) {
+            $ing['unit_key'] = $unit_key;
           }
           else {
-            if ($unit = recipe_unit_from_name('Unit')) {
-              $ing['unit_obj'] = $unit;
-              if (strlen($ing['ingredient_name']) > 0) {
-                $ing['ingredient_name'] = $ing['ingredient_name'] .' '. trim($data_string);
-              }
-              else {
-                $ing['ingredient_name'] = trim($data_string);
-              }
+            $ing['unit_key'] = 'unit';
+            if (strlen($ing['ingredient_name']) > 0) {
+              $ing['ingredient_name'] = $ing['ingredient_name'] .' '. trim($data_string);
+            }
+            else {
+              $ing['ingredient_name'] = trim($data_string);
             }
           }
           $recipe['ingredients'][] = $ing;

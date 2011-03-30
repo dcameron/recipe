@@ -7,16 +7,6 @@
 
 
 /**
- * Implementation of hook_install().
- * Automatically creates tables in hook_schema.
- */
-function recipe_install() {
-  // Add units to the units table.
-  _recipe_populate_units();
-}
-
-
-/**
  * Implementation of hook_uninstall().
  * Automatically drops tables in hook_schema.
  */
@@ -98,10 +88,12 @@ function recipe_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-      'unit_id' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
+      'unit_key' => array(
+        'type' => 'varchar',
+        'length' => 255,
         'not null' => TRUE,
+        'default' => '',
+        'description' => 'Untranslated unit key from the units array.',
       ),
       'quantity' => array(
         'type' => 'float',
@@ -146,45 +138,6 @@ function recipe_schema() {
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
-      ),
-    ),
-    'primary key' => array('id'),
-  );
-
-  $schema['recipe_unit'] = array(
-    'description' => 'The base table for recipe units.',
-    'fields' => array(
-      'id' => array(
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'name' => array(
-        'type' => 'varchar',
-        'length' => 255,
-      ),
-      'abbreviation' => array(
-        'type' => 'varchar',
-        'length' => 8,
-      ),
-      'metric' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        'unsigned' => TRUE,
-        'default' => 0,
-      ),
-      'type' => array(
-        'type' => 'varchar',
-        'length' => 6,
-        'not null' => TRUE,
-        'default' => 'Mass',
-      ),
-      'aliases' => array(
-        'type' => 'varchar',
-        'length' => 128,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'A common separated list of other names and abbreviations that apply to this unit.',
       ),
     ),
     'primary key' => array('id'),
@@ -384,5 +337,53 @@ function recipe_update_7002() {
     $modules = module_implements('rdf_mapping');
     rdf_modules_installed($modules);
   }
+
+}
+
+/**
+ * Adds unit_key column to the recipe_node_ingredient table.
+ */
+function recipe_update_7003() {
+  // Add the new unit_key field to the recipe_node_ingredient table.
+  db_add_field('recipe_node_ingredient', 'unit_key',  array(
+    'type' => 'varchar',
+    'length' => 255,
+    'not null' => TRUE,
+    'default' => '',
+  ));
+
+  // Update unit_key field from the old unit name field from the recipe_unit table.
+  $data_errors = FALSE;
+  $query = 'update {recipe_node_ingredient} rni set rni.unit_key = (select lower(max(ru.name)) from {recipe_unit} ru where ru.id=rni.unit_id)';
+  if (db_query($query) == FALSE) {
+    $data_errors = TRUE;
+  }
+
+  // For the unit keys that changed, update them to the new key.
+  $changes = array(
+    'pint' => 'us liquid pint',
+    'quart' => 'us liquid quart',
+    'gallon' => 'us gallon',
+    'tablespoon (metric)' => 'tablespoon',
+    'metric tablespoon' => 'tablespoon',
+    'teaspoon (metric)' => 'teaspoon',
+    'metric teaspoon' => 'teaspoon',
+    'millilitre' => 'milliliter',
+    'centilitre' => 'centiliter',
+    'decilitre' => 'decilitre',
+    'litre' => 'liter',
+  );
+  foreach ($changes as $old_key => $new_key) {
+    db_update('recipe_node_ingredient')
+      ->condition('unit_key', $old_key)
+      ->fields(array('unit_key' => $new_key))
+      ->execute();
+  }
+
+  // Remove unit_id field from the recipe_node_ingredient table.
+  db_drop_field('recipe_node_ingredient', 'unit_id');
+
+  // Don't remove the recipe_unit table at this time.
+  // People may have user-entered content in there.
 
 }

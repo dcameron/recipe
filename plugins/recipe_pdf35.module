@@ -225,12 +225,13 @@ function get_page_item_count($page) {
 function prepare_receipe_data($node) {
 
   // Preprocess the ingredients.
+  $units = recipe_get_units();
   $ingredients = array();
   foreach ( $node->recipe['ingredients']['ing'] as $key => $i ) {
     $fullingredient = !empty($i['note']) ? $i['name'] . ' (' . $i['note'] .')' : $i['name'];
     $quantity = recipe_ingredient_quantity_from_decimal($i['quantity'], TRUE);
     $quantity = trim(str_replace('&frasl;', '/', $quantity));
-    $ingredients[] = $quantity . ' ' . $i['abbreviation'] . ' ' . $fullingredient;
+    $ingredients[] = $quantity . ' ' . $units[$i['unit_key']]['abbreviation'] . ' ' . $fullingredient;
   }
 
   // Preprocess the instructions.

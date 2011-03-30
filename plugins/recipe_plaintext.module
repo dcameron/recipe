@@ -99,13 +99,10 @@ function recipe_plaintext_import($recipe_txt = NULL) {
         $i['ingredient_name'] = $matches[3];
         $i['ingredient_note'] = '';
 
-        // Look up units in the units table.
-        // If it is not found, use the generic 'unit' object and place the original in 'notes'.
-        $i['unit_obj'] = recipe_unit_fuzzymatch($i['unit_name']);
-        if ( $i['unit_obj'] == FALSE ) {
+        $i['unit_key'] = recipe_unit_fuzzymatch($i['unit_name']);
+        if ( $i['unit_key'] == FALSE ) {
           $i['ingredient_note'] = $i['unit_name'] . '! ' . $i['ingredient_note'];
-          $i['unit_name'] = 'Unit';
-          $i['unit_obj'] = recipe_unit_fuzzymatch($i['unit_name']);
+          $i['unit_key'] = 'unit';
           drupal_set_message(t('Could not find the ingredient units in :recipe (:line)', array(':recipe' => $recipe['title'], ':line' => $line)), 'warning');
         }
 
@@ -121,9 +118,14 @@ function recipe_plaintext_import($recipe_txt = NULL) {
         $i['quantity'] = recipe_ingredient_quantity_from_fraction($matches[1]);
         $i['unit_name'] = 'Unit';
         $i['ingredient_name'] = $matches[2];
+        $i['ingredient_note'] = '';
 
-        // FALSE if no-match
-        $i['unit_obj'] = recipe_unit_fuzzymatch($i['unit_name']);
+        $i['unit_key'] = recipe_unit_fuzzymatch($i['unit_name']);
+        if ( $i['unit_key'] == FALSE ) {
+          $i['ingredient_note'] = $i['unit_name'] . '! ' . $i['ingredient_note'];
+          $i['unit_key'] = 'unit';
+          drupal_set_message(t('Could not find the ingredient units in :recipe (:line)', array(':recipe' => $recipe['title'], ':line' => $line)), 'warning');
+        }
 
         // FALSE if no-match
         $i['ingred_obj'] = recipe_ingredient_match($i['ingredient_name']);
@@ -136,7 +138,7 @@ function recipe_plaintext_import($recipe_txt = NULL) {
         $i['quantity'] = 0;
         $i['unit_name'] = 'Unit';
         $i['ingredient_name'] = "failed: " . $line;
-        $i['unit_obj'] = FALSE;
+        $i['unit_key'] = FALSE;
         $i['ingred_obj'] = FALSE;
         $recipe['ingredients'][] = $i;
       }
@@ -195,6 +197,7 @@ function recipe_plaintext_export($nid = NULL, $yield = NULL) {
 
 
 function format_plaintext_ingredients($node = NULL) {
+	$units = recipe_get_units();
 
   $col_widths = array('quantity' => 0, 'unit' => 0);
 
@@ -227,10 +230,10 @@ function format_plaintext_ingredients($node = NULL) {
     // Display units or abbreviation.
     // Print the abbreviation if recipe_unit_display says too or the abbreviation is blank (ie = Unit, which we don't print).
     if ( variable_get('recipe_unit_display', 0) == 0 || $i->abbreviation == '&nbsp;') {
-      $i['str_unit'] = $i['abbreviation'];
+      $i['str_unit'] = $units[$i['unit_key']]['abbreviation'];
     }
     else {
-      $i['str_unit'] = recipe_unit_name($i['unit_id']);
+      $i['str_unit'] = $units[$i['unit_key']]['name'];
     }
     if ( strlen($i['str_unit']) > $col_widths['unit'] ) {
       $col_widths['unit'] = strlen($i['str_unit']);
