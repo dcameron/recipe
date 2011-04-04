@@ -444,7 +444,7 @@ function recipe_form($node, &$form_state) {
     $form['recipe']['ingredients']['ing'][$id]['unit_key'] = array(
       '#type' => 'select',
       '#title' => t('Unit'),
-      '#default_value' => $ingredient['unit_key'],
+      '#default_value' => $ingredient['unit_key'] != '' ? $ingredient['unit_key'] : variable_get('recipe_default_unit', ''),
       '#options' => recipe_unit_options(),
     );
     $form['recipe']['ingredients']['ing'][$id]['name'] = array(

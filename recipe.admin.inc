@@ -23,6 +23,7 @@ function recipe_admin_settings() {
     '#description' => t('This text will be displayed at the top of the recipe submission form. Useful for helping or instructing your users.'),
   );
 
+  // Ingredient section
   $form['recipe_ingredients'] = array(
     '#type' => 'fieldset',
     '#title' => t('Recipe ingredient section'),
@@ -43,7 +44,13 @@ function recipe_admin_settings() {
     '#description' => t('Display ingredient units like Tbsp or Tablespoon.'),
     '#required' => TRUE,
   );
-  $form['recipe_ingredients']['recipe_preferred_system_of_measure'] = array(
+
+  // System of measurement section
+  $form['recipe_ingredients']['system_of_measurement'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('System of measurement'),
+  );
+  $form['recipe_ingredients']['system_of_measurement']['recipe_preferred_system_of_measure'] = array(
     '#type' => 'radios',
     '#title' => t('Preferred system of measure'),
     '#default_value' => variable_get('recipe_preferred_system_of_measure', 0),
@@ -51,7 +58,14 @@ function recipe_admin_settings() {
     '#description' => t('Which system of measure should be preferred where it is ambiguous.'),
     '#required' => TRUE,
   );
-  $form['recipe_ingredients']['recipe_preferred_system_of_measure_limit'] = array(
+  $form['recipe_ingredients']['system_of_measurement']['recipe_default_unit'] = array(
+    '#type' => 'select',
+    '#title' => t('Default unit type for ingredients'),
+    '#default_value' => variable_get('recipe_default_unit', ''),
+    '#options' => recipe_unit_options(),
+    '#description' => t('The default unit for new ingredients on the recipe edit screen.'),
+  );
+  $form['recipe_ingredients']['system_of_measurement']['recipe_preferred_system_of_measure_limit'] = array(
     '#type' => 'checkbox',
     '#title' => t('Limit UI to the preferred system of measure'),
     '#default_value' => variable_get('recipe_preferred_system_of_measure_limit', 0),
@@ -64,20 +78,20 @@ function recipe_admin_settings() {
     '#title' => t('Ingredient name normalization'),
     '#default_value' => variable_get('recipe_ingredient_name_normalize', 0),
     '#options' => array(t('Leave as entered'), t('Convert to lowercase')),
-    '#description' => t('When recipes are entered, should ingredient names be converted or left alone.'),
+    '#description' => t('When recipes are entered, should ingredient names be converted or left alone?'),
     '#required' => TRUE,
   );
   $form['recipe_ingredients']['recipe_add_more_count'] = array(
     '#type' => 'textfield',
-    '#title' => t('More ingredient count'),
+    '#title' => t('Add more ingredient count'),
     '#default_value' => variable_get('recipe_add_more_count', 5),
     '#size' => 5,
     '#maxlength' => 5,
-    '#description' => t('How ingredients to add when you click "more ingredients" on the recipe edit screen.'),
+    '#description' => t('How many ingredients to add when you click "more ingredients" on the recipe edit screen.'),
   );
 
 
-
+  // Summary Section
   $form['recipe_summary'] = array(
     '#type' => 'fieldset',
     '#title' => t('Recipe summary'),
