@@ -1454,11 +1454,18 @@ function recipe_node_sanitize(&$node) {
     $node->recipe['notes'] = check_markup($node->recipe['notes'], $filter_format_id);
   }
 
-  // Handle other fields.
+
+
+
+  // Handle the rest of the recipe table fields.
   if (!empty($node->recipe['source'])) {
     $node->recipe['source'] = filter_xss($node->recipe['source'], array());
   }
+  if (!empty($node->recipe['yield_unit'])) {
+    $node->recipe['yield_unit'] = filter_xss($node->recipe['yield_unit'], array());
+  }
 
+  // Handle the ingredient fields.
   if (isset($node->recipe['ingredients']['ing'])) {
     $tmp = $node->recipe['ingredients']['ing'];
     $node->recipe['ingredients']['ing'] = array();
@@ -1471,6 +1478,9 @@ function recipe_node_sanitize(&$node) {
 
       if (isset($ingredient['name'])) {
         $ingredient['name'] = filter_xss($ingredient['name'], array());
+      }
+      if (isset($ingredient['unit_key'])) {
+        $ingredient['unit_key'] = filter_xss($ingredient['unit_key'], array());
       }
       if (isset($ingredient['note'])) {
         $ingredient['note'] = filter_xss($ingredient['note'], array());
