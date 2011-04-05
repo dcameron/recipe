@@ -1407,7 +1407,7 @@ function recipe_validate($node, $form, &$form_state) {
   }
 
   foreach ($form_state['values']['recipe']['ingredients']['ing'] as $key => $ingredient) {
-    if (empty($ingredient['unit_key']['#value'])) {
+    if (empty($ingredient['unit_key']['#value']) && !empty($ingredient['name']['#value'])) {
       form_set_error("ingredients][ing][$key][unit_key", t("You must choose a valid unit."));
       $return = FALSE;
     }
