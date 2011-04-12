@@ -16,19 +16,6 @@
   width: 7em;
 }
 
-#recipe_custom_yield fieldset .form-item {
-  display: inline;
-}
-
-.recipe-summary .form-submit {
-  font-size: 75%;
-  width: 8em;
-  float:right;
-}
-
-#recipe_custom_yield fieldset {
-  border: none;
-}
 
 /*
  * import preview
@@ -62,16 +49,19 @@
   font-family: monospace;
 }
 
-
-
-
-
-/* Summary Box */
+/*
+ * Summary Box
+ */
 .recipe-summary {
   float: right;
-  margin:0; padding:0;
   width: 20em;
+  margin:0; padding:0;
   font-size: 1.0em;
+}
+/* If summary is in block, remove float and width so that it won't blowup the layout. */
+.block-recipe .recipe-summary {
+  float:none;
+  width:100%;
 }
 .recipe-summary table {
   border-collapse: collapse;
@@ -102,4 +92,15 @@
 }
 .recipe-summary h2 {
   margin:0; padding:0;
+}
+.recipe-summary .form-submit {
+  font-size: 75%;
+  width: 8em;
+  float:right;
+}
+#recipe_custom_yield fieldset {
+  border: none;
+}
+#recipe_custom_yield fieldset .form-item {
+  display: inline;
 }

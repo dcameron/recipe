@@ -179,17 +179,17 @@ function recipe_plaintext_export($nid = NULL, $yield = NULL) {
   }
 
   // Set the custom yield so we can scale up/down the recipe quantities.
-  $node->recipe['custom_yield'] = $yield;
+  $node->recipe_custom_yield = $yield;
 
   $output = $node->title ."\n\n";
   $output .= t('Ingredients:') ."\n";
   $output .= format_plaintext_ingredients($node) ."\n";
   $output .= t('Instructions:') ."\n";
-  $output .= wordwrap(strip_html_and_encode_entities($node->recipe['instructions']), 75, "\n") ."\n\n";
+  $output .= wordwrap(strip_html_and_encode_entities($node->recipe_instructions), 75, "\n") ."\n\n";
   $output .= t('Description:') ."\n";
-  $output .= strip_html_and_encode_entities($node->recipe['description']) ."\n\n";
+  $output .= strip_html_and_encode_entities($node->recipe_description) ."\n\n";
   $output .= t('Notes:') ."\n";
-  $output .= strip_html_and_encode_entities($node->recipe['notes']) ."\n";
+  $output .= strip_html_and_encode_entities($node->recipe_notes) ."\n";
 
   drupal_add_http_header('Content-type', 'text/plain; charset=utf-8');
   return $output;
@@ -203,12 +203,12 @@ function format_plaintext_ingredients($node = NULL) {
 
   //prepare ingredients factor
   $factor = 1;
-  if (isset($node->recipe['custom_yield'])) {
-    $factor = $node->recipe['custom_yield'] / $node->recipe['yield'];
-    $node->recipe['yield'] = $node->recipe['custom_yield'];
+  if (isset($node->recipe_custom_yield)) {
+    $factor = $node->recipe_custom_yield / $node->recipe_yield;
+    $node->recipe_yield = $node->recipe_custom_yield;
   }
 
-  foreach ( $node->recipe['ingredients']['ing'] as $key => &$i ) {
+  foreach ( $node->recipe_ingredients['ing'] as $key => &$i ) {
     // Translate decimal quantity to text fraction.
     if ($i['quantity'] > 0) {
       $i['quantity'] *= $factor;
@@ -243,7 +243,7 @@ function format_plaintext_ingredients($node = NULL) {
   // Render output with the correct column padding.
   $output = '';
   $wrap_pad = str_repeat(" ", $col_widths['unit'] + $col_widths['quantity'] + 2);
-  foreach ( $node->recipe['ingredients']['ing'] as $key => $i ) {
+  foreach ( $node->recipe_ingredients['ing'] as $key => $i ) {
     $output .= wordwrap(sprintf("%". $col_widths['quantity'] ."s %-". $col_widths['unit'] . "s %s\n", $i['str_quantity'], $i['str_unit'], $i['str_ingredient']), 75, "\n$wrap_pad");
   }
 

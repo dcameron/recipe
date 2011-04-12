@@ -65,10 +65,11 @@ function recipe_recipeML_export_single($nid = NULL, $yield = NULL, $add_content_
   }
 
   // Set the custom yield so we can scale up/down the recipe quantities.
+  $node->recipe_custom_yield = $yield;
   $factor = 1;
-  if (isset($yield)) {
-    $factor = $yield / $node->recipe['yield'];
-    $node->recipe['yield'] = $yield;
+  if (isset($node->recipe_custom_yield)) {
+    $factor = $node->recipe_custom_yield / $node->recipe_yield;
+    $node->recipe_yield = $node->recipe_custom_yield;
   }
 
   $cat_string = '';
@@ -99,16 +100,16 @@ function recipe_recipeML_export_single($nid = NULL, $yield = NULL, $add_content_
     '<head>'."\n".
     '<title>'. my_xml_escape($node->title) ."</title>\n".
     '      <version>'. date('m-d-Y', $node->changed) .'</version>'."\n".
-    '      <source>'. my_xml_escape((($node->recipe['source'] == '') ? url('node/'.$node->nid, array('absolute' => TRUE)) : $node->recipe['source'])) .'</source>'."\n".
-    '      <yield><qty>'. floatval($node->recipe['yield']) .'</qty><unit>'. my_xml_escape(($node->recipe['yield_unit'] == '')?t('Servings'):$node->recipe['yield_unit']) .'</unit></yield>'."\n".
-    '      <preptime type="cooking"><time><qty>'. $node->recipe['preptime'] .'</qty><timeunit>minutes</timeunit></time></preptime>'.
+    '      <source>'. my_xml_escape((($node->recipe_source == '') ? url('node/'.$node->nid, array('absolute' => TRUE)) : $node->recipe_source)) .'</source>'."\n".
+    '      <yield><qty>'. floatval($node->recipe_yield) .'</qty><unit>'. my_xml_escape(($node->recipe_yield_unit == '')?t('Servings'):$node->recipe_yield_unit) .'</unit></yield>'."\n".
+    '      <preptime type="cooking"><time><qty>'. $node->recipe_preptime .'</qty><timeunit>minutes</timeunit></time></preptime>'.
     "\n$cat_string".
     '</head>'."\n".
-    '<description>'. my_xml_escape($node->recipe['description']) .'</description>'."\n".
+    '<description>'. my_xml_escape($node->recipe_description) .'</description>'."\n".
     '<ingredients>';
 
   $units = recipe_get_units();
-  foreach ($node->recipe['ingredients']['ing'] as $ingredient) {
+  foreach ($node->recipe_ingredients['ing'] as $ingredient) {
     $prep = '';
     if (strlen($ingredient['note']) > 0) {
       $prep = '<prep>'. my_xml_escape($ingredient['note']) .'</prep>';
@@ -134,8 +135,8 @@ function recipe_recipeML_export_single($nid = NULL, $yield = NULL, $add_content_
 
   $output .= "\n".
     '</ingredients>'."\n".
-    '<directions>'. my_xml_escape($node->recipe['instructions']) .'</directions>'."\n".
-    '<note>'. my_xml_escape($node->recipe['notes']) .'</note>'."\n".
+    '<directions>'. my_xml_escape($node->recipe_instructions) .'</directions>'."\n".
+    '<note>'. my_xml_escape($node->recipe_notes) .'</note>'."\n".
     '</recipe>'."\n";
 
 

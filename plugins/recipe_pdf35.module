@@ -43,7 +43,7 @@ function recipe_pdf35_export_single($nid = NULL, $yield = NULL) {
   }
 
   // Set the custom yield so we can scale up/down the recipe quantities.
-  $node->recipe['custom_yield'] = $yield;
+  $node->recipe_custom_yield = $yield;
 
   $recipe_data = prepare_receipe_data($node);
 
@@ -227,15 +227,31 @@ function prepare_receipe_data($node) {
   // Preprocess the ingredients.
   $units = recipe_get_units();
   $ingredients = array();
-  foreach ( $node->recipe['ingredients']['ing'] as $key => $i ) {
+
+  //prepare ingredients factor
+  $factor = 1;
+  if (isset($node->recipe_custom_yield)) {
+    $factor = $node->recipe_custom_yield / $node->recipe_yield;
+    $node->recipe_yield = $node->recipe_custom_yield;
+  }
+
+  foreach ( $node->recipe_ingredients['ing'] as $key => $i ) {
     $fullingredient = !empty($i['note']) ? $i['name'] . ' (' . $i['note'] .')' : $i['name'];
+
+    if ($i['quantity'] > 0) {
+      $i['quantity'] *= $factor;
+    }
+    else {
+      $i['quantity'] = ' ';
+    }
+
     $quantity = recipe_ingredient_quantity_from_decimal($i['quantity'], TRUE);
     $quantity = trim(str_replace('&frasl;', '/', $quantity));
     $ingredients[] = $quantity . ' ' . $units[$i['unit_key']]['abbreviation'] . ' ' . $fullingredient;
   }
 
   // Preprocess the instructions.
-  $instructions_str = str_replace("&deg;", "\xB0", $node->recipe['instructions']);
+  $instructions_str = str_replace("&deg;", "\xB0", $node->recipe_instructions);
 
   $data = array(
     'recipe_title' => $node->title,
