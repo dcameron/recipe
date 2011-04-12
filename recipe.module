@@ -398,11 +398,19 @@ function recipe_form($node, &$form_state) {
     $node->recipe_ingredients['ing'] = array();
   }
 
+  # Figure out max weight so new ingredients will sort at the bottom by default.
+  $max_weight = 0;
+  foreach ($node->recipe_ingredients['ing'] as $id => $ingredient) {
+    if ($max_weight < $ingredient['weight']) {
+      $max_weight = $ingredient['weight'];
+    }
+  }
+
   if (isset($form_state['add_ingredients']) || count($node->recipe_ingredients['ing']) == 0) {
     unset($form_state['add_ingredients']);
     $add_count = variable_get('recipe_add_more_count', 5);
     for ($delta = 0; $delta < $add_count; $delta++) {
-      array_push($node->recipe_ingredients['ing'], array('ri_id' => NULL, 'quantity' => '', 'unit_key' => '', 'name' => '', 'note' => '', 'weight' => 0));
+      array_push($node->recipe_ingredients['ing'], array('ri_id' => NULL, 'quantity' => '', 'unit_key' => '', 'name' => '', 'note' => '', 'weight' => $max_weight + $delta));
     }
   }
 
