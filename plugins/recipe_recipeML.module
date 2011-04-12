@@ -204,12 +204,10 @@ function recipe_recipeML_import_form_submit($form, &$form_state) {
   xml_set_character_data_handler($xml_parser, 'recipe_import_element_data');
 
   if (!xml_parse($xml_parser, $data, 1)) {
-    $message = t('Failed to parse RecipeML file: %error at line %line.',
-                 array(
-                 '%error' => xml_error_string(xml_get_error_code($xml_parser)),
-                 '%line' => xml_get_current_line_number($xml_parser)));
-    watchdog('recipe', $message, WATCHDOG_WARNING);
-    drupal_set_message($message, 'error');
+    watchdog('recipe', 'Failed to parse RecipeML file: @error at line @line.', array(
+                 '@error' => xml_error_string(xml_get_error_code($xml_parser)),
+                 '@line' => xml_get_current_line_number($xml_parser)),
+                 WATCHDOG_WARNING);
   }
   // Free the parser.
   xml_parser_free($xml_parser);

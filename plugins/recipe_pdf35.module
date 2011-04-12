@@ -144,7 +144,7 @@ for ($i=0; $i<count($pdf_pages); $i++) {
 
   // Page Numbers
   if ( count($pdf_pages) > 1 ) {
-    $page_nbr = t('Page ' . ($i + 1));
+    $page_nbr = t('Page @page_number', array('@page_number'=>$i + 1));
     $obj = "BT /F1 6 Tf 12 TL 325 17 Td ($page_nbr)' ET";
     $len = strlen($obj);
     $obj = "<< /Length $len >>\nstream\n${obj}\nendstream";
