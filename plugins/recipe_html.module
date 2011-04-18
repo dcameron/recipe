@@ -56,9 +56,15 @@ function recipe_html_export_single($nid = NULL, $yield = NULL) {
     return;
   }
 
-  $elements = node_view($node, 'full', $yield);
+  $build = node_view($node, 'print', $yield);
+  // Don't pass to theme handlers.
+  unset($build['#theme']);
+  // Don't want to show links in print view.
+  unset($build['links']);
+  // Pass a fully rendered variable.  This is modeled after the book module in core.
+  $node->rendered = drupal_render($build);
 
-  return theme('recipe_export_html_page', array('elements' => $elements));
+  return theme('recipe_export_html_page', array('node' => $node));
 }
 
 
@@ -68,47 +74,15 @@ function recipe_html_export_single($nid = NULL, $yield = NULL) {
 function recipe_html_theme() {
   return array(
     'recipe_export_html_page' => array(
-      'function' => 'theme_recipe_export_html_page',
-      'variables' => array('variables' => NULL),
-    ),
-
-    'recipe_html_node' => array(
       'template' => 'recipe_html_node',
-      'variables' => array('variables' => NULL),
+      'variables' => array('node' => NULL),
     ),
-
   );
 }
 
 
-function recipe_html_preprocess_recipe_html_node(&$variables) {
-
-  // Return immediately if this node is not a recipe or if this is a teaser (teaser doesn't use special recipe fields).
-  // This gets called for all node types.
-  $type = $variables['elements']['#node']->type;
-  if ($type != 'recipe') {
-    return;
-  }
-
-  template_preprocess_node($variables);
-}
-
-
-/**
- * How the recipe's HTML export should be themed.
- *
- * @ingroup themeable
- */
-function theme_recipe_export_html_page($variables) {
-
-  global $base_url;
-  $html = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n";
-  $html .= '<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">';
-  $html .= "<head>\n<title>". check_plain($variables['elements']['#node']->title) ."</title>\n";
-  $html .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
-  $html .= '<base href="'. $base_url .'/" />'."\n";
-  $html .= "<style type=\"text/css\">\n@import url(". drupal_get_path('module', 'recipe') ."/recipe.css);\n</style>\n";
-  # 'title' is exception to "all recipe titles in recipe CSS namespace" rule
-  $html .= "</head>\n<body>\n". theme('recipe_html_node', array('elements' => $variables['elements'])) ."\n</body>\n</html>\n";
-  return $html;
+function template_preprocess_recipe_export_html_page(&$variables) {
+  $variables['title'] = check_plain($variables['node']->title);
+  // 'contents' is already rendered.  Use the contents key so as not to confuse template authors.
+  $variables['contents'] = $variables['node']->rendered;
 }

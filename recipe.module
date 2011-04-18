@@ -970,7 +970,7 @@ function theme_recipe_ingredients($variables) {
         $fullingredient = strlen($ingredient['note']) > 0 ? $ingredient['name'] . ' (' . $ingredient['note'] . ')' : $ingredient['name'];
 
 
-        $output .= "\n" . '<div rel="v:ingredient"><div typeof="v:Ingredient"><div class="quantity-unit" property="v:amount"> ' . $ingredient['quantity'] . ' ' . $units . '</div> <span property="v:name">' . $fullingredient . '</span></div></div>';
+        $output .= "\n" . '<div rel="v:ingredient"><div typeof="v:Ingredient"><div class="quantity-unit" property="v:amount"> ' . $ingredient['quantity'] . ' ' . $units . '</div> <span class="ingredient-name" property="v:name">' . $fullingredient . '</span></div></div>';
       }
     }
     $output .= '</div>';
