@@ -786,7 +786,7 @@ function recipe_block_view($delta = '') {
           $node = node_load(arg(1));
           if ( $node->type == 'recipe' ) {
             $block['subject'] = variable_get('recipe_summary_title', t('Summary'));
-            $block['content'] = theme('recipe_summary', array('node' => $node, 'show_title' => FALSE, 'show_yield_form' => FALSE));
+            $block['content'] = theme('recipe_summary', array('node' => $node, 'show_title' => FALSE, 'show_yield_form' => TRUE));
             return $block;
           }
         }
@@ -1501,6 +1501,7 @@ function recipe_yield_form($form, &$form_state, $node, $show_yield_form) {
       '#default_value' => $node->recipe_yield,
       '#size' => 2,
       '#maxlength' => 4,
+      '#attributes' => array('class' => array('recipe-yield-value')),
     );
     $form['yield_unit'] = array(
       '#markup' => ($node->recipe_yield_unit == '')?t('Servings'):$node->recipe_yield_unit,
@@ -1509,18 +1510,22 @@ function recipe_yield_form($form, &$form_state, $node, $show_yield_form) {
     $form['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Change'),
+      '#attributes' => array('class' => array('recipe-yield-change')),
     );
     $form['reset'] = array(
       '#type' => 'submit',
       '#value' => t('Reset'),
+      '#attributes' => array('class' => array('recipe-yield-reset')),
     );
     $form['halve'] = array(
       '#type' => 'submit',
       '#value' => t('Halve'),
+      '#attributes' => array('class' => array('recipe-yield-halve')),
     );
     $form['double'] = array(
       '#type' => 'submit',
       '#value' => t('Double'),
+      '#attributes' => array('class' => array('recipe-yield-double')),
     );
   }
 
