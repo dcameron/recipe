@@ -309,7 +309,8 @@ function recipe_save_ingredients($node) {
 /**
  * Implementation of hook_delete().
  *
- * When a node is deleted, we need to clean up related tables.
+ * When a node is deleted, delete the recipe and recipe node ingredient links.
+ * Leave the ingredients.
  */
 function recipe_delete($node) {
   db_query("DELETE FROM {recipe} WHERE nid = :nid", array(':nid' => $node->nid));
