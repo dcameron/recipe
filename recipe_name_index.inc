@@ -103,7 +103,7 @@ function recipe_get_node_alpha_list(&$node_list = NULL) {
       $letter = strtolower($matches[1]);
     }
     else {
-      $letter = strtolower(substr($n['title'], $i, 1));
+      $letter = strtolower(drupal_substr($n['title'], $i, 1));
     }
 
     if ( is_numeric($letter) ) {

@@ -142,7 +142,7 @@ function recipe_get_ingredients($iid = NULL) {
 function recipe_get_ingredient_alpha_list(&$ingredient_list = NULL) {
   $alpha_list = array();
   foreach ($ingredient_list as &$i) {
-    $letter = strtolower(substr($i['name'], 0, 1));
+    $letter = strtolower(drupal_substr($i['name'], 0, 1));
     $i['letter'] = $letter;
     $alpha_list[$letter] = 1;
   }
