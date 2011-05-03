@@ -1,5 +1,0 @@
-name = Recipe pdf35
-description = Enables exporting of 3x5" cards in pdf format.
-dependencies[] = recipe
-package = Recipe
-core = 7.x
