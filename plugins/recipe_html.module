@@ -2,7 +2,10 @@
 
 /**
  * @file
- * recipe_html.module - Enables importing and exporting of full-page html recipes.
+ * recipe_html.module - Enables a print view for recipes.
+ * This supports full 8-1/2" x 11", and 5"x7" and 3"x5" index cards.
+ * Some printers may not be able to deal with small page sizes like this.
+ * They may have to print on 8-1/2"x11" paper and cut.
  */
 
 /**
@@ -11,29 +14,21 @@
 function recipe_html_recipeio($type) {
   $supported = array(
     'export_single' => array(
-      'format_name' => t('HTML'),
+      'format_name' => t('Print View'),
       'callback' => 'recipe_html_export_single',
-      'format_help' => t('Export to a printer friendly HTML format.'),
-      'access arguments' => 'access content',   // everyone should be able to export HTML
+      'format_help' => t('NOTE: You must use your web browser\'s print dialog to change the page size and orientation.'),
+      'access arguments' => 'access content',   // Everyone
     )
   );
 
   if ( isset($supported[$type]) ) {
-    return array('reciphtml' => $supported[$type]);
+    // Key needs to be lower case.
+    return array('recipeprint' => $supported[$type]);
   }
   else {
     return FALSE;
   }
 }
-
-/**
- * Example implementation of hook_perm().  If you need special permissions for a format,
- * use this and match the permission name to the access arguments above.
-
-function recipe_html_perm() {
-  return array(t('export single'));
-}
-*/
 
 
 function recipe_html_export_single($nid = NULL, $yield = NULL) {
@@ -61,10 +56,16 @@ function recipe_html_export_single($nid = NULL, $yield = NULL) {
   unset($build['#theme']);
   // Don't want to show links in print view.
   unset($build['links']);
+
+  // Streamline the summary box.
+  $build['recipe_summary_box'] = array(
+    '#markup' => theme('recipe_html_summary_box', array('node' => $node, 'show_yield_form' => isset($node->recipe_show_yield_form) ? $node->recipe_show_yield_form : TRUE)),
+  );
+
   // Pass a fully rendered variable.  This is modeled after the book module in core.
   $node->rendered = drupal_render($build);
 
-  return theme('recipe_export_html_page', array('node' => $node));
+  return theme('recipe_html_page', array('node' => $node));
 }
 
 
@@ -73,20 +74,108 @@ function recipe_html_export_single($nid = NULL, $yield = NULL) {
  */
 function recipe_html_theme() {
   return array(
-    'recipe_export_html_page' => array(
+    'recipe_html_page' => array(
       'template' => 'recipe_html_node',
+      'variables' => array('node' => NULL),
+    ),
+    'recipe_html_summary_box' => array(
+      'function' => 'theme_recipe_html_summary_box',
       'variables' => array('node' => NULL),
     ),
   );
 }
 
 
-function template_preprocess_recipe_export_html_page(&$variables) {
+function template_preprocess_recipe_html_page(&$variables) {
   // Add recipe.css file since we are bypassing the normal page rendering routinee to get rid of sidebars and headers.
-  $css_path = drupal_get_path("module", "recipe") . "/recipe.css";
-  $variables['styles'] = '<style type="text/css" media="all">@import url("' . $css_path . '")</style>';
+  $css_path = drupal_get_path("module", "recipe") . "/plugins/recipe_html.css";
+  $variables['styles'] = '<style type="text/css" media="all">@import url("/' . $css_path . '")</style>';
 
   $variables['title'] = check_plain($variables['node']->title);
   // 'contents' is already rendered.  Use the contents key so as not to confuse template authors.
   $variables['contents'] = $variables['node']->rendered;
+}
+
+/**
+ * Default theme implementation for the recipe summary box.
+ */
+function theme_recipe_html_summary_box($variables) {
+  $node = $variables['node'];
+
+  // Construct the summary
+  $output = '<div class="recipe-summary">';
+  $output .= '<table>';
+  $cols = 0;
+  if ($node->recipe_preptime) {
+    $cols++;
+  }
+  if ($node->recipe_cooktime) {
+    $cols++;
+  }
+  if (!empty($node->recipe_cooktime) && !empty($node->recipe_preptime)) {
+    $cols++;
+  }
+
+  if (!empty($node->recipe_source)) {
+    $output .= '<tr><td colspan="' . $cols . '">';
+    $output .= t('Source') . ": " . $node->recipe_source;
+    $output .= '<td></tr>';
+  }
+
+  if ( $cols > 0 ) {
+    $output .= '<tr>';
+  }
+  if ($node->recipe_preptime) {
+    $_minutes = $node->recipe_preptime;
+    $_text = '';
+    if ($node->recipe_preptime < 60) {
+      $_text = format_plural($_minutes, '1 minute', '@count minutes');
+    }
+    elseif ($node->recipe_preptime % 60 == 0) {
+      $_text = format_plural($_minutes / 60, '1 hour', '@count hours');
+    }
+    else {
+      $_text = t('!time hours', array('!time' => recipe_ingredient_quantity_from_decimal($_minutes / 60)));
+    }
+    $output .= '<td>' . t('Prep time') . ': ' . $_text . '</td>';
+  }
+
+  if ($node->recipe_cooktime) {
+    $_minutes = $node->recipe_cooktime;
+    $_text = '';
+    if ($node->recipe_cooktime < 60) {
+      $_text = format_plural($_minutes, '1 minute', '@count minutes');
+    }
+    elseif ($node->recipe_cooktime % 60 == 0) {
+      $_text = format_plural($_minutes / 60, '1 hour', '@count hours');
+    }
+    else {
+      $_text = t('!time hours', array('!time' => recipe_ingredient_quantity_from_decimal($_minutes / 60)));
+    }
+    $output .= '<td>' . t('Cooking time') . ': ' . $_text . '</td>';
+  }
+
+  if (!empty($node->recipe_cooktime) && !empty($node->recipe_preptime)) {
+    $_minutes = $node->recipe_cooktime + $node->recipe_preptime;
+    $_text = '';
+    if ($_minutes < 60) {
+      $_text = format_plural($_minutes, '1 minute', '@count minutes');
+    }
+    elseif ($_minutes % 60 == 0) {
+      $_text = format_plural($_minutes / 60, '1 hour', '@count hours');
+    }
+    else {
+      $_text = t('!time hours', array('!time' => recipe_ingredient_quantity_from_decimal($_minutes / 60)));
+    }
+    $output .= '<td>' . t('Total time') . ': ' . $_text . '</td>';
+  }
+
+  if ( $cols > 0 ) {
+    $output .= '</tr>';
+  }
+
+  $output .= '</table>';
+  $output .= '</div>';
+
+  return $output;
 }
