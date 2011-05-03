@@ -64,7 +64,7 @@ function recipe_html_export_single($nid = NULL, $yield = NULL) {
 
   // Pass a fully rendered variable.  This is modeled after the book module in core.
   $node->rendered = drupal_render($build);
-
+  drupal_add_http_header('Content-Type', 'text/html; charset=utf-8', FALSE);
   return theme('recipe_html_page', array('node' => $node));
 }
 
