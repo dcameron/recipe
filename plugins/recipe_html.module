@@ -2,7 +2,7 @@
 
 /**
  * @file
- * recipe_recipeML.module - Enables importing and exporting of recipeML format recipes.
+ * recipe_html.module - Enables importing and exporting of full-page html recipes.
  */
 
 /**
