@@ -21,6 +21,13 @@ h2 {
   padding-left: 40pt;
   text-indent: -40pt;
 }
+.recipe-ingredients .section {
+	margin-left: 10pt
+}
+
+.recipe-instructions ol {
+	margin-left: 20pt;
+}
 
 .recipe-ingredients .quantity-unit {
   float: left;
