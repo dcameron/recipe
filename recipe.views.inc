@@ -116,7 +116,7 @@ function recipe_views_data() {
     'title' => t('Description'),
     'help' => t("The description for this recipe."),
     'field' => array(
-      'handler' => 'views_handler_field',
+      'handler' => 'views_handler_field_xss',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_string',
@@ -133,7 +133,7 @@ function recipe_views_data() {
     'title' => t('Instructions'),
     'help' => t("The instructions for this recipe."),
     'field' => array(
-      'handler' => 'views_handler_field',
+      'handler' => 'views_handler_field_xss',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_string',
@@ -150,7 +150,7 @@ function recipe_views_data() {
     'title' => t('Notes'),
     'help' => t("The notes for this recipe."),
     'field' => array(
-      'handler' => 'views_handler_field',
+      'handler' => 'views_handler_field_xss',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_string',
