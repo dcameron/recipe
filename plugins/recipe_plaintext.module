@@ -243,8 +243,8 @@ function format_plaintext_ingredients($node = NULL) {
   // Render output with the correct column padding.
   $output = '';
   $wrap_pad = str_repeat(" ", $col_widths['unit'] + $col_widths['quantity'] + 2);
-  foreach ( $node->recipe_ingredients['ing'] as $key => $i ) {
-    $output .= wordwrap(sprintf("%". $col_widths['quantity'] ."s %-". $col_widths['unit'] . "s %s\n", $i['str_quantity'], $i['str_unit'], $i['str_ingredient']), 75, "\n$wrap_pad");
+  foreach ( $node->recipe_ingredients['ing'] as $key => $j ) {
+    $output .= wordwrap(sprintf("%". $col_widths['quantity'] ."s %-". $col_widths['unit'] . "s %s\n", $j['str_quantity'], $j['str_unit'], $j['str_ingredient']), 75, "\n$wrap_pad");
   }
 
   return $output;
