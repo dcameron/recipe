@@ -280,7 +280,7 @@ function recipe_save_ingredients($node) {
   foreach ($node->recipe_ingredients['ing'] as $key => $ingredient) {
 
     // Delete, if you have a valid ri_id and the ingredient name is blank.
-    if ( isset($ingredient['ri_id']) && $ingredient['name'] == '' ) {
+    if (isset($ingredient['ri_id']) && empty($ingredient['name'])) {
       db_delete('recipe_node_ingredient')
         ->condition('id', $ingredient['ri_id'])
         ->execute();
@@ -924,7 +924,7 @@ function theme_recipe_ingredients($variables) {
         if (!isset($ingredient['abbreviation']) && isset($unit_list[$ingredient['unit_key']])) {
           $ingredient['abbreviation'] = $unit_list[$ingredient['unit_key']]['abbreviation'];
         }
-        if ($ingredient['abbreviation'] == '') {
+        if (empty($ingredient['abbreviation'])) {
           $ingredient['abbreviation'] = '&nbsp;';
         }
 
@@ -1740,7 +1740,7 @@ function recipe_unit_fuzzymatch($unit_name_or_abbrev) {
   $units = recipe_get_units();
 
   // Empty strings should use the default non-printing 'unit'.
-  if ( $unit_name_or_abbrev == '' ) {
+  if (empty($unit_name_or_abbrev)) {
     $unit_name_or_abbrev = 'unit';
   }
 
