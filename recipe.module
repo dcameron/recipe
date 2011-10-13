@@ -462,12 +462,14 @@ function recipe_form($node, &$form_state) {
       '#default_value' => preg_replace('/\&frasl;/', '/', recipe_ingredient_quantity_from_decimal($ingredient['quantity'], TRUE)),
       '#size' => 8,
       '#maxlength' => 8,
+      '#attributes' => array('class' => array('form-item-recipe-ingredients-quantity')),
     );
     $form['recipe_ingredients']['ing'][$id]['unit_key'] = array(
       '#type' => 'select',
       '#title' => t('Unit'),
       '#default_value' => $ingredient['unit_key'] != '' ? $ingredient['unit_key'] : variable_get('recipe_default_unit', ''),
       '#options' => recipe_unit_options(),
+      '#attributes' => array('class' =>array('form-item-recipe-ingredients-unit-key')),
     );
     $form['recipe_ingredients']['ing'][$id]['name'] = array(
       '#type' => 'textfield',
@@ -476,13 +478,15 @@ function recipe_form($node, &$form_state) {
       '#size' => 25,
       '#maxlength' => 128,
       '#autocomplete_path' => $callback,
+      '#attributes' => array('class' =>array('form-item-recipe-ingredients-name')),
     );
     $form['recipe_ingredients']['ing'][$id]['note'] = array(
       '#type' => 'textfield',
       '#title' => t('Note'),
       '#default_value' => $ingredient['note'],
       '#size' => 40,
-      '#maxlength' => 256
+      '#maxlength' => 256,
+      '#attributes' => array('class' =>array('form-item-recipe-ingredients-note')),
     );
     $form['recipe_ingredients']['ing'][$id]['weight'] = array(
       '#type' => 'weight',
