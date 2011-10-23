@@ -1045,8 +1045,9 @@ function theme_recipe_summary($variables) {
 
   $output .= '<table>';
 
-  // Render the yield.
-  $output .= '<tr><th class="summary-title">' . t('Yield') . '</th><td class="summary-data">' . drupal_render(drupal_get_form('recipe_yield_form', $node, $show_yield_form)) . '</td></tr>';
+  // Render the yield form.
+  $yield_form = drupal_get_form('recipe_yield_form', $node, $show_yield_form);
+  $output .= '<tr><th class="summary-title">' . t('Yield') . '</th><td class="summary-data">' . drupal_render($yield_form) . '</td></tr>';
 
   if ($node->recipe_source) {
     $output .= '<tr><th>' . t('Source') . '</th><td>' . $node->recipe_source . '</td></tr>';
