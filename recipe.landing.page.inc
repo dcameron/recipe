@@ -36,8 +36,9 @@ function theme_recipe_landing_page() {
   // Render the recent recipes list.
   if (variable_get('recipe_recent_box_enable', 1) == 1) {
     $node_list = recipe_get_latest(variable_get('recipe_recent_display', 5));
+    $build_node_list = node_title_list($node_list);
     $output .= '<div class="recipe_index_recent">';
-    $output .= theme('recipe_box', array('title' => variable_get('recipe_recent_box_title', t('Latest recipes')), 'content' => drupal_render(node_title_list($node_list))));
+    $output .= theme('recipe_box', array('title' => variable_get('recipe_recent_box_title', t('Latest recipes')), 'content' => drupal_render($build_node_list)));
     $output .= '</div>';
   }
 
