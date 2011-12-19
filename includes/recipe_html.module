@@ -88,7 +88,7 @@ function recipe_html_theme() {
 
 function template_preprocess_recipe_html_page(&$variables) {
   // Add recipe.css file since we are bypassing the normal page rendering routinee to get rid of sidebars and headers.
-  $css_path = drupal_get_path("module", "recipe") . "/plugins/recipe_html.css";
+  $css_path = drupal_get_path("module", "recipe") . "/includes/recipe_html.css";
   $variables['styles'] = '<style type="text/css" media="all">@import url("/' . $css_path . '")</style>';
 
   $variables['title'] = check_plain($variables['node']->title);
