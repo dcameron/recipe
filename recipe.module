@@ -86,18 +86,6 @@ function recipe_theme($existing, $type, $theme, $path) {
       'function' => 'theme_recipe_ingredients',
       'variables' => array('node' => NULL),
     ),
-    'recipe_ingredient_index_page' => array(
-      'variables' => array('tree' => NULL),
-      'file' => 'recipe_ingredient_index.inc',
-    ),
-    'recipe_name_index_page' => array(
-      'variables' => array('alpha_list' => NULL, 'node_list' => NULL),
-      'file' => 'recipe_name_index.inc',
-    ),
-
-    'recipe_box' => array(
-      'variables' => array('title' => NULL, 'content' => NULL),
-    ),
   );
 }
 
@@ -170,7 +158,7 @@ function recipe_link($type, $node = NULL, $teaser = FALSE) {
     if ($ing) {
       $links['where_used'] = array(
         'title' => t('Recipes where used'),
-        'href' => "recipe/bying/" . $ing['id']
+        'href' => "recipe/by_ing/" . $ing['id']
       );
     }
   }
@@ -643,22 +631,6 @@ function recipe_menu() {
     'page callback' => 'recipe_landing_page',
     'access arguments' => array('access content'),
     'file' => 'recipe.landing.page.inc'
-  );
-  $items['recipe/byname'] = array(
-    'title' => 'By name',
-    'description' => 'Find individual recipes by name.',
-    'page callback' => 'recipe_name_index_page',
-    'access arguments' => array('access content'),
-    'file' => 'recipe_name_index.inc',
-    'weight' => -1
-  );
-
-  $items['recipe/bying'] = array(
-    'title' => 'By ingredient',
-    'description' => 'Find individual recipes by their ingredients.',
-    'page callback' => 'recipe_ingredient_index_page',
-    'access arguments' => array('access content'),
-    'file' => 'recipe_ingredient_index.inc'
   );
 
   $items['recipe/ingredient/autocomplete'] = array(
@@ -1862,7 +1834,7 @@ function recipe_import_multi_myaccess($string, $account = NULL, $reset = FALSE) 
  * @return
  *   A database query result suitable for use the node_title_list.
  */
-function recipe_get_latest($count = 0) {
+function recipe_get_latest($count = 5) {
   $select = db_select('node', 'n');
   $select->addField('n', 'nid');
   $select->addField('n', 'title');
@@ -1890,7 +1862,7 @@ function strip_html_and_encode_entities($string) {
 function recipe_views_api() {
  return array(
    'api' => 2,
-   'path' => drupal_get_path('module', 'recipe'),
+   'path' => drupal_get_path('module', 'recipe') . '/includes',
  );
 }
 

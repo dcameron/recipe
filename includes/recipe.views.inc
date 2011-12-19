@@ -218,6 +218,23 @@ function recipe_views_data() {
 
 
   // Fields
+  $data['recipe_ingredient']['id'] = array(
+    'title' => t('Ingredient ID'),
+    'help' => t("An ingredient id."),
+    'field' => array(
+      'handler' => 'views_handler_field',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_numeric',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
   $data['recipe_ingredient']['name'] = array(
     'title' => t('Ingredient Name'),
     'help' => t("An ingredient name."),

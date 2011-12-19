@@ -23,7 +23,7 @@ function theme_recipe_landing_page() {
   if (user_access('create recipe content')) {
     $content[] = array(
       'title' => t('Add a new recipe'),
-      'description' => t('Add a new recipe to the site.'),
+      'description' => '',
       'href' => 'node/add/recipe',
       'localized_options' => array('attributes' => array()),
     );
@@ -38,7 +38,7 @@ function theme_recipe_landing_page() {
     $node_list = recipe_get_latest(variable_get('recipe_recent_display', 5));
     $build_node_list = node_title_list($node_list);
     $output .= '<div class="recipe_index_recent">';
-    $output .= theme('recipe_box', array('title' => variable_get('recipe_recent_box_title', t('Latest recipes')), 'content' => drupal_render($build_node_list)));
+    $output .= '<h2 class="title">' . variable_get('recipe_recent_box_title', t('Latest recipes')) . '</h2><div>' . drupal_render($build_node_list) . '</div>';
     $output .= '</div>';
   }
 
