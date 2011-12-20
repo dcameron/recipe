@@ -113,6 +113,7 @@ function recipe_views_default_views() {
   $handler->display->display_options['arguments']['title']['default_argument_type'] = 'fixed';
   $handler->display->display_options['arguments']['title']['default_argument_options']['argument'] = 'a';
   $handler->display->display_options['arguments']['title']['summary']['format'] = 'unformatted_summary';
+  $handler->display->display_options['arguments']['title']['summary_options']['count'] = FALSE;
   $handler->display->display_options['arguments']['title']['summary_options']['items_per_page'] = '25';
   $handler->display->display_options['arguments']['title']['summary_options']['inline'] = 1;
   $handler->display->display_options['arguments']['title']['summary_options']['separator'] = ' | ';
