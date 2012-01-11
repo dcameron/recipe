@@ -1633,6 +1633,7 @@ function recipe_import_get_node($parsed_recipe_object = FALSE) {
     $node->nid = NULL;
     node_object_prepare($node);
     $node->title = $parsed_recipe_object['title'];
+    $node->language = LANGUAGE_NONE;
 
     //recipe stuff
 
