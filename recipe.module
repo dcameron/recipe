@@ -663,15 +663,6 @@ function recipe_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -1,
   );
-  $items['admin/content/recipe/recipe_index'] = array(
-    'title' => 'Indexes',
-    'description' => 'Configure settings for the recipe index page.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('recipe_index_settings_form'),
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'recipe.admin.inc',
-  );
   $items['admin/content/recipe/export_multi'] = array(
     'title' => 'Bulk export',
     'description' => 'Export all recipes from this site into a supported output format.  The data is returned directly to your web browser.  You can enable output formats on the modules screen.',

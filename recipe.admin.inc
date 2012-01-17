@@ -148,49 +148,6 @@ function recipe_admin_settings() {
 }
 
 
-/**
- * Implementation of hook_settings()
- */
-function recipe_index_settings_form() {
-  $form = array();
-  if (!module_exists('recipe')) {
-    drupal_set_message(t('The &quot;recipe&quot; module is disabled or not installed. Recipes will not function until this is corrected. Check the availability of that module, and enable if needed, in the %modules.', array('%modules' => l(t('modules administration page'), 'admin/modules'))), 'error');
-  }
-
-  $form['recipe_bycat'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Category index settings'),
-    '#description' => t('If you don\'t want the menu items, you can go to admin/build/menu and disable them.'),
-  );
-  $form['recipe_bycat']['recipe_index_depth'] = array(
-    '#type' => 'select',
-    '#title' => t('Term depth'),
-    '#default_value' => variable_get('recipe_index_depth', 4),
-  '#options' => array(0 => t('Choose depth'), 1 => "1", 2 => "2", 3 => "3", 4 => "4", 5 => "5", 6 => "6", 1000 => t('All Levels')),
-    '#description' => t('Defines how many levels of terms should be displayed on a category index page.  Applies to hierarchical vocabularies.'),
-  );
-  $form['recipe_bycat']['recipe_index_catalog_show_child_category_links'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Show recipes in child categories'),
-    '#return_value' => 1,
-    '#default_value' => variable_get('recipe_index_catalog_show_child_category_links', 1),
-    '#description' => t('List recipes in the current category and its children down to the selected Term Depth(above).'),
-  );
-
-  // The setting above affect the menu system.
-  menu_rebuild();
-
-  return system_settings_form($form);
-}
-
-
-function recipe_index_settings_form_validate($form, &$form_state) {
-  if ( $form_state['values']['recipe_index_depth'] <= 0 ) {
-    form_set_error('recipe_index_depth', t("You must select a 'Term depth'."));
-  }
-}
-
-
 function recipe_export_multi($type = NULL) {
 
   // load supported formats
