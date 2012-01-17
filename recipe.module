@@ -158,7 +158,7 @@ function recipe_link($type, $node = NULL, $teaser = FALSE) {
     if ($ing) {
       $links['where_used'] = array(
         'title' => t('Recipes where used'),
-        'href' => "recipe/by_ing/" . $ing['id']
+        'href' => "recipe/by_ing_id/" . $ing['id']
       );
     }
   }
