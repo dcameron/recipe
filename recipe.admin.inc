@@ -134,7 +134,7 @@ function recipe_admin_settings() {
     '#default_value' => variable_get('recipe_recent_box_title', t('Latest recipes')),
     '#size' => 35,
     '#maxlength' => 255,
-    '#description' => t('Title of the recent recipes box on the recipes index page.'),
+    '#description' => t('Title of the recent recipes box.'),
   );
   $form['recipe_recent_box']['recipe_recent_display'] = array(
     '#type' => 'select',
