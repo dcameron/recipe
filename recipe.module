@@ -216,9 +216,9 @@ function recipe_update($node) {
       'source' => $node->recipe_source,
       'yield' => $node->recipe_yield,
       'yield_unit' => $node->recipe_yield_unit,
-      'description' => $node->recipe_description['value'],
-      'instructions' => $node->recipe_instructions['value'],
-      'notes' => $node->recipe_notes['value'],
+      'description' => is_array($node->recipe_description) ? $node->recipe_description['value'] : $node->recipe_description,
+      'instructions' => is_array($node->recipe_instructions) ? $node->recipe_instructions['value'] : $node->recipe_instructions,
+      'notes' => is_array($node->recipe_notes) ? $node->recipe_notes['value'] : $node->recipe_notes,
       'preptime' => $node->recipe_preptime,
       'cooktime' => $node->recipe_cooktime,
     ))
