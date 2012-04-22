@@ -925,7 +925,7 @@ function theme_recipe_ingredients($variables) {
         $fullingredient = strlen($ingredient['note']) > 0 ? $ingredient['name'] . ' (' . $ingredient['note'] . ')' : $ingredient['name'];
 
 
-        $output .= "\n" . '<div rel="v:ingredient"><div typeof="v:Ingredient"><div class="quantity-unit" property="v:amount"> ' . $ingredient['quantity'] . ' ' . $units . '</div> <span class="ingredient-name" property="v:name">' . $fullingredient . '</span></div></div>';
+        $output .= "\n" . '<div rel="schema:ingredient"><div typeof="schema:Ingredient"><div class="quantity-unit" property="schema:amount"> ' . $ingredient['quantity'] . ' ' . $units . '</div> <span class="ingredient-name" property="schema:name">' . $fullingredient . '</span></div></div>';
       }
     }
     $output .= '</div>';
@@ -1971,7 +1971,7 @@ function fixEncoding($in_str) {
  */
 function recipe_rdf_namespaces() {
   return array(
-    'v' => 'http://rdf.data-vocabulary.org/#',
+    'schema' => 'http://schema.org/',
   );
 }
 
@@ -1985,27 +1985,27 @@ function recipe_rdf_mapping() {
       'type' => 'node',
       'bundle' => 'recipe',
       'mapping' => array(
-        'rdftype' => array('v:Recipe'),
+        'rdftype' => array('schema:Recipe'),
         'title' => array(
-          'predicates' => array('v:name'),
+          'predicates' => array('schema:name'),
         ),
         'recipe_instructions' => array(
-          'predicates' => array('v:instructions'),
+          'predicates' => array('schema:instructions'),
         ),
         'recipe_description' => array(
-          'predicates' => array('v:summary'),
+          'predicates' => array('schema:summary'),
         ),
         'recipe_preptime' => array(
-          'predicates' => array('v:prepTime'),
+          'predicates' => array('schema:prepTime'),
         ),
         'recipe_cooktime' => array(
-          'predicates' => array('v:cookTime'),
+          'predicates' => array('schema:cookTime'),
         ),
         'recipe_totaltime' => array(
-          'predicates' => array('v:totalTime'),
+          'predicates' => array('schema:totalTime'),
         ),
         'recipe_yield' => array(
-          'predicates' => array('v:yield'),
+          'predicates' => array('schema:yield'),
         ),
       ),
     ),
