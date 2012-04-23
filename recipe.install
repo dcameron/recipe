@@ -387,3 +387,12 @@ function recipe_update_7003() {
   // People may have user-entered content in there.
 
 }
+
+/**
+ * Update recipe RDF mapping to use the schema.org terms.
+ */
+function recipe_update_7004() {
+  if (module_exists("rdf")) {
+    rdf_mapping_save(current(recipe_rdf_mapping()));
+  }
+}
