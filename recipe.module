@@ -1425,7 +1425,7 @@ function recipe_node_sanitize(&$node) {
 
   // Handle the rest of the recipe table fields.
   if (!empty($node->recipe_source)) {
-    $node->recipe_source = filter_xss($node->recipe_source, array());
+    $node->recipe_source = filter_xss($node->recipe_source, array('a'));
   }
   if (!empty($node->recipe_yield_unit)) {
     $node->recipe_yield_unit = filter_xss($node->recipe_yield_unit, array());
