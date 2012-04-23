@@ -510,19 +510,21 @@ function recipe_form($node, &$form_state) {
   );
 
   $form['recipe_preptime'] = array(
-    '#type' => 'select',
+    '#type' => 'textfield',
+    '#size' => 10,
+    '#maxlength' => 10,
     '#title' => t('Preparation time'),
-    '#default_value' => !empty($node->recipe_preptime) ? $node->recipe_preptime : '',
-    '#options' => $_RECIPE_DURATIONS,
-    '#description' => t('How long does this recipe take to prepare (i.e. elapsed time)'),
+    '#default_value' => !empty($node->recipe_preptime) ? $node->recipe_preptime : 0,
+    '#description' => t('How long does this recipe take to prepare, in <strong>minutes</strong>.  Utilize 0 for N/A.'),
   );
 
   $form['recipe_cooktime'] = array(
-    '#type' => 'select',
+    '#type' => 'textfield',
+    '#size' => 10,
+    '#maxlength' => 10,
     '#title' => t('Cooking time'),
-    '#default_value' => !empty($node->recipe_cooktime) ? $node->recipe_cooktime : '',
-    '#options' => $_RECIPE_DURATIONS,
-    '#description' => t('How long does this recipe take to cook'),
+    '#default_value' => !empty($node->recipe_cooktime) ? $node->recipe_cooktime : 0,
+    '#description' => t('How long does this recipe take to cook, in <strong>minutes</strong>. Utilize 0 for N/A.'),
   );
 
 
@@ -1382,6 +1384,16 @@ function recipe_validate($node, $form, &$form_state) {
       $return = FALSE;
     }
   }
+  
+  if (!is_numeric($form_state['values']['recipe_preptime']) || $form_state['values']['recipe_preptime'] < 0) {
+    form_set_error('recipe_preptime', t('Preparation time must be a valid positive integer. Utilize 0 for N/A.'));
+    $return = FALSE;
+  }
+  if (!is_numeric($form_state['values']['recipe_cooktime']) || $form_state['values']['recipe_cooktime'] < 0) {
+    form_set_error('recipe_cooktime', t('Cooking time must be a valid positive integer. Utilize 0 for N/A.'));
+    $return = FALSE;
+  }
+  
   return $return;
 }
 
@@ -1642,8 +1654,8 @@ function recipe_import_get_node($parsed_recipe_object = FALSE) {
     $node->recipe_source = $parsed_recipe_object['source'] != '' ? $parsed_recipe_object['source'] : $user->name;
     $node->recipe_yield = $parsed_recipe_object['yield'];
     $node->recipe_yield_unit = $parsed_recipe_object['yield_unit'];
-    $node->recipe_preptime = 30;
-    $node->recipe_cooktime = 30;
+    $node->recipe_preptime = $parsed_recipe_object['preptime'] != '' ? $parsed_recipe_object['preptime'] : 30;
+    $node->recipe_cooktime = $parsed_recipe_object['cooktime'] != '' ? $parsed_recipe_object['cooktime'] : 30;
 
     //ingredients, have to change them into node->ingredients format
     $ingredient_list = array();
