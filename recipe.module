@@ -914,13 +914,19 @@ function theme_recipe_ingredients($variables) {
         }
 
         $units = '';
-        // Print the abbreviation if recipe_unit_display says too or the abbreviation is blank (ie = Unit, which we don't print).
+        if (isset($unit_list[$ingredient['unit_key']])) {
+          // Print the singular or plural term depending on the quantity.
+          $title = $ingredient['quantity'] > 1 ? $unit_list[$ingredient['unit_key']]['plural'] : $unit_list[$ingredient['unit_key']]['name'];
+        }
+        else {
+          $title = $ingredient['unit_key'];
+        }
+        // Print the abbreviation if recipe_unit_display says to or the abbreviation is blank (ie = Unit, which we don't print).
         if ( variable_get('recipe_unit_display', 0) == 0 || $ingredient['abbreviation'] == '&nbsp;') {
-          $title = isset($unit_list[$ingredient['unit_key']]) ? $unit_list[$ingredient['unit_key']]['name'] : $ingredient['unit_key'];
           $units = '<abbr ' . drupal_attributes(array('title' => $title)) . '>' . $ingredient['abbreviation'] . '</abbr>';
         }
         else {
-          $units = isset($unit_list[$ingredient['unit_key']]) ? $unit_list[$ingredient['unit_key']]['name'] : $ingredient['unit_key'];
+          $units = $title;
         }
         $fullingredient = strlen($ingredient['note']) > 0 ? $ingredient['name'] . ' (' . $ingredient['note'] . ')' : $ingredient['name'];
 
