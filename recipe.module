@@ -10,26 +10,6 @@
 define('RECIPE_BLOCK_RECENT', 0);
 define('RECIPE_BLOCK_SUMMARY', 1);
 
-global $_RECIPE_DURATIONS;
-$_RECIPE_DURATIONS = array(
-  0   => t('N/A'),
-  5   => t('!time_duration minutes', array('!time_duration' => '5')),
-  10  => t('!time_duration minutes', array('!time_duration' => '10')),
-  15  => t('!time_duration minutes', array('!time_duration' => '15')),
-  20  => t('!time_duration minutes', array('!time_duration' => '20')),
-  30  => t('!time_duration minutes', array('!time_duration' => '30')),
-  45  => t('!time_duration minutes', array('!time_duration' => '45')),
-  60  => t('!time_duration hour',    array('!time_duration' => '1')),
-  90  => t('!time_duration hours',   array('!time_duration' => '1 1/2')),
-  120 => t('!time_duration hours',   array('!time_duration' => '2')),
-  150 => t('!time_duration hours',   array('!time_duration' => '2 1/2')),
-  180 => t('!time_duration hours',   array('!time_duration' => '3')),
-  210 => t('!time_duration hours',   array('!time_duration' => '3 1/2')),
-  240 => t('!time_duration hours',   array('!time_duration' => '4')),
-  300 => t('!time_duration hours',   array('!time_duration' => '5')),
-  360 => t('!time_duration hours',   array('!time_duration' => '6')),
-);
-
 /**
  * Implementation of hook_help().
  */
@@ -330,7 +310,6 @@ function recipe_delete($node) {
 * Implementation of hook_form().
 */
 function recipe_form($node, &$form_state) {
-  global $_RECIPE_DURATIONS;
 
   // Title.
   $form['title'] = array(
@@ -1002,7 +981,6 @@ function theme_recipe_instructions($variables) {
  * Default theme implementation for the recipe summary box.
  */
 function theme_recipe_summary($variables) {
-  global $_RECIPE_DURATIONS;
 
   $node = $variables['node'];
   $show_title = isset($variables['show_title']) ? $variables['show_title'] : FALSE;
@@ -1028,20 +1006,16 @@ function theme_recipe_summary($variables) {
     $_hours = floor($_o_minutes / 60);
     $_minutes = $_o_minutes - ($_hours * 60);
     $_text = '';
-    if (isset($_RECIPE_DURATIONS[$_o_minutes])) {
-      $_text = $_RECIPE_DURATIONS[$_o_minutes];
+    if ($_hours > 0) {
+      $_text = format_plural($_hours, '1 hour', '@count hours');
     }
-    else {
-      if ($_hours > 0) {
-        $_text = format_plural($_hours, '1 hour', '@count hours');
+    if ($_minutes > 0) {
+      if (strlen($_text) > 0) {
+        $_text .= ', ';
       }
-      if ($_minutes > 0) {
-        if (strlen($_text) > 0) {
-          $_text .= ', ';
-        }
-        $_text .= format_plural($_minutes, '1 minute', '@count minutes');
-      }
+      $_text .= format_plural($_minutes, '1 minute', '@count minutes');
     }
+    
 
     // Wrap description in RDFa markup.
     if ( !empty($node->rdf_mapping['recipe_preptime']) ) {
@@ -1058,19 +1032,14 @@ function theme_recipe_summary($variables) {
     $_hours = floor($_o_minutes / 60);
     $_minutes = $_o_minutes - ($_hours * 60);
     $_text = '';
-    if (isset($_RECIPE_DURATIONS[$_o_minutes])) {
-      $_text = $_RECIPE_DURATIONS[$_o_minutes];
+    if ($_hours > 0) {
+      $_text = format_plural($_hours, '1 hour', '@count hours');
     }
-    else {
-      if ($_hours > 0) {
-        $_text = format_plural($_hours, '1 hour', '@count hours');
+    if ($_minutes > 0) {
+      if (strlen($_text) > 0) {
+        $_text .= ', ';
       }
-      if ($_minutes > 0) {
-        if (strlen($_text) > 0) {
-          $_text .= ', ';
-        }
-        $_text .= format_plural($_minutes, '1 minute', '@count minutes');
-      }
+      $_text .= format_plural($_minutes, '1 minute', '@count minutes');
     }
 
     // Wrap description in RDFa markup.
@@ -1088,19 +1057,14 @@ function theme_recipe_summary($variables) {
     $_hours = floor($_o_minutes / 60);
     $_minutes = $_o_minutes - ($_hours * 60);
     $_text = '';
-    if (isset($_RECIPE_DURATIONS[$_o_minutes])) {
-      $_text = $_RECIPE_DURATIONS[$_o_minutes];
+    if ($_hours > 0) {
+      $_text = format_plural($_hours, '1 hour', '@count hours');
     }
-    else {
-      if ($_hours > 0) {
-        $_text = format_plural($_hours, '1 hour', '@count hours');
+    if ($_minutes > 0) {
+      if (strlen($_text) > 0) {
+        $_text .= ', ';
       }
-      if ($_minutes > 0) {
-        if (strlen($_text) > 0) {
-          $_text .= ', ';
-        }
-        $_text .= format_plural($_minutes, '1 minute', '@count minutes');
-      }
+      $_text .= format_plural($_minutes, '1 minute', '@count minutes');
     }
 
     // Wrap description in RDFa markup.
