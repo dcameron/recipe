@@ -197,7 +197,6 @@ function recipe_plaintext_export($nid = NULL, $yield = NULL) {
 
 
 function format_plaintext_ingredients($node = NULL) {
-	$units = recipe_get_units();
 
   $col_widths = array('quantity' => 0, 'unit' => 0);
 
@@ -208,6 +207,7 @@ function format_plaintext_ingredients($node = NULL) {
     $node->recipe_yield = $node->recipe_custom_yield;
   }
 
+  $unit_list = recipe_get_units();
   foreach ( $node->recipe_ingredients['ing'] as $key => &$i ) {
     // Translate decimal quantity to text fraction.
     if ($i['quantity'] > 0) {
@@ -227,14 +227,30 @@ function format_plaintext_ingredients($node = NULL) {
 
     $i['str_ingredient'] = strlen($i['note']) > 0 ? $i['name'] . ' (' . $i['note'] .')' : $i['name'];
 
-    // Display units or abbreviation.
-    // Print the abbreviation if recipe_unit_display says too or the abbreviation is blank (ie = Unit, which we don't print).
-    if ( variable_get('recipe_unit_display', 0) == 0 || $i->abbreviation == '&nbsp;') {
-      $i['str_unit'] = $units[$i['unit_key']]['abbreviation'];
+    if (isset($unit_list[$i['unit_key']])) {
+      // Print the singular or plural term depending on the quantity.
+      $title = $i['quantity'] > 1 ? $unit_list[$i['unit_key']]['plural'] : $unit_list[$i['unit_key']]['name'];
     }
     else {
-      $i['str_unit'] = $units[$i['unit_key']]['name'];
+      $title = $i['unit_key'];
     }
+    
+    // Print the abbreviation if recipe_unit_display says to or the abbreviation is blank (ie = Unit, which we don't print).
+    if (!isset($i['abbreviation']) && isset($unit_list[$i['unit_key']])) {
+      $i['abbreviation'] = $unit_list[$i['unit_key']]['abbreviation'];
+    }
+    if (empty($i['abbreviation'])) {
+      $i['abbreviation'] = ' ';
+    }
+    
+    $i['str_unit'] = '';
+    if ( variable_get('recipe_unit_display', 0) == 0 || $i['abbreviation'] == ' ') {
+      $i['str_unit'] = $i['abbreviation'];
+    }
+    else {
+      $i['str_unit'] = $title;
+    }
+
     if ( strlen($i['str_unit']) > $col_widths['unit'] ) {
       $col_widths['unit'] = strlen($i['str_unit']);
     }

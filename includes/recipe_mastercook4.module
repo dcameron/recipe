@@ -76,7 +76,6 @@ function recipe_mastercook4_export_single($nid = NULL, $yield = NULL) {
 
 
 function merge_template($node) {
-  $units = recipe_get_units();
 
   //prepare prepare time
   $decimal_hours = $node->recipe_preptime/60;
@@ -92,6 +91,7 @@ function merge_template($node) {
   }
 
   $ingredients = '';
+  $unit_list = recipe_get_units();
   foreach ( $node->recipe_ingredients['ing'] as $key => $i ) {
     if ($i['quantity'] > 0) {
       $i['quantity'] *= $factor;
@@ -99,14 +99,29 @@ function merge_template($node) {
     else {
       $i['quantity'] = ' ';
     }
-
-    // Display units or abbreviation.
-    // Print the abbreviation if recipe_unit_display says too or the abbreviation is blank (ie = Unit, which we don't print).
-    if ( variable_get('recipe_unit_display', 0) == 0 || $i->abbreviation == '&nbsp;') {
-      $i['str_unit'] = $units[$i['unit_key']]['abbreviation'];
+    
+    if (isset($unit_list[$i['unit_key']])) {
+      // Print the singular or plural term depending on the quantity.
+      $title = $i['quantity'] > 1 ? $unit_list[$i['unit_key']]['plural'] : $unit_list[$i['unit_key']]['name'];
     }
     else {
-      $i['str_unit'] = $units[$i['unit_key']]['name'];
+      $title = $i['unit_key'];
+    }
+    
+    // Print the abbreviation if recipe_unit_display says to or the abbreviation is blank (ie = Unit, which we don't print).
+    if (!isset($i['abbreviation']) && isset($unit_list[$i['unit_key']])) {
+      $i['abbreviation'] = $unit_list[$i['unit_key']]['abbreviation'];
+    }
+    if (empty($i['abbreviation'])) {
+      $i['abbreviation'] = ' ';
+    }
+    
+    $i['str_unit'] = '';
+    if ( variable_get('recipe_unit_display', 0) == 0 || $i['abbreviation'] == ' ') {
+      $i['str_unit'] = $i['abbreviation'];
+    }
+    else {
+      $i['str_unit'] = $title;
     }
 
     $ingredients .= format_mastercook4_ingredient($i);

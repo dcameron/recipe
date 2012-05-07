@@ -869,12 +869,6 @@ function theme_recipe_ingredients($variables) {
     $output .= '<div class="section">';
     foreach ($node->recipe_ingredients['ing'] as $ingredient) {
       if (isset($ingredient['quantity']) && $ingredient['name']) {
-        if (!isset($ingredient['abbreviation']) && isset($unit_list[$ingredient['unit_key']])) {
-          $ingredient['abbreviation'] = $unit_list[$ingredient['unit_key']]['abbreviation'];
-        }
-        if (empty($ingredient['abbreviation'])) {
-          $ingredient['abbreviation'] = '&nbsp;';
-        }
 
         // In preview mode the quantity are plain text fractions and should not be multiplied.
 
@@ -894,7 +888,6 @@ function theme_recipe_ingredients($variables) {
           $ingredient['name'] = l($ingredient['name'], 'node/' . $ingredient['link']);
         }
 
-        $units = '';
         if (isset($unit_list[$ingredient['unit_key']])) {
           // Print the singular or plural term depending on the quantity.
           $title = $ingredient['quantity'] > 1 ? $unit_list[$ingredient['unit_key']]['plural'] : $unit_list[$ingredient['unit_key']]['name'];
@@ -902,7 +895,16 @@ function theme_recipe_ingredients($variables) {
         else {
           $title = $ingredient['unit_key'];
         }
+        
         // Print the abbreviation if recipe_unit_display says to or the abbreviation is blank (ie = Unit, which we don't print).
+        if (!isset($ingredient['abbreviation']) && isset($unit_list[$ingredient['unit_key']])) {
+          $ingredient['abbreviation'] = $unit_list[$ingredient['unit_key']]['abbreviation'];
+        }
+        if (empty($ingredient['abbreviation'])) {
+          $ingredient['abbreviation'] = '&nbsp;';
+        }
+        
+        $units = '';
         if ( variable_get('recipe_unit_display', 0) == 0 || $ingredient['abbreviation'] == '&nbsp;') {
           $units = '<abbr ' . drupal_attributes(array('title' => $title)) . '>' . $ingredient['abbreviation'] . '</abbr>';
         }

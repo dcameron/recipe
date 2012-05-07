@@ -108,7 +108,7 @@ function recipe_recipeML_export_single($nid = NULL, $yield = NULL, $add_content_
     '<description>'. my_xml_escape($node->recipe_description) .'</description>'."\n".
     '<ingredients>';
 
-  $units = recipe_get_units();
+  $unit_list = recipe_get_units();
   foreach ($node->recipe_ingredients['ing'] as $ingredient) {
     $prep = '';
     if (strlen($ingredient['note']) > 0) {
@@ -119,16 +119,29 @@ function recipe_recipeML_export_single($nid = NULL, $yield = NULL, $add_content_
       $ingredient['quantity'] *= $factor;
     }
 
-    // Display units or abbreviation.
-    // Print the abbreviation if recipe_unit_display says too or the abbreviation is blank (ie = Unit, which we don't print).
-    if ( variable_get('recipe_unit_display', 0) == 0 || $i->abbreviation == '&nbsp;') {
-      $ingredient['str_unit'] = $units[$ingredient['unit_key']]['abbreviation'];
+    if (isset($unit_list[$ingredient['unit_key']])) {
+      // Print the singular or plural term depending on the quantity.
+      $title = $ingredient['quantity'] > 1 ? $unit_list[$ingredient['unit_key']]['plural'] : $unit_list[$ingredient['unit_key']]['name'];
     }
     else {
-      $ingredient['str_unit'] = $units[$ingredient['unit_key']]['name'];
+      $title = $ingredient['unit_key'];
     }
-
-
+    
+    // Print the abbreviation if recipe_unit_display says to or the abbreviation is blank (ie = Unit, which we don't print).
+    if (!isset($ingredient['abbreviation']) && isset($unit_list[$ingredient['unit_key']])) {
+      $ingredient['abbreviation'] = $unit_list[$ingredient['unit_key']]['abbreviation'];
+    }
+    if (empty($ingredient['abbreviation'])) {
+      $ingredient['abbreviation'] = ' ';
+    }
+    
+    $ingredient['str_unit'] = '';
+    if ( variable_get('recipe_unit_display', 0) == 0 || $ingredient['abbreviation'] == ' ') {
+      $ingredient['str_unit'] = $ingredient['abbreviation'];
+    }
+    else {
+      $ingredient['str_unit'] = $title;
+    }
 
     $output .= "\n".'<ing><amt><qty>'. $ingredient['quantity'] .'</qty><unit>'. $ingredient['str_unit'] .'</unit></amt><item>'. my_xml_escape($ingredient['name']) ."</item>$prep</ing>";
   }
