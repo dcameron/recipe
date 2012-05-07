@@ -59,6 +59,7 @@ function recipe_mastercook4_export_single($nid = NULL, $yield = NULL) {
     return;
   }
   $node = node_load($nid);
+  recipe_mastercook4_textify($node);
 
   // you should not be able to export unpublished recipes
   if ( $node->status == 0 ) {
@@ -74,7 +75,7 @@ function recipe_mastercook4_export_single($nid = NULL, $yield = NULL) {
 }
 
 
-function merge_template($node = NULL) {
+function merge_template($node) {
   $units = recipe_get_units();
 
   //prepare prepare time
@@ -415,4 +416,13 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
   }
 
   return $recipe;
+}
+
+/*
+ * Mastercook is an old style text format, remove html.
+ */
+function recipe_mastercook4_textify(&$node) {
+  $node->title = filter_xss($node->title, array());
+  $node->recipe_source = filter_xss($node->recipe_source, array());
+  $node->recipe_instructions = filter_xss($node->recipe_instructions, array());
 }
