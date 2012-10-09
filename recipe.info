@@ -2,3 +2,5 @@ name = Recipe
 description = Collect and display recipes.
 package = Recipe
 core = 7.x
+
+configure = admin/config/system/recipe

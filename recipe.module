@@ -17,11 +17,11 @@ function recipe_help($path, $arg) {
   switch ($path) {
     case 'node/add/recipe':
       return variable_get('recipe_help', '');
-    case 'admin/content/recipe/export_multi':
-      $output = '<p>' . t('You can enable/disable bulk export formats on the <a href="@modules-page">modules page</a> in the recipes section.', array('@modules-page' => url('admin/build/modules'))) . '</p>';
+    case 'admin/structure/recipe':
+      $output = '<p>' . t('You can enable/disable bulk export formats on the <a href="@modules-page">modules page</a> in the recipes section.', array('@modules-page' => url('admin/modules', array('fragment' => 'edit-modules-recipe')))) . '</p>';
       return $output;
-    case 'admin/content/recipe/import_multi':
-      $output = '<p>' . t('You can enable/disable bulk import formats on the <a href="@modules-page">modules page</a> in the recipes section.', array('@modules-page' => url('admin/build/modules'))) . '</p>';
+    case 'admin/structure/recipe/import_multi':
+      $output = '<p>' . t('You can enable/disable bulk import formats on the <a href="@modules-page">modules page</a> in the recipes section.', array('@modules-page' => url('admin/modules', array('fragment' => 'edit-modules-recipe')))) . '</p>';
       return $output;
   }
 }
@@ -629,37 +629,39 @@ function recipe_menu() {
 
 
 
-  // Admin menus below here.
-  $items['admin/content/recipe'] = array(
-    'title' => 'Recipes',
+  // Recipe configuration and bulk import/export menus.
+  $items['admin/config/system/recipe'] = array(
+    'title' => 'Recipe',
     'description' => 'Settings that control how the recipe module functions.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('recipe_admin_settings'),
     'access arguments' => array('administer site configuration'),
-    'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
+    'type' => MENU_NORMAL_ITEM,
     'file' => 'recipe.admin.inc',
+	'weight' => 0,
   );
-  $items['admin/content/recipe/settings'] = array(
-    'title' => 'Settings',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -1,
-  );
-  $items['admin/content/recipe/export_multi'] = array(
-    'title' => 'Bulk export',
-    'description' => 'Export all recipes from this site into a supported output format.  The data is returned directly to your web browser.  You can enable output formats on the modules screen.',
+
+  $items['admin/structure/recipe'] = array(
+    'title' => 'Recipe bulk import/export',
+    'description' => 'Export/Import all recipes from this site to/from a supported format.',
     'page callback' => 'recipe_export_multi',
     'access callback' => 'recipe_export_multi_myaccess',
     'access arguments' => array('administer site configuration'),
-    'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
+    'type' => MENU_NORMAL_ITEM,
     'file' => 'recipe.admin.inc',
   );
-  $items['admin/content/recipe/import_multi'] = array(
-    'title' => 'Bulk import',
-    'description' => 'Import recipes in a supported input format into this site.  The data is uploaded as a file to the server.  You can enable input formats on the modules screen.',
+  $items['admin/structure/recipe/export_multi'] = array(
+    'title' => 'Recipe bulk export',
+	'description' => 'Export all recipes from this site into a supported output format.',
+    'type' => MENU_DEFAULT_LOCAL_TASK | MENU_LOCAL_TASK,
+  );
+  $items['admin/structure/recipe/import_multi'] = array(
+    'title' => 'Recipe bulk import',
+    'description' => 'Import all recipes from this site into a supported output format.',
     'page callback' => 'recipe_import_multi',
     'access callback' => 'recipe_import_multi_myaccess',
     'access arguments' => array('administer site configuration'),
-    'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
+    'type' => MENU_LOCAL_TASK,
     'file' => 'recipe.admin.inc',
   );
 
@@ -895,7 +897,7 @@ function theme_recipe_ingredients($variables) {
         else {
           $title = $ingredient['unit_key'];
         }
-        
+
         // Print the abbreviation if recipe_unit_display says to or the abbreviation is blank (ie = Unit, which we don't print).
         if (!isset($ingredient['abbreviation']) && isset($unit_list[$ingredient['unit_key']])) {
           $ingredient['abbreviation'] = $unit_list[$ingredient['unit_key']]['abbreviation'];
@@ -903,7 +905,7 @@ function theme_recipe_ingredients($variables) {
         if (empty($ingredient['abbreviation'])) {
           $ingredient['abbreviation'] = '&nbsp;';
         }
-        
+
         $units = '';
         if ( variable_get('recipe_unit_display', 0) == 0 || $ingredient['abbreviation'] == '&nbsp;') {
           $units = '<abbr ' . drupal_attributes(array('title' => $title)) . '>' . $ingredient['abbreviation'] . '</abbr>';
@@ -1017,7 +1019,7 @@ function theme_recipe_summary($variables) {
       }
       $_text .= format_plural($_minutes, '1 minute', '@count minutes');
     }
-    
+
 
     // Wrap description in RDFa markup.
     if ( !empty($node->rdf_mapping['recipe_preptime']) ) {
@@ -1350,7 +1352,7 @@ function recipe_validate($node, $form, &$form_state) {
       $return = FALSE;
     }
   }
-  
+
   if (!is_numeric($form_state['values']['recipe_preptime']) || $form_state['values']['recipe_preptime'] < 0) {
     form_set_error('recipe_preptime', t('Preparation time must be a valid positive integer. Utilize 0 for N/A.'));
     $return = FALSE;
@@ -1359,7 +1361,7 @@ function recipe_validate($node, $form, &$form_state) {
     form_set_error('recipe_cooktime', t('Cooking time must be a valid positive integer. Utilize 0 for N/A.'));
     $return = FALSE;
   }
-  
+
   return $return;
 }
 

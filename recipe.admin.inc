@@ -150,6 +150,8 @@ function recipe_admin_settings() {
 
 function recipe_export_multi($type = NULL) {
 
+  drupal_set_title(t('Recipe bulk export'));
+
   // load supported formats
   $formats = module_invoke_all('recipeio', 'export_multi');
   $o = t('Supported bulk output formats:');
@@ -157,7 +159,7 @@ function recipe_export_multi($type = NULL) {
     foreach ( $formats as $key => $format ) {
       $format_count = 0;
       if ($format) {
-        $o .= '<br/>' . l($format['format_name'], "admin/content/recipe/export_multi/$key");
+        $o .= '<br/>' . l($format['format_name'], "admin/structure/recipe/export_multi/$key");
         $format_count++;
       }
     }
@@ -183,6 +185,8 @@ function recipe_export_multi($type = NULL) {
 
 function recipe_import_multi($type = NULL) {
 
+  drupal_set_title(t('Recipe bulk import'));
+
   // load supported formats
   $formats = module_invoke_all('recipeio', 'import_multi');
   $o = t('Supported bulk input formats:');
@@ -190,7 +194,7 @@ function recipe_import_multi($type = NULL) {
     $format_count = 0;
     foreach ( $formats as $key => $format ) {
       if ($format) {
-        $o .= '<br/>' . l($format['format_name'], "admin/content/recipe/import_multi/$key");
+        $o .= '<br/>' . l($format['format_name'], "admin/structure/recipe/import_multi/$key");
         $format_count++;
       }
     }
