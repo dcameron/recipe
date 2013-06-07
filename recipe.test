@@ -1,0 +1,209 @@
+<?php
+/**
+ * @file
+ * Tests for recipe.module.
+ */
+
+/**
+ * Tests the functionality of the Recipe content type.
+ */
+class RecipeWebTestCase extends DrupalWebTestCase {
+  protected $admin_user;
+  protected $unit_list;
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Recipe content type',
+      'description' => 'Ensure that the recipe content type functions properly.',
+      'group' => 'Recipe',
+    );
+  }
+
+  public function setUp() {
+    // Enable modules required for testing.
+    parent::setUp('recipe');
+    // Create and log in the admin user with Recipe content permissions.
+    $this->admin_user = $this->drupalCreateUser(array('create recipe content', 'administer site configuration'));
+    $this->drupalLogin($this->admin_user);
+    // Populate the unit list.
+    $this->unit_list = recipe_get_units();
+  }
+
+  /**
+   * Create a recipe node using the node form and test the module settings.
+   */
+  public function testRecipeContent() {
+    // Generate values for our test node.
+    $title = $this->randomName(16);
+    $description = $this->randomName(255);
+    $yield_unit = $this->randomName(10);
+    $yield = 5;
+    $source = $this->randomName(16);
+    $notes = $this->randomName(255);
+    $instructions = $this->randomname(255);
+    $preptime = 60;
+    $cooktime = 15;
+
+    // Ingredient with quantity == 1 and unit tablespoon with note.
+    $ing_0_quantity = 1;
+    $ing_0_unit = 'tablespoon';
+    $ing_0_name = $this->randomName(16);
+    $ing_0_note = $this->randomName(16);
+
+    // Ingredient with quantity > 1 and unit tablespoon with note.
+    $ing_1_quantity = 2;
+    $ing_1_unit = 'tablespoon';
+    $ing_1_name = $this->randomName(16);
+    $ing_1_note = $this->randomName(16);
+
+    // Ingredient with quantity == 0 and unit tablespoon with note.
+    $ing_2_quantity = 0;
+    $ing_2_unit = 'tablespoon';
+    $ing_2_name = $this->randomName(16);
+    $ing_2_note = $this->randomName(16);
+
+    // Ingredient without note.
+    $ing_3_quantity = 1;
+    $ing_3_unit = 'tablespoon';
+    $ing_3_name = $this->randomName(16);
+    $ing_3_note = '';
+
+    // Ingredient with unit that has no abbreviation.
+    $ing_4_quantity = 10;
+    $ing_4_unit = 'unit';
+    $ing_4_name = $this->randomName(16);
+    $ing_4_note = $this->randomName(16);
+
+    $edit = array(
+      'title' => $title,
+      'recipe_description[value]' => $description,
+      'recipe_yield_unit' => $yield_unit,
+      'recipe_yield' => $yield,
+      'recipe_source' => $source,
+      'recipe_notes[value]' => $notes,
+      'recipe_instructions[value]' => $instructions,
+      'recipe_preptime' => $preptime,
+      'recipe_cooktime' => $cooktime,
+      'recipe_ingredients[ing][0][quantity]' => $ing_0_quantity,
+      'recipe_ingredients[ing][0][unit_key]' => $ing_0_unit,
+      'recipe_ingredients[ing][0][name]' => $ing_0_name,
+      'recipe_ingredients[ing][0][note]' => $ing_0_note,
+      'recipe_ingredients[ing][1][quantity]' => $ing_1_quantity,
+      'recipe_ingredients[ing][1][unit_key]' => $ing_1_unit,
+      'recipe_ingredients[ing][1][name]' => $ing_1_name,
+      'recipe_ingredients[ing][1][note]' => $ing_1_note,
+      'recipe_ingredients[ing][2][quantity]' => $ing_2_quantity,
+      'recipe_ingredients[ing][2][unit_key]' => $ing_2_unit,
+      'recipe_ingredients[ing][2][name]' => $ing_2_name,
+      'recipe_ingredients[ing][2][note]' => $ing_2_note,
+      'recipe_ingredients[ing][3][quantity]' => $ing_3_quantity,
+      'recipe_ingredients[ing][3][unit_key]' => $ing_3_unit,
+      'recipe_ingredients[ing][3][name]' => $ing_3_name,
+      'recipe_ingredients[ing][3][note]' => $ing_3_note,
+      'recipe_ingredients[ing][4][quantity]' => $ing_4_quantity,
+      'recipe_ingredients[ing][4][unit_key]' => $ing_4_unit,
+      'recipe_ingredients[ing][4][name]' => $ing_4_name,
+      'recipe_ingredients[ing][4][note]' => $ing_4_note,
+    );
+
+    // Post the values to the node form.
+    $this->drupalPost('node/add/recipe', $edit, t('Save'));
+    $this->assertText(t('Recipe @title has been created.', array('@title' => $title)));
+
+    // Check the page for the recipe content.
+    $this->assertText($description, 'Found the recipe description.');
+    $this->assertFieldById('edit-custom-yield', $yield, 'Found the recipe yield in the custom yield form.');
+    $this->assertText($yield_unit, 'Found the recipe yield unit.');
+    $this->assertText($source, 'Found the recipe source.');
+    $this->assertText($notes, 'Found the recipe notes.');
+    $this->assertText($instructions, 'Found the recipe instructions');
+    $this->assertText($this->formatTime($preptime), 'Found the recipe prep time.');
+    $this->assertText($this->formatTime($cooktime), 'Found the recipe cook time.');
+    $this->assertText($this->formatTime($preptime + $cooktime), 'Found the recipe total time.');
+
+    $this->assertText(t('@ing_quantity @ing_abbr', array('@ing_quantity' => $ing_0_quantity, '@ing_abbr' => $this->unit_list[$ing_0_unit]['abbreviation'])), 'Found ingredient 0 quantity and abbreviation.');
+    $this->assertText(format_string('@ing_name (@ing_note)', array('@ing_name' => $ing_0_name, '@ing_note' => $ing_0_note)), 'Found ingredient 0 name and note.');
+
+    $this->assertText(t('@ing_quantity @ing_abbr', array('@ing_quantity' => $ing_1_quantity, '@ing_abbr' => $this->unit_list[$ing_1_unit]['abbreviation'])), 'Found ingredient 1 quantity and abbreviation.');
+    $this->assertText(format_string('@ing_name (@ing_note)', array('@ing_name' => $ing_1_name, '@ing_note' => $ing_1_note)), 'Found ingredient 1 name and note.');
+
+    $this->assertNoText(t('@ing_quantity @ing_abbr', array('@ing_quantity' => $ing_2_quantity, '@ing_abbr' => $this->unit_list[$ing_2_unit]['abbreviation'])), 'Did not find ingredient 2 quantity == 0.');
+    $this->assertText(format_string('@ing_name (@ing_note)', array('@ing_name' => $ing_2_name, '@ing_note' => $ing_2_note)), 'Found ingredient 2 name and note.');
+
+    $this->assertText(t('@ing_quantity @ing_abbr', array('@ing_quantity' => $ing_3_quantity, '@ing_abbr' => $this->unit_list[$ing_3_unit]['abbreviation'])), 'Found ingredient 3 quantity and abbreviation.');
+    $this->assertNoText(format_string('@ing_name (@ing_note)', array('@ing_name' => $ing_3_name, '@ing_note' => $ing_3_note)), 'Did not find ingredient 3 name with blank note field, "()".');
+
+    $this->assertRaw(format_string('@ing_quantity <abbr  title="units">&nbsp;</abbr>', array('@ing_quantity' => $ing_4_quantity)), 'Found ingredient 4 quantity and blank abbreviation.');
+    $this->assertText(format_string('@ing_name (@ing_note)', array('@ing_name' => $ing_4_name, '@ing_note' => $ing_4_note)), 'Found ingredient 4 name and note.');
+
+    // Check the page HTML for the recipe RDF properties.
+    $properties = array(
+      'schema:Recipe',
+      'schema:name',
+      'schema:instructions',
+      'schema:summary',
+      'schema:prepTime',
+      'schema:cookTime',
+      'schema:totalTime',
+      // @todo 'schema:yield' is defined in recipe_rdf_mapping(), but is not
+      // currently implemented in any theme function.
+      //'schema:yield',
+    );
+    foreach ($properties as $property) {
+      $this->assertRaw($property, format_string('Found the RDF property "@property" in the recipe node HTML.', array('@property' => $property)));
+    }
+
+    // Change the Recipe module settings.
+    $summary_title = $this->randomName(16);
+    $edit = array(
+      // Enable full unit name display.
+      'recipe_unit_display' => 1,
+      // Enable lowercase normalization of ingredient names.
+      // @todo The ingredient name normalization setting currently does nothing.
+      //'recipe_ingredient_name_normalize' => 1,
+      // Hide the recipe summary.
+      'recipe_summary_location' => 2,
+    );
+
+    // Post the values to the settings form.
+    $this->drupalPost('admin/config/system/recipe', $edit, t('Save configuration'));
+
+    // Check the recipe node display again.
+    $this->drupalGet('node/1');
+
+    $this->assertText(t('@ing_quantity @ing_unit', array('@ing_quantity' => $ing_0_quantity, '@ing_unit' => $this->unit_list[$ing_0_unit]['name'])), 'Found ingredient 0 quantity and singular unit name.');
+
+    $this->assertText(t('@ing_quantity @ing_unit', array('@ing_quantity' => $ing_1_quantity, '@ing_unit' => $this->unit_list[$ing_1_unit]['plural'])), 'Found ingredient 1 quantity and plural unit name.');
+
+    //$this->assertText(strtolower($ing_0_name), 'Found normalized ingredient 0 name.');
+    //$this->assertText(strtolower($ing_1_name), 'Found normalized ingredient 1 name.');
+    //$this->assertText(strtolower($ing_2_name), 'Found normalized ingredient 2 name.');
+    //$this->assertText(strtolower($ing_3_name), 'Found normalized ingredient 3 name.');
+    //$this->assertText(strtolower($ing_4_name), 'Found normalized ingredient 4 name.');
+
+    $this->assertNoText($summary_title, 'Did not find the recipe summary.');
+  }
+
+  /**
+   * Format recipe times for display.
+   *
+   * @todo This function and the code its copied from in theme_recipe_summary()
+   * need to be replaced with an equivalent function in recipe.module.
+   */
+  protected function formatTime($time) {
+    $_o_minutes = $time;
+    $_hours = floor($_o_minutes / 60);
+    $_minutes = $_o_minutes - ($_hours * 60);
+    $_text = '';
+    if ($_hours > 0) {
+      $_text = format_plural($_hours, '1 hour', '@count hours');
+    }
+    if ($_minutes > 0) {
+      if (strlen($_text) > 0) {
+        $_text .= ', ';
+      }
+      $_text .= format_plural($_minutes, '1 minute', '@count minutes');
+    }
+    return $_text;
+  }
+}
