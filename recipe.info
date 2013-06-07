@@ -4,3 +4,5 @@ package = Recipe
 core = 7.x
 
 configure = admin/config/system/recipe
+
+files[] = recipe.test
