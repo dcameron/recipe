@@ -131,20 +131,20 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $this->assertText($this->formatTime($cooktime), 'Found the recipe cook time.');
     $this->assertText($this->formatTime($preptime + $cooktime), 'Found the recipe total time.');
 
-    $this->assertText(t('@ing_quantity @ing_abbr', array('@ing_quantity' => $ing_0_quantity, '@ing_abbr' => $this->unit_list[$ing_0_unit]['abbreviation'])), 'Found ingredient 0 quantity and abbreviation.');
-    $this->assertText(format_string('@ing_name (@ing_note)', array('@ing_name' => $ing_0_name, '@ing_note' => $ing_0_note)), 'Found ingredient 0 name and note.');
+    $this->assertText(t('@quantity @unit', array('@quantity' => $ing_0_quantity, '@unit' => $this->unit_list[$ing_0_unit]['abbreviation'])), 'Found ingredient 0 quantity and abbreviation.');
+    $this->assertText(format_string('@name (@note)', array('@name' => $ing_0_name, '@note' => $ing_0_note)), 'Found ingredient 0 name and note.');
 
-    $this->assertText(t('@ing_quantity @ing_abbr', array('@ing_quantity' => $ing_1_quantity, '@ing_abbr' => $this->unit_list[$ing_1_unit]['abbreviation'])), 'Found ingredient 1 quantity and abbreviation.');
-    $this->assertText(format_string('@ing_name (@ing_note)', array('@ing_name' => $ing_1_name, '@ing_note' => $ing_1_note)), 'Found ingredient 1 name and note.');
+    $this->assertText(t('@quantity @unit', array('@quantity' => $ing_1_quantity, '@unit' => $this->unit_list[$ing_1_unit]['abbreviation'])), 'Found ingredient 1 quantity and abbreviation.');
+    $this->assertText(format_string('@name (@note)', array('@name' => $ing_1_name, '@note' => $ing_1_note)), 'Found ingredient 1 name and note.');
 
-    $this->assertNoText(t('@ing_quantity @ing_abbr', array('@ing_quantity' => $ing_2_quantity, '@ing_abbr' => $this->unit_list[$ing_2_unit]['abbreviation'])), 'Did not find ingredient 2 quantity == 0.');
-    $this->assertText(format_string('@ing_name (@ing_note)', array('@ing_name' => $ing_2_name, '@ing_note' => $ing_2_note)), 'Found ingredient 2 name and note.');
+    $this->assertNoText(t('@quantity @unit', array('@quantity' => $ing_2_quantity, '@unit' => $this->unit_list[$ing_2_unit]['abbreviation'])), 'Did not find ingredient 2 quantity == 0.');
+    $this->assertText(format_string('@name (@note)', array('@name' => $ing_2_name, '@note' => $ing_2_note)), 'Found ingredient 2 name and note.');
 
-    $this->assertText(t('@ing_quantity @ing_abbr', array('@ing_quantity' => $ing_3_quantity, '@ing_abbr' => $this->unit_list[$ing_3_unit]['abbreviation'])), 'Found ingredient 3 quantity and abbreviation.');
-    $this->assertNoText(format_string('@ing_name (@ing_note)', array('@ing_name' => $ing_3_name, '@ing_note' => $ing_3_note)), 'Did not find ingredient 3 name with blank note field, "()".');
+    $this->assertText(t('@quantity @unit', array('@quantity' => $ing_3_quantity, '@unit' => $this->unit_list[$ing_3_unit]['abbreviation'])), 'Found ingredient 3 quantity and abbreviation.');
+    $this->assertNoText(format_string('@name (@note)', array('@name' => $ing_3_name, '@note' => $ing_3_note)), 'Did not find ingredient 3 name with blank note field, "()".');
 
-    $this->assertRaw(format_string('@ing_quantity <abbr  title="units">&nbsp;</abbr>', array('@ing_quantity' => $ing_4_quantity)), 'Found ingredient 4 quantity and blank abbreviation.');
-    $this->assertText(format_string('@ing_name (@ing_note)', array('@ing_name' => $ing_4_name, '@ing_note' => $ing_4_note)), 'Found ingredient 4 name and note.');
+    $this->assertRaw(format_string('@quantity <abbr  title="units">&nbsp;</abbr>', array('@quantity' => $ing_4_quantity)), 'Found ingredient 4 quantity and blank abbreviation.');
+    $this->assertText(format_string('@name (@note)', array('@name' => $ing_4_name, '@note' => $ing_4_note)), 'Found ingredient 4 name and note.');
 
     // Check the page HTML for the recipe RDF properties.
     $properties = array(
@@ -184,9 +184,9 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     // Check the recipe node display again.
     $this->drupalGet('node/1');
 
-    $this->assertText(t('@ing_quantity @ing_unit', array('@ing_quantity' => $ing_0_quantity, '@ing_unit' => $this->unit_list[$ing_0_unit]['name'])), 'Found ingredient 0 quantity and singular unit name.');
+    $this->assertText(t('@quantity @unit', array('@quantity' => $ing_0_quantity, '@unit' => $this->unit_list[$ing_0_unit]['name'])), 'Found ingredient 0 quantity and singular unit name.');
 
-    $this->assertText(t('@ing_quantity @ing_unit', array('@ing_quantity' => $ing_1_quantity, '@ing_unit' => $this->unit_list[$ing_1_unit]['plural'])), 'Found ingredient 1 quantity and plural unit name.');
+    $this->assertText(t('@quantity @unit', array('@quantity' => $ing_1_quantity, '@unit' => $this->unit_list[$ing_1_unit]['plural'])), 'Found ingredient 1 quantity and plural unit name.');
 
     //$this->assertText(strtolower($ing_0_name), 'Found normalized ingredient 0 name.');
     //$this->assertText(strtolower($ing_1_name), 'Found normalized ingredient 1 name.');
