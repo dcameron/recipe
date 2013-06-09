@@ -14,13 +14,13 @@ class RecipeWebTestCase extends DrupalWebTestCase {
     // Enable modules required for testing.
     parent::setUp('recipe');
     // Create and log in the admin user with Recipe content permissions.
-    $this->admin_user = $this->drupalCreateUser(array('create recipe content', 'administer site configuration'));
+    $this->admin_user = $this->drupalCreateUser(array('create recipe content', 'administer site configuration', 'administer blocks'));
     $this->drupalLogin($this->admin_user);
   }
 }
 
 /**
- * Tests the functionality of the Recipe content type.
+ * Tests the functionality of the Recipe content type and Recipe blocks.
  */
 class RecipeNodeTestCase extends RecipeWebTestCase {
   protected $unit_list;
@@ -172,7 +172,10 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
       // @todo The ingredient name normalization setting currently does nothing.
       //'recipe_ingredient_name_normalize' => 1,
       // Hide the recipe summary.
-      'recipe_summary_location' => 2,
+      // @todo The recipe summary location setting currently does nothing.
+      //'recipe_summary_location' => 2,
+      // Change the Summary block title.
+      'recipe_summary_title' => $summary_title,
     );
 
     // Post the values to the settings form.
@@ -191,7 +194,23 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     //$this->assertText(strtolower($ing_3_name), 'Found normalized ingredient 3 name.');
     //$this->assertText(strtolower($ing_4_name), 'Found normalized ingredient 4 name.');
 
-    $this->assertNoText($summary_title, 'Did not find the recipe summary.');
+    //$this->assertNoText(t('Summary'), 'Did not find the recipe summary.');
+
+    // Enable the Newest Recipes and Recipe Summary blocks.
+    // Check for it and the node link.
+    $edit = array(
+      "blocks[recipe_recent][region]" => 'sidebar_first',
+      "blocks[recipe_summary][region]" => 'sidebar_first',
+    );
+    $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
+    $this->assertText(t('Newest recipes'), 'Found the Newest recipes block.');
+    $this->assertLink($title, 0);
+    // Make sure the Summary block doesn't appear on a non-recipe-node page.
+    $this->assertNoText($summary_title, 'Did not find the altered Summary block title.');
+
+    // Check for the Summary block on the recipe node page.
+    $this->drupalGet('node/1');
+    $this->assertText($summary_title, 'Found the altered Summary block title.');
   }
 
   /**
