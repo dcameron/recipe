@@ -211,6 +211,11 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     // Check for the Summary block on the recipe node page.
     $this->drupalGet('node/1');
     $this->assertText($summary_title, 'Found the altered Summary block title.');
+
+    // Test ingredient autocomplete for the first ingredient.
+    $input = substr($ing_0_name, 0, 3);
+    $this->drupalGet('recipe/ingredient/autocomplete/' . $input);
+    $this->assertRaw('{"' . $ing_0_name . '":"' . $ing_0_name . '"}', format_string('Autocomplete returns ingredient %ingredient_name after typing the first 3 letters.', array('%ingredient_name' => $ing_0_name)));
   }
 
   /**
