@@ -16,7 +16,7 @@ class RecipeWebTestCase extends DrupalWebTestCase {
     parent::setUp(array('recipe', 'recipe_plaintext', 'recipe_html', 'recipe_recipeML', 'recipe_mastercook4'));
 
     // Create and log in the admin user with Recipe content permissions.
-    $this->admin_user = $this->drupalCreateUser(array('create recipe content', 'export recipes', 'administer site configuration', 'administer blocks'));
+    $this->admin_user = $this->drupalCreateUser(array('create recipe content', 'import recipes', 'export recipes', 'administer site configuration', 'administer blocks'));
     $this->drupalLogin($this->admin_user);
 
     // Populate the unit list.
@@ -510,6 +510,75 @@ class RecipeLandingPageTestCase extends RecipeWebTestCase {
     $this->drupalGet('recipe');
     $this->assertNoText($recent_recipe_title);
     $this->assertNoLink($node_title);
+  }
+}
+
+/**
+ * Tests the single and multiple recipe import forms.
+ */
+class RecipeImportFormsTestCase extends RecipeWebTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Recipe import forms',
+      'description' => 'Test the single and multiple recipe import forms',
+      'group' => 'Recipe',
+    );
+  }
+
+  /**
+   * Test import a recipe in plain text format with the single import form.
+   */
+  public function testPlainTextSingleImport() {
+    // Enter a recipe into the import form and preview it.
+    $edit = array(
+      'recipe_format' => 'recipe_plaintext_import',
+      'recipe_import_text' => 'Salt water
+
+Ingredients:
+2 c water (cold)
+1 T salt
+
+Instructions:
+Combine water and salt in a glass.
+
+Stir.
+
+Description:
+Basic salt water.
+
+Notes:
+Do not consume!
+',
+    );
+    $this->drupalPost('node/add/recipe/import', $edit, 'Preview');
+    $this->assertText('Salt water');
+    $this->assertText('2 c', 'Found ingredent 0 quantity and unit.');
+    $this->assertText('water (cold)', 'Found ingredient 0 name and note.');
+    $this->assertText('1 T', 'Found ingredient 1 quantity and unit.');
+    $this->assertText('salt', 'Found ingredient 1 name.');
+    $this->assertText('Instructions:
+Combine water and salt in a glass.
+
+Stir.
+
+Description:
+Basic salt water.
+
+Notes:
+Do not consume!', 'Found recipe instructions, description, and notes.');
+
+    // Import the recipe into a node.
+    $this->drupalPost('node/add/recipe/import', $edit, 'Import');
+    $this->drupalGet('node/1');
+    $this->assertText('Salt water');
+    $this->assertText('2 c', 'Found ingredent 0 quantity and unit.');
+    $this->assertText('water (cold)', 'Found ingredient 0 name and note.');
+    $this->assertText('1 T', 'Found ingredient 1 quantity and unit.');
+    $this->assertText('salt', 'Found ingredient 1 name.');
+    $this->assertText('Combine water and salt in a glass.', 'Found the first instruction.');
+    $this->assertText('Stir.', 'Found the second instruction.');
+    $this->assertText('Basic salt water.', 'Found the recipe description.');
+    $this->assertText('Do not consume!', 'Found the recipe notes.');
   }
 }
 
