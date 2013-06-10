@@ -580,6 +580,57 @@ Do not consume!', 'Found recipe instructions, description, and notes.');
     $this->assertText('Basic salt water.', 'Found the recipe description.');
     $this->assertText('Do not consume!', 'Found the recipe notes.');
   }
+
+  /**
+   * Test import a recipe in MasterCook4 format with the single import form.
+   */
+  public function testMasterCook4SingleImport() {
+    // Enter a recipe into the import form and preview it.
+    $edit = array(
+      'recipe_format' => 'recipe_mastercook4_import_single',
+      'recipe_import_text' => '* Exported from MasterCook *
+
+                     Salt water
+
+Recipe By     : John Doe
+Serving Size  : 1    Preparation Time : 0:05
+Categories    :
+  Amount  Measure       Ingredient -- Preparation Method
+--------  ------------  --------------------------------
+       2          cups  water -- cold
+       1    tablespoon  salt
+
+Combine water and salt in a glass.
+
+Stir.
+
+                                    - - - - - - - - - - - - - - - - - - -
+
+NOTES : Do not consume!',
+    );
+    $this->drupalPost('node/add/recipe/import', $edit, 'Preview');
+    $this->assertText('Salt water');
+    $this->assertText('2 c', 'Found ingredent 0 quantity and unit.');
+    $this->assertText('water (cold)', 'Found ingredient 0 name and note.');
+    $this->assertText('1 T', 'Found ingredient 1 quantity and unit.');
+    $this->assertText('salt', 'Found ingredient 1 name.');
+    $this->assertText('Combine water and salt in a glass.
+
+Stir.', 'Found recipe instructions.');
+    $this->assertText('Do not consume!', 'Found recipe notes.');
+
+    // Import the recipe into a node.
+    $this->drupalPost('node/add/recipe/import', $edit, 'Import');
+    $this->drupalGet('node/1');
+    $this->assertText('Salt water');
+    $this->assertText('2 c', 'Found ingredent 0 quantity and unit.');
+    $this->assertText('water (cold)', 'Found ingredient 0 name and note.');
+    $this->assertText('1 T', 'Found ingredient 1 quantity and unit.');
+    $this->assertText('salt', 'Found ingredient 1 name.');
+    $this->assertText('Combine water and salt in a glass.', 'Found the first instruction.');
+    $this->assertText('Stir.', 'Found the second instruction.');
+    $this->assertText('Do not consume!', 'Found the recipe notes.');
+  }
 }
 
 /**
