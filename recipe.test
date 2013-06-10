@@ -9,13 +9,18 @@
  */
 class RecipeWebTestCase extends DrupalWebTestCase {
   protected $admin_user;
+  protected $unit_list;
 
   public function setUp() {
     // Enable modules required for testing.
     parent::setUp(array('recipe', 'recipe_plaintext', 'recipe_html', 'recipe_recipeML', 'recipe_mastercook4'));
+
     // Create and log in the admin user with Recipe content permissions.
     $this->admin_user = $this->drupalCreateUser(array('create recipe content', 'export recipes', 'administer site configuration', 'administer blocks'));
     $this->drupalLogin($this->admin_user);
+
+    // Populate the unit list.
+    $this->unit_list = recipe_get_units();
   }
 }
 
@@ -23,20 +28,12 @@ class RecipeWebTestCase extends DrupalWebTestCase {
  * Tests the functionality of the Recipe content type and Recipe blocks.
  */
 class RecipeNodeTestCase extends RecipeWebTestCase {
-  protected $unit_list;
-
   public static function getInfo() {
     return array(
       'name' => 'Recipe content type',
       'description' => 'Ensure that the recipe content type functions properly.',
       'group' => 'Recipe',
     );
-  }
-
-  public function setUp() {
-    parent::setUp();
-    // Populate the unit list.
-    $this->unit_list = recipe_get_units();
   }
 
   /**
@@ -344,6 +341,91 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     else {
       return t('!time hours', array('!time' => recipe_ingredient_quantity_from_decimal($time / 60)));
     }
+  }
+}
+
+/**
+ * Tests the custom yield form in a recipe node.
+ */
+class RecipeYieldFormTestCase extends RecipeWebTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Recipe yield form',
+      'description' => 'Test the custom yield form in a recipe node.',
+      'group' => 'Recipe',
+    );
+  }
+
+  /**
+   * Tests the custom yield form functionality.
+   *
+   * This test only verifies that the form is capable of altering the yield and
+   * ingredient quantities.  Issues with values returned by ingredient quantity
+   * conversion can be tested in RecipeUnitTestCase.
+   */
+  public function testRecipeYieldForm() {
+    // Create a recipe node.
+    $node_title = $this->randomName(16);
+    $yield = 10;
+    $quantity = 2;
+    $unit_key = 'cup';
+    $ingredient_name = $this->randomName(16);
+    $edit = array(
+      'type' => 'recipe',
+      'title' => $node_title,
+      'recipe_source' => '',
+      'recipe_yield' => $yield,
+      'recipe_yield_unit' => '',
+      'recipe_description' => array(
+        'value' => '',
+      ),
+      'recipe_instructions' => array(
+        'value' => '',
+      ),
+      'recipe_notes' => array(
+        'value' => '',
+      ),
+      'recipe_preptime' => 1,
+      'recipe_cooktime' => 1,
+      'recipe_ingredients' => array(
+        'ing' => array(
+          0 => array(
+            'quantity' => $quantity,
+            'unit_key' => $unit_key,
+            'name' => $ingredient_name,
+            'note' => '',
+            'weight' => 0,
+          ),
+        ),
+      ),
+    );
+    $this->drupalCreateNode($edit);
+
+    // Go to the recipe node and verify the yield and quantity values.
+    $this->drupalGet('node/1');
+    $this->assertFieldById('edit-custom-yield', $yield, 'Found the recipe yield in the custom yield form.');
+    $this->assertText(format_string('@quantity @unit', array('@quantity' => $quantity, '@unit' => $this->unit_list[$unit_key]['abbreviation'])), 'Found the recipe quantity.');
+
+    // Use the custom yield form to halve the yield and check for new values.
+    $this->drupalPost(NULL, NULL, 'Halve');
+    $this->assertFieldById('edit-custom-yield', $yield / 2, 'Found the halved recipe yield in the custom yield form.');
+    $this->assertText(format_string('@quantity @unit', array('@quantity' => $quantity / 2, '@unit' => $this->unit_list[$unit_key]['abbreviation'])), 'Found the halved recipe quantity.');
+
+    // Use the custom yield form to reset the values.
+    $this->drupalPost(NULL, NULL, 'Reset');
+    $this->assertFieldById('edit-custom-yield', $yield, 'Found the recipe yield in the custom yield form.');
+    $this->assertText(format_string('@quantity @unit', array('@quantity' => $quantity, '@unit' => $this->unit_list[$unit_key]['abbreviation'])), 'Found the recipe quantity.');
+
+    // Use the custom yield form to double the yield and check for new values.
+    $this->drupalPost(NULL, NULL, 'Double');
+    $this->assertFieldById('edit-custom-yield', $yield * 2, 'Found the doubled recipe yield in the custom yield form.');
+    $this->assertText(format_string('@quantity @unit', array('@quantity' => $quantity * 2, '@unit' => $this->unit_list[$unit_key]['abbreviation'])), 'Found the doubled recipe quantity.');
+
+    // Use the custom yield form to triple the yield and check for new values.
+    $edit = array('custom_yield' => $yield * 3);
+    $this->drupalPost(NULL, $edit, 'Change');
+    $this->assertFieldById('edit-custom-yield', $yield * 3, 'Found the tripled recipe yield in the custom yield form.');
+    $this->assertText(format_string('@quantity @unit', array('@quantity' => $quantity * 3, '@unit' => $this->unit_list[$unit_key]['abbreviation'])), 'Found the tripled recipe quantity.');
   }
 }
 
