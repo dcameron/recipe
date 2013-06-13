@@ -631,6 +631,47 @@ Stir.', 'Found recipe instructions.');
     $this->assertText('Stir.', 'Found the second instruction.');
     $this->assertText('Do not consume!', 'Found the recipe notes.');
   }
+
+  /**
+   * Test import recipes in MasterCook4 format with the multiple import form.
+   */
+  public function testMasterCook4MultipleImport() {
+    // Check for the MasterCook4 form link on the bulk import page.
+    $this->drupalGet('admin/structure/recipe/import_multi');
+    $this->assertLink('MasterCook4', 0);
+
+    // Import the MasterCook4 test file using the multiple import form.
+    $edit = array(
+      'files[recipe_import_file]' => drupal_get_path('module', 'recipe') . '/tests/recipe_mastercook4_test.mxp',
+    );
+    $this->drupalPost('admin/structure/recipe/import_multi/mastercook4', $edit, t('Import'));
+    $this->assertText(t('The attached file was successfully uploaded'));
+
+    // Verify that the first recipe was imported correctly.
+    $this->drupalGet('node/1');
+    $this->assertText('Salt water');
+    $this->assertText('John Doe', 'Found the recipe source.');
+    $this->assertText('2 c', 'Found ingredent 0 quantity and unit.');
+    $this->assertText('water (cold)', 'Found ingredient 0 name and note.');
+    $this->assertText('1 T', 'Found ingredient 1 quantity and unit.');
+    $this->assertText('salt', 'Found ingredient 1 name.');
+    $this->assertText('Combine water and salt in a glass.', 'Found the first instruction.');
+    $this->assertText('Stir.', 'Found the second instruction.');
+    $this->assertText('Do not consume!', 'Found the recipe notes.');
+
+    // Verify that the second recipe was imported correctly.
+    $this->drupalGet('node/2');
+    $this->assertText('Hard-boiled eggs');
+    $this->assertText('Jane Doe', 'Found the recipe source.');
+    $this->assertText('2 q', 'Found ingredent 0 quantity and unit.');
+    $this->assertText('water (hot)', 'Found ingredient 0 name and note.');
+    $this->assertRaw('4 <abbr  title="units">&nbsp;</abbr>', 'Found ingredient 1 quantity and unit.');
+    $this->assertText('eggs', 'Found ingredient 1 name.');
+    $this->assertText('Boil the water.', 'Found the first instruction.');
+    $this->assertText('Put the eggs in the boiling water for 5 minutes.', 'Found the second instruction.');
+    $this->assertText('Allow the eggs to cool.', 'Found the third instruction.');
+    $this->assertText('Break the shells and consume.', 'Found the fourth instruction.');
+  }
 }
 
 /**
