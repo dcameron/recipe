@@ -11,7 +11,7 @@
 
 
 /**
- * Settings form for menu callback
+ * Page callback: Constructs a form for configuring the Recipe module.
  */
 function recipe_admin_settings() {
   $form['recipe_help'] = array(
@@ -147,7 +147,11 @@ function recipe_admin_settings() {
   return system_settings_form($form);
 }
 
-
+/**
+ * Page callback: Displays recipe nodes in various formats.
+ *
+ * @see recipe_menu()
+ */
 function recipe_export_multi($type = NULL) {
 
   drupal_set_title(t('Recipe bulk export'));
@@ -183,8 +187,12 @@ function recipe_export_multi($type = NULL) {
   }
 }
 
+/**
+ * Page callback: Displays bulk recipe import forms.
+ *
+ * @see recipe_menu()
+ */
 function recipe_import_multi($type = NULL) {
-
   drupal_set_title(t('Recipe bulk import'));
 
   // load supported formats
@@ -217,4 +225,3 @@ function recipe_import_multi($type = NULL) {
     drupal_not_found();
   }
 }
-

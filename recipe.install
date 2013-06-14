@@ -5,9 +5,9 @@
  * Install, update and uninstall functions for the recipe module.
  */
 
-
 /**
- * Implementation of hook_uninstall().
+ * Implements hook_uninstall().
+ *
  * Automatically drops tables in hook_schema.
  */
 function recipe_uninstall() {
@@ -21,10 +21,9 @@ function recipe_uninstall() {
   db_query('DELETE FROM {variable} WHERE name like :type', array(':type' => 'recipe_%'));
 }
 
-
 /**
-* Implementation of hook_schema().
-*/
+ * Implements hook_schema().
+ */
 function recipe_schema() {
   $schema['recipe'] = array(
     'fields' => array(
@@ -146,9 +145,8 @@ function recipe_schema() {
   return $schema;
 }
 
-
 /**
- * Load the recipe_units table.
+ * Loads the recipe_units table.
  */
 function _recipe_populate_units() {
   $units = _recipe_get_default_units();
@@ -166,10 +164,10 @@ function _recipe_populate_units() {
   return TRUE;
 }
 
-
 /**
- * Get an array of the default unit values.
- * Used to fill the recipe_unit table.
+ * Returns an array of the default unit values.
+ *
+ * This is used to fill the recipe_unit table.
  */
 function _recipe_get_default_units() {
   $units = array(
@@ -260,7 +258,6 @@ function recipe_update_6103() {
   db_add_field('recipe', 'yield_unit',  array('type' => 'varchar', 'length' => 64, 'not null' => TRUE, 'default' => ''));
 }
 
-
 /**
  * Fixes bad index depth setting value from recipe-6.x-1.1
  */
@@ -273,7 +270,6 @@ function recipe_update_6104() {
   }
   return $ret;
 }
-
 
 /**
  * Adds description column to the recipe table.
@@ -307,7 +303,6 @@ function recipe_update_7000() {
   if (!empty($field)) {
     field_delete_instance($instance, FALSE);
   }
-
 }
 
 /**
@@ -319,7 +314,6 @@ function recipe_update_7001() {
     rdf_modules_installed($modules);
   }
 }
-
 
 /**
  * Adds cooktime column to the recipe table.
@@ -337,7 +331,6 @@ function recipe_update_7002() {
     $modules = module_implements('rdf_mapping');
     rdf_modules_installed($modules);
   }
-
 }
 
 /**
@@ -385,7 +378,6 @@ function recipe_update_7003() {
 
   // Don't remove the recipe_unit table at this time.
   // People may have user-entered content in there.
-
 }
 
 /**

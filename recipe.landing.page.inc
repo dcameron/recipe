@@ -5,11 +5,16 @@
  * Page callbacks for recipe index page.
  */
 
+/**
+ * Page callback: Displays the Recipes Menu and list of recent recipes.
+ */
 function recipe_landing_page() {
   return theme('recipe_landing_page');
 }
 
-
+/**
+ * Returns HTML for the recipe landing page.
+ */
 function theme_recipe_landing_page() {
   drupal_set_title(t("Recipes Menu"));
 

@@ -34,14 +34,10 @@ node.nid +--------------+     +------------------+     +-------------+
 
 */
 
-
-
 /**
- * Implementation of hook_views_data().
+ * Implements hook_views_data().
  */
 function recipe_views_data() {
-
-
   /*
    * Recipe table section.
    */

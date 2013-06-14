@@ -1,7 +1,13 @@
 <?php
+/**
+ * @file
+ * Provides default Views for the Recipe module.
+ */
 
+/**
+ * Implements hook_views_default_views().
+ */
 function recipe_views_default_views() {
-
   $views = array();
 
   $view = new view;
