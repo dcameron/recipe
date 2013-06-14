@@ -279,6 +279,7 @@ function recipe_import_element_start($parser, $name, $attributes) {
         'description' => '',
         'yield' => '1',
         'yield_unit' => 'Servings',
+        'cooktime' => 0,
         'categories' => array(),
         'ingredients' => array(),
         'instructions' => '',
@@ -405,6 +406,10 @@ function recipe_import_element_end($parser, $name) {
       case 'SOURCE':
         $recipe['source'] = trim($data_string);
         break;
+      case 'PREP':
+          $ing = array_pop($recipe['ingredients']);
+          $ing['ingredient_note'] = trim($data_string);
+          $recipe['ingredients'][] = $ing;
       case 'PREPTIME':
         $recipe['__region'] = '';
         break;
