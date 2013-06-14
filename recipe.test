@@ -257,7 +257,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $this->assertRaw(format_string('Recipe By     : @source', array('@source' => $source)), 'Found the recipe source.');
     $this->assertRaw($notes, 'Found the recipe notes.');
     $this->assertRaw($instructions, 'Found the recipe instructions');
-    $hours = (int) $preptime / 60;
+    $hours = (int) ($preptime / 60);
     $minutes = $preptime % 60;
     $mastercook_time = $hours . ':' . $minutes;
     $this->assertRaw(format_string('Preparation Time :@time', array('@time' => $mastercook_time)), 'Found the recipe prep time.');
@@ -301,6 +301,188 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $this->assertRaw(format_string('<ing><amt><qty>@quantity</qty><unit>@unit</unit></amt><item>@name</item><prep>@note</prep></ing>', array('@quantity' => $ing_2_quantity, '@unit' => $this->unit_list[$ing_2_unit]['name'], '@name' => $ing_2_name, '@note' => $ing_2_note)), 'Found ingredient 2.');
     $this->assertRaw(format_string('<ing><amt><qty>@quantity</qty><unit>@unit</unit></amt><item>@name</item></ing>', array('@quantity' => $ing_3_quantity, '@unit' => $this->unit_list[$ing_3_unit]['name'], '@name' => $ing_3_name, '@note' => $ing_0_note)), 'Found ingredient 3.');
     $this->assertRaw(format_string('<ing><amt><qty>@quantity</qty><unit> </unit></amt><item>@name</item><prep>@note</prep></ing>', array('@quantity' => $ing_4_quantity, '@name' => $ing_4_name, '@note' => $ing_4_note)), 'Found ingredient 4.');
+  }
+
+  /**
+   * Tests exporting recipes with the multiple export page.
+   */
+  public function testRecipeMultipleExport() {
+    // Create two recipe nodes.
+    $node_title_1 = $this->randomName(16);
+    $source_1 = $this->randomName(16);
+    $yield_1 = 10;
+    $yield_unit_1 = $this->randomName(10);
+    $description_1 = $this->randomName(32);
+    $instructions_1 = $this->randomName(32);
+    $notes_1 = $this->randomName(32);
+    $preptime_1 = 30;
+    $cooktime_1 = 90;
+    $quantity_1 = 2;
+    $unit_key_1 = 'cup';
+    $ingredient_name_1 = $this->randomName(16);
+    $ingredient_note_1 = $this->randomName(16);
+    $edit = array(
+      'type' => 'recipe',
+      'title' => $node_title_1,
+      'recipe_source' => $source_1,
+      'recipe_yield' => $yield_1,
+      'recipe_yield_unit' => $yield_unit_1,
+      'recipe_description' => array(
+        'value' => $description_1,
+      ),
+      'recipe_instructions' => array(
+        'value' => $instructions_1,
+      ),
+      'recipe_notes' => array(
+        'value' => $notes_1,
+      ),
+      'recipe_preptime' => $preptime_1,
+      'recipe_cooktime' => $cooktime_1,
+      'recipe_ingredients' => array(
+        'ing' => array(
+          0 => array(
+            'quantity' => $quantity_1,
+            'unit_key' => $unit_key_1,
+            'name' => $ingredient_name_1,
+            'note' => $ingredient_note_1,
+            'weight' => 0,
+          ),
+        ),
+      ),
+    );
+    $this->drupalCreateNode($edit);
+
+    $node_title_2 = $this->randomName(16);
+    $source_2 = $this->randomName(16);
+    $yield_2 = 10;
+    $yield_unit_2 = $this->randomName(10);
+    $description_2 = $this->randomName(32);
+    $instructions_2 = $this->randomName(32);
+    $notes_2 = $this->randomName(32);
+    $preptime_2 = 15;
+    $cooktime_2 = 45;
+    $quantity_2 = 2;
+    $unit_key_2 = 'cup';
+    $ingredient_name_2 = $this->randomName(16);
+    $ingredient_note_2 = $this->randomName(16);
+    $edit = array(
+      'type' => 'recipe',
+      'title' => $node_title_2,
+      'recipe_source' => $source_2,
+      'recipe_yield' => $yield_2,
+      'recipe_yield_unit' => $yield_unit_2,
+      'recipe_description' => array(
+        'value' => $description_2,
+      ),
+      'recipe_instructions' => array(
+        'value' => $instructions_2,
+      ),
+      'recipe_notes' => array(
+        'value' => $notes_2,
+      ),
+      'recipe_preptime' => $preptime_2,
+      'recipe_cooktime' => $cooktime_2,
+      'recipe_ingredients' => array(
+        'ing' => array(
+          0 => array(
+            'quantity' => $quantity_2,
+            'unit_key' => $unit_key_2,
+            'name' => $ingredient_name_2,
+            'note' => $ingredient_note_2,
+            'weight' => 0,
+          ),
+        ),
+      ),
+    );
+    $this->drupalCreateNode($edit);
+
+    // Check for links to all the export formats on the bulk export page.
+    $this->drupalGet('admin/structure/recipe');
+    $this->assertLink('MasterCook4');
+    $this->assertLink('Plain Text');
+    $this->assertLink('recipeML');
+
+    // Check for the recipe data on the MasterCook4 bulk export page.
+    $this->drupalGet('admin/structure/recipe/export_multi/mastercook4');
+    $this->assertRaw($node_title_1);
+    // The MasterCook4 format does not output the description.
+    $this->assertRaw(format_string('Serving Size  : @yield', array('@yield' => $yield_1)), 'Found the recipe yield.');
+    // The MasterCook4 format does not output the yield unit.
+    $this->assertRaw(format_string('Recipe By     : @source', array('@source' => $source_1)), 'Found the recipe source.');
+    $this->assertRaw($notes_1, 'Found the recipe notes.');
+    $this->assertRaw($instructions_1, 'Found the recipe instructions');
+    $hours = (int) ($preptime_1 / 60);
+    $minutes = $preptime_1 % 60;
+    $mastercook_time = $hours . ':' . $minutes;
+    $this->assertRaw(format_string('Preparation Time :@time', array('@time' => $mastercook_time)), 'Found the recipe prep time.' . $mastercook_time);
+    // The MasterCook4 format does not output the cook time.
+    // The MasterCook4 format does not output the total time.
+    $this->assertRaw(format_string('@quantity  @unit             @name -- @note', array('@quantity' => $quantity_1, '@unit' => $this->unit_list[$unit_key_1]['abbreviation'], '@name' => $ingredient_name_1, '@note' => $ingredient_note_1)), 'Found ingredient 0.');
+
+    $this->assertRaw($node_title_2);
+    // The MasterCook4 format does not output the description.
+    $this->assertRaw(format_string('Serving Size  : @yield', array('@yield' => $yield_2)), 'Found the recipe yield.');
+    // The MasterCook4 format does not output the yield unit.
+    $this->assertRaw(format_string('Recipe By     : @source', array('@source' => $source_2)), 'Found the recipe source.');
+    $this->assertRaw($notes_2, 'Found the recipe notes.');
+    $this->assertRaw($instructions_2, 'Found the recipe instructions');
+    $hours = (int) ($preptime_2 / 60);
+    $minutes = $preptime_2 % 60;
+    $mastercook_time = $hours . ':' . $minutes;
+    $this->assertRaw(format_string('Preparation Time :@time', array('@time' => $mastercook_time)), 'Found the recipe prep time.' . $mastercook_time);
+    // The MasterCook4 format does not output the cook time.
+    // The MasterCook4 format does not output the total time.
+    $this->assertRaw(format_string('@quantity  @unit             @name -- @note', array('@quantity' => $quantity_2, '@unit' => $this->unit_list[$unit_key_2]['abbreviation'], '@name' => $ingredient_name_2, '@note' => $ingredient_note_2)), 'Found ingredient 0.');
+
+    // Check for the recipe data on the plain text export page.
+    $this->drupalGet('admin/structure/recipe/export_multi/plaintext');
+    $this->assertRaw($node_title_1);
+    $this->assertRaw($description_1, 'Found the recipe description.');
+    // The plain text format does not output the yield.
+    // The plain text format does not output the yield unit.
+    // The plain text format does not output the source.
+    $this->assertRaw($notes_1, 'Found the recipe notes.');
+    $this->assertRaw($instructions_1, 'Found the recipe instructions');
+    // The plain text format does not output the prep time.
+    // The plain text format does not output the cook time.
+    // The plain text format does not output the total time.
+    $this->assertRaw(format_string('@quantity @unit @name (@note)', array('@quantity' => $quantity_1, '@unit' => $this->unit_list[$unit_key_1]['abbreviation'], '@name' => $ingredient_name_1, '@note' => $ingredient_note_1)), 'Found ingredient 0.');
+
+    $this->assertRaw($node_title_2);
+    $this->assertRaw($description_2, 'Found the recipe description.');
+    // The plain text format does not output the yield.
+    // The plain text format does not output the yield unit.
+    // The plain text format does not output the source.
+    $this->assertRaw($notes_2, 'Found the recipe notes.');
+    $this->assertRaw($instructions_2, 'Found the recipe instructions');
+    // The plain text format does not output the prep time.
+    // The plain text format does not output the cook time.
+    // The plain text format does not output the total time.
+    $this->assertRaw(format_string('@quantity @unit @name (@note)', array('@quantity' => $quantity_2, '@unit' => $this->unit_list[$unit_key_2]['abbreviation'], '@name' => $ingredient_name_2, '@note' => $ingredient_note_2)), 'Found ingredient 0.');
+
+    // Check for the recipe data on the recipeML export page.
+    $this->drupalGet('admin/structure/recipe/export_multi/recipeml');
+    $this->assertRaw($node_title_1);
+    $this->assertRaw(format_string('<description>@description</description>', array('@description' => $description_1)), 'Found the recipe description.');
+    $this->assertRaw(format_string('<yield><qty>@yield</qty><unit>@yield_unit</unit></yield>', array('@yield' => $yield_1, '@yield_unit' => $yield_unit_1)), 'Found the recipe yield and yield unit.');
+    $this->assertRaw(format_string('<source>@source</source>', array('@source' => $source_1)), 'Found the recipe source.');
+    $this->assertRaw(format_string('<note>@notes</note>', array('@notes' => $notes_1)), 'Found the recipe notes.');
+    $this->assertRaw(format_string('<directions>@instructions</directions>', array('@instructions' => $instructions_1)), 'Found the recipe instructions');
+    $this->assertRaw(format_string('<preptime type="cooking"><time><qty>@preptime</qty><timeunit>minutes</timeunit></time></preptime>', array('@preptime' => $preptime_1)), 'Found the recipe prep time.');
+    // The recipeML format does not output the cook time.
+    // The recipeML format does not output the total time.
+    $this->assertRaw(format_string('<ing><amt><qty>@quantity</qty><unit>@unit</unit></amt><item>@name</item><prep>@note</prep></ing>', array('@quantity' => $quantity_1, '@unit' => $this->unit_list[$unit_key_1]['abbreviation'], '@name' => $ingredient_name_1, '@note' => $ingredient_note_1)), 'Found ingredient 0.');
+
+    $this->assertRaw($node_title_2);
+    $this->assertRaw(format_string('<description>@description</description>', array('@description' => $description_2)), 'Found the recipe description.');
+    $this->assertRaw(format_string('<yield><qty>@yield</qty><unit>@yield_unit</unit></yield>', array('@yield' => $yield_2, '@yield_unit' => $yield_unit_2)), 'Found the recipe yield and yield unit.');
+    $this->assertRaw(format_string('<source>@source</source>', array('@source' => $source_2)), 'Found the recipe source.');
+    $this->assertRaw(format_string('<note>@notes</note>', array('@notes' => $notes_2)), 'Found the recipe notes.');
+    $this->assertRaw(format_string('<directions>@instructions</directions>', array('@instructions' => $instructions_2)), 'Found the recipe instructions');
+    $this->assertRaw(format_string('<preptime type="cooking"><time><qty>@preptime</qty><timeunit>minutes</timeunit></time></preptime>', array('@preptime' => $preptime_2)), 'Found the recipe prep time.');
+    // The recipeML format does not output the cook time.
+    // The recipeML format does not output the total time.
+    $this->assertRaw(format_string('<ing><amt><qty>@quantity</qty><unit>@unit</unit></amt><item>@name</item><prep>@note</prep></ing>', array('@quantity' => $quantity_2, '@unit' => $this->unit_list[$unit_key_2]['abbreviation'], '@name' => $ingredient_name_2, '@note' => $ingredient_note_2)), 'Found ingredient 0.');
   }
 
   /**
