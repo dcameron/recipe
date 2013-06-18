@@ -1747,6 +1747,7 @@ function recipe_get_latest($count = 5) {
   $select->orderBy('n.sticky', 'DESC');
   $select->orderBy('n.created', 'DESC');
   $select->range(0, $count);
+  $select->addTag('node_access');
   return $select->execute();
 }
 
