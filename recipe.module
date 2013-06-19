@@ -646,14 +646,8 @@ function recipe_block_view($delta = '') {
   $block = array();
   switch ($delta) {
     case 'recent':
-      $result = db_select('node', 'n')
-        ->fields('n', array('nid', 'title', 'created'))
-        ->condition('type', 'recipe')
-        ->condition('status', 1)
-        ->orderBy('created', 'DESC')
-        ->range(0, 5)
-        ->execute();
-      if ($node_title_list = node_title_list($result)) {
+      $node_list = recipe_get_latest(5);
+      if ($node_title_list = node_title_list($node_list)) {
         $block['subject'] = t('Newest Recipes');
         $block['content']['recipe_list'] = $node_title_list;
         return $block;

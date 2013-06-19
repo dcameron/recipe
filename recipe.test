@@ -731,10 +731,16 @@ class RecipeNodeAccessTestCase extends DrupalWebTestCase {
       'private' => TRUE,
     );
     $this->drupalPost('node/add/recipe', $edit, 'Save');
+
+    // Enable the Newest Recipes and Recipe Summary blocks.
+    $edit = array(
+      "blocks[recipe_recent][region]" => 'sidebar_first',
+    );
+    $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
   }
 
   /**
-   * Tests node_access for nodes displayed in the Recent Recipes box at /recipe.
+   * Tests node_access for nodes displayed in recipe lists.
    */
   public function testRecentRecipeBoxNodeAccess() {
     // Logout and assert that the anonymous user can't access the node.
@@ -756,9 +762,12 @@ class RecipeNodeAccessTestCase extends DrupalWebTestCase {
     $this->drupalLogout();
     $this->drupalGet('node/1');
     $this->assertResponse(200);
-    // Logout and verify a link to the test recipe can be seen at /recipe.
+    // Logout and assert that two links to the test recipe can be seen at
+    // /recipe. One should be from the /recipe page Recent Recipes box and the
+    // other should be from the Latest Recipes block.
     $this->drupalGet('recipe');
-    $this->assertLink($this->node_title);
+    $this->assertLink($this->node_title, 0);
+    $this->assertLink($this->node_title, 1);
   }
 }
 
