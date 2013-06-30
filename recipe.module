@@ -832,20 +832,22 @@ function theme_recipe_ingredients($variables) {
           $title = $ingredient['unit_key'];
         }
 
-        // Print the abbreviation if recipe_unit_display says to or the abbreviation is blank (ie = Unit, which we don't print).
+        // Get the ingredient's unit abbreviation.
         if (!isset($ingredient['abbreviation']) && isset($unit_list[$ingredient['unit_key']])) {
           $ingredient['abbreviation'] = $unit_list[$ingredient['unit_key']]['abbreviation'];
         }
-        if (empty($ingredient['abbreviation'])) {
-          $ingredient['abbreviation'] = '&nbsp;';
-        }
 
         $units = '';
-        if ( variable_get('recipe_unit_display', 0) == 0 || $ingredient['abbreviation'] == '&nbsp;') {
-          $units = '<abbr ' . drupal_attributes(array('title' => $title)) . '>' . $ingredient['abbreviation'] . '</abbr>';
-        }
-        else {
-          $units = $title;
+        // Print the unit unless it has no abbreviation. Those units do not get
+        // printed in any case.
+        if (!empty($ingredient['abbreviation'])) {
+          // Print the abbreviation if recipe_unit_display == 0.
+          if (variable_get('recipe_unit_display', 0) == 0) {
+            $units = '<abbr ' . drupal_attributes(array('title' => $title)) . '>' . $ingredient['abbreviation'] . '</abbr>';
+          }
+          else {
+            $units = $title;
+          }
         }
         $fullingredient = strlen($ingredient['note']) > 0 ? $ingredient['name'] . ' (' . $ingredient['note'] . ')' : $ingredient['name'];
 

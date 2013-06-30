@@ -140,7 +140,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $this->assertText(t('@quantity @unit', array('@quantity' => $ing_3_quantity, '@unit' => $this->unit_list[$ing_3_unit]['abbreviation'])), 'Found ingredient 3 quantity and abbreviation.');
     $this->assertNoText(format_string('@name (@note)', array('@name' => $ing_3_name, '@note' => $ing_3_note)), 'Did not find ingredient 3 name with blank note field, "()".');
 
-    $this->assertRaw(format_string('@quantity <abbr  title="units">&nbsp;</abbr>', array('@quantity' => $ing_4_quantity)), 'Found ingredient 4 quantity and blank abbreviation.');
+    $this->assertRaw(format_string('<div class="quantity-unit" property="schema:amount"> @quantity </div>', array('@quantity' => $ing_4_quantity)), 'Found ingredient 4 quantity with no unit.');
     $this->assertText(format_string('@name (@note)', array('@name' => $ing_4_name, '@note' => $ing_4_note)), 'Found ingredient 4 name and note.');
 
     // Check the page HTML for the recipe RDF properties.
@@ -246,7 +246,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $this->assertRaw(format_string('@quantity @unit', array('@quantity' => $ing_3_quantity, '@unit' => $this->unit_list[$ing_3_unit]['name'])), 'Found ingredient 3 quantity and unit name.');
     $this->assertRaw($ing_3_name, 'Found ingredient 3 name.');
 
-    $this->assertRaw(format_string('@quantity <abbr  title="units">&nbsp;</abbr>', array('@quantity' => $ing_4_quantity)), 'Found ingredient 4 quantity and blank unit name.');
+    $this->assertRaw(format_string('<div class="quantity-unit" property="schema:amount"> @quantity </div>', array('@quantity' => $ing_4_quantity)), 'Found ingredient 4 quantity and with no unit.');
     $this->assertRaw(format_string('@name (@note)', array('@name' => $ing_4_name, '@note' => $ing_4_note)), 'Found ingredient 4 name and note.');
 
     // Check for the recipe data on the MasterCook4 export page.
@@ -923,7 +923,7 @@ Stir.', 'Found recipe instructions.');
     $this->assertText('Jane Doe', 'Found the recipe source.');
     $this->assertText('2 q', 'Found ingredent 0 quantity and unit.');
     $this->assertText('water (hot)', 'Found ingredient 0 name and note.');
-    $this->assertRaw('4 <abbr  title="units">&nbsp;</abbr>', 'Found ingredient 1 quantity and unit.');
+    $this->assertRaw('<div class="quantity-unit" property="schema:amount"> 4 </div>', 'Found ingredient 1 quantity with no unit.');
     $this->assertText('eggs', 'Found ingredient 1 name.');
     $this->assertText('Boil the water.', 'Found the first instruction.');
     $this->assertText('Put the eggs in the boiling water for 5 minutes.', 'Found the second instruction.');
@@ -968,7 +968,7 @@ Stir.', 'Found recipe instructions.');
     $this->assertText('Jane Doe', 'Found the recipe source.');
     $this->assertText('2 q', 'Found ingredent 0 quantity and unit.');
     $this->assertText('water (hot)', 'Found ingredient 0 name and note.');
-    $this->assertRaw('4 <abbr  title="units">&nbsp;</abbr>', 'Found ingredient 1 quantity and unit.');
+    $this->assertRaw('<div class="quantity-unit" property="schema:amount"> 4 </div>', 'Found ingredient 1 quantity with no unit.');
     $this->assertText('eggs', 'Found ingredient 1 name.');
     $this->assertText('Boil the water.', 'Found the first instruction.');
     $this->assertText('Put the eggs in the boiling water for 5 minutes.', 'Found the second instruction.');
