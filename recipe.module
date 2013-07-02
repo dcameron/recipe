@@ -40,6 +40,10 @@ function recipe_theme($existing, $type, $theme, $path) {
       'function' => 'theme_recipe_description',
       'variables' => array('node' => NULL),
     ),
+    'recipe_description_summary' => array(
+      'function' => 'theme_recipe_description_summary',
+      'variables' => array('node' => NULL),
+    ),
     'recipe_summary' => array(
       'function' => 'theme_recipe_summary',
       'variables' => array('node' => NULL, 'show_title' => TRUE),
@@ -723,6 +727,9 @@ function recipe_view($node, $view_mode) {
   // If it is a teaser, you're done.
   // The teaser should have a full $node object, but not the $node->content render array.
   if ($view_mode == 'teaser') {
+    $node->content['recipe_description'] = array(
+        '#markup' => theme('recipe_description_summary', array('node' => $node)),
+    );
     return $node;
   }
 
@@ -878,6 +885,24 @@ function theme_recipe_description($variables) {
   $output .= '<h2 class="title">' . t('Description') . '</h2>';
   $output .= '<div class="section">' . $node->recipe_description . '</div>';
   $output .= '</div>';
+  return $output;
+}
+
+/**
+ * Returns HTML for displaying the recipe description summary.
+ */
+function theme_recipe_description_summary($variables) {
+  $node = $variables['node'];
+
+  // Wrap description in RDFa markup.
+  if ( !empty($node->rdf_mapping['recipe_description']) ) {
+    $attributes = rdf_rdfa_attributes($node->rdf_mapping['recipe_description']);
+    $attributes['class'] = array('recipe-section');
+    $node->recipe_description = theme('rdf_template_variable_wrapper', array('content' => $node->recipe_description, 'attributes' => $attributes, 'inline' => FALSE));
+  }
+
+  $output = '';
+  $output .= '<div>' . $node->recipe_description . '</div>';
   return $output;
 }
 

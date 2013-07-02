@@ -301,6 +301,10 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $this->assertRaw(format_string('<ing><amt><qty>@quantity</qty><unit>@unit</unit></amt><item>@name</item><prep>@note</prep></ing>', array('@quantity' => $ing_2_quantity, '@unit' => $this->unit_list[$ing_2_unit]['name'], '@name' => $ing_2_name, '@note' => $ing_2_note)), 'Found ingredient 2.');
     $this->assertRaw(format_string('<ing><amt><qty>@quantity</qty><unit>@unit</unit></amt><item>@name</item></ing>', array('@quantity' => $ing_3_quantity, '@unit' => $this->unit_list[$ing_3_unit]['name'], '@name' => $ing_3_name, '@note' => $ing_0_note)), 'Found ingredient 3.');
     $this->assertRaw(format_string('<ing><amt><qty>@quantity</qty><unit> </unit></amt><item>@name</item><prep>@note</prep></ing>', array('@quantity' => $ing_4_quantity, '@name' => $ing_4_name, '@note' => $ing_4_note)), 'Found ingredient 4.');
+
+    // Check for the description in the teaser view at /node.
+    $this->drupalGet('node');
+    $this->assertText($description, 'Found the recipe description.');
   }
 
   /**
