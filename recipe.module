@@ -1966,40 +1966,40 @@ function recipe_duration_iso8601($data = '') {
  */
 function recipe_get_units($limit_to_preferred = 0) {
   $us_units = array(
-    'cup' =>             array('name' => t('cup'),         'plural' => t('cups'),         'abbreviation' => t('c'),     'system' => 'us customary', 'type' => t('volume'), 'aliases' => array()),
-    'us liquid pint' =>  array('name' => t('pint'),        'plural' => t('pints'),        'abbreviation' => t('pt'),    'system' => 'us customary', 'type' => t('volume'), 'aliases' => array()),
-    'us liquid quart' => array('name' => t('quart'),       'plural' => t('quarts'),       'abbreviation' => t('q'),     'system' => 'us customary', 'type' => t('volume'), 'aliases' => array()),
-    'us gallon' =>       array('name' => t('gallon'),      'plural' => t('gallons'),      'abbreviation' => t('gal'),   'system' => 'us customary', 'type' => t('volume'), 'aliases' => array()),
-    'pound' =>           array('name' => t('pound'),       'plural' => t('pounds'),       'abbreviation' => t('lb'),    'system' => 'us customary', 'type' => t('weight'), 'aliases' => array()),
-    'ounce' =>           array('name' => t('ounce'),       'plural' => t('ounces'),       'abbreviation' => t('oz'),    'system' => 'us customary', 'type' => t('weight'), 'aliases' => array()),
-    'us fluid ounce' =>  array('name' => t('fluid ounce'), 'plural' => t('fluid ounces'), 'abbreviation' => t('fl oz'), 'system' => 'us customary', 'type' => t('volume'), 'aliases' => array()),
+    'cup' =>             array('name' => t('cup'),         'plural' => t('cups'),         'abbreviation' => t('c', array(), array('context' => 'abbreviation cup')),     'system' => 'us customary', 'type' => t('volume'), 'aliases' => array()),
+    'us liquid pint' =>  array('name' => t('pint'),        'plural' => t('pints'),        'abbreviation' => t('pt', array(), array('context' => 'abbreviation pint')),    'system' => 'us customary', 'type' => t('volume'), 'aliases' => array()),
+    'us liquid quart' => array('name' => t('quart'),       'plural' => t('quarts'),       'abbreviation' => t('q', array(), array('context' => 'abbreviation quart')),     'system' => 'us customary', 'type' => t('volume'), 'aliases' => array()),
+    'us gallon' =>       array('name' => t('gallon'),      'plural' => t('gallons'),      'abbreviation' => t('gal', array(), array('context' => 'abbreviation gallon')),   'system' => 'us customary', 'type' => t('volume'), 'aliases' => array()),
+    'pound' =>           array('name' => t('pound'),       'plural' => t('pounds'),       'abbreviation' => t('lb', array(), array('context' => 'abbreviation pound')),    'system' => 'us customary', 'type' => t('weight'), 'aliases' => array()),
+    'ounce' =>           array('name' => t('ounce'),       'plural' => t('ounces'),       'abbreviation' => t('oz', array(), array('context' => 'abbreviation ounce')),    'system' => 'us customary', 'type' => t('weight'), 'aliases' => array()),
+    'us fluid ounce' =>  array('name' => t('fluid ounce'), 'plural' => t('fluid ounces'), 'abbreviation' => t('fl oz', array(), array('context' => 'abbreviation fluid ounce')), 'system' => 'us customary', 'type' => t('volume'), 'aliases' => array()),
   );
 
   $si_units = array(
-    'milliliter' => array('name' => t('milliliter'), 'plural' => t('milliliters'), 'abbreviation' => t('ml'),  'system' => 'si', 'type' => t('volume'), 'aliases' =>  array()),
-    'centiliter' => array('name' => t('centiliter'), 'plural' => t('centiliters'), 'abbreviation' => t('cl'),  'system' => 'si', 'type' => t('volume'), 'aliases' =>  array()),
-    'liter' =>      array('name' => t('liter'),      'plural' => t('liters'),      'abbreviation' => t('l'),   'system' => 'si', 'type' => t('volume'), 'aliases' =>  array()),
-    'deciliter' =>  array('name' => t('deciliter'),  'plural' => t('deciliters'),  'abbreviation' => t('dl'),  'system' => 'si', 'type' => t('volume'), 'aliases' =>  array()),
-    'milligram' =>  array('name' => t('milligram'),  'plural' => t('milligrams'),  'abbreviation' => t('mg'),  'system' => 'si', 'type' => t('weight'), 'aliases' =>  array()),
-    'gram' =>       array('name' => t('gram'),       'plural' => t('grams'),       'abbreviation' => t('g'),   'system' => 'si', 'type' => t('weight'), 'aliases' =>  array()),
-    'centigram' =>  array('name' => t('centigram'),  'plural' => t('centigrams'),  'abbreviation' => t('cg'),  'system' => 'si', 'type' => t('weight'), 'aliases' =>  array()),
-    'kilogram' =>   array('name' => t('kilogram'),   'plural' => t('kilograms'),   'abbreviation' => t('kg'),  'system' => 'si', 'type' => t('weight'), 'aliases' =>  array()),
+    'milliliter' => array('name' => t('milliliter'), 'plural' => t('milliliters'), 'abbreviation' => t('ml', array(), array('context' => 'abbreviation milliliter')),  'system' => 'si', 'type' => t('volume'), 'aliases' =>  array()),
+    'centiliter' => array('name' => t('centiliter'), 'plural' => t('centiliters'), 'abbreviation' => t('cl', array(), array('context' => 'abbreviation centiliter')),  'system' => 'si', 'type' => t('volume'), 'aliases' =>  array()),
+    'liter' =>      array('name' => t('liter'),      'plural' => t('liters'),      'abbreviation' => t('l', array(), array('context' => 'abbreviation liter')),   'system' => 'si', 'type' => t('volume'), 'aliases' =>  array()),
+    'deciliter' =>  array('name' => t('deciliter'),  'plural' => t('deciliters'),  'abbreviation' => t('dl', array(), array('context' => 'abbreviation deciliter')),  'system' => 'si', 'type' => t('volume'), 'aliases' =>  array()),
+    'milligram' =>  array('name' => t('milligram'),  'plural' => t('milligrams'),  'abbreviation' => t('mg', array(), array('context' => 'abbreviation milligram')),  'system' => 'si', 'type' => t('weight'), 'aliases' =>  array()),
+    'gram' =>       array('name' => t('gram'),       'plural' => t('grams'),       'abbreviation' => t('g', array(), array('context' => 'abbreviation gram')),   'system' => 'si', 'type' => t('weight'), 'aliases' =>  array()),
+    'centigram' =>  array('name' => t('centigram'),  'plural' => t('centigrams'),  'abbreviation' => t('cg', array(), array('context' => 'abbreviation centigram')),  'system' => 'si', 'type' => t('weight'), 'aliases' =>  array()),
+    'kilogram' =>   array('name' => t('kilogram'),   'plural' => t('kilograms'),   'abbreviation' => t('kg', array(), array('context' => 'abbreviation kilogram')),  'system' => 'si', 'type' => t('weight'), 'aliases' =>  array()),
   );
 
   $common_units = array(
-    'tablespoon' => array('name' => t('tablespoon'), 'plural' => t('tablespoons'), 'abbreviation' => t('T'),   'system' => 'common', 'type' => t('volume'), 'aliases' => array('tbsp', 'tb')),
-    'teaspoon' =>   array('name' => t('teaspoon'),   'plural' => t('teaspoons'),   'abbreviation' => t('t'),   'system' => 'common', 'type' => t('volume'), 'aliases' => array('tsp')),
+    'tablespoon' => array('name' => t('tablespoon'), 'plural' => t('tablespoons'), 'abbreviation' => t('T', array(), array('context' => 'abbreviation tablespoon')),   'system' => 'common', 'type' => t('volume'), 'aliases' => array('tbsp', 'tb')),
+    'teaspoon' =>   array('name' => t('teaspoon'),   'plural' => t('teaspoons'),   'abbreviation' => t('t', array(), array('context' => 'abbreviation teaspoon')),   'system' => 'common', 'type' => t('volume'), 'aliases' => array('tsp')),
 
-    'slice' =>    array('name' => t('slice'),   'plural' => t('slices'),   'abbreviation' => t('sli'), 'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
-    'clove' =>    array('name' => t('clove'),   'plural' => t('cloves'),   'abbreviation' => t('clv'), 'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
-    'load' =>     array('name' => t('loaf'),    'plural' => t('loaves'),   'abbreviation' => t('lf'),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
-    'pinch' =>    array('name' => t('pinch'),   'plural' => t('pinches'),  'abbreviation' => t('pn'),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
-    'package' =>  array('name' => t('package'), 'plural' => t('packages'), 'abbreviation' => t('pk'),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array('pack')),
-    'can' =>      array('name' => t('can'),     'plural' => t('cans'),     'abbreviation' => t('cn'),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array('jar')),
-    'drop' =>     array('name' => t('drop'),    'plural' => t('drops'),    'abbreviation' => t('dr'),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
-    'bunch' =>    array('name' => t('bunch'),   'plural' => t('bunches'),  'abbreviation' => t('bn'),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
-    'dash' =>     array('name' => t('dash'),    'plural' => t('dashes'),   'abbreviation' => t('ds'),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
-    'carton' =>   array('name' => t('carton'),  'plural' => t('cartons'),  'abbreviation' => t('ct'),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
+    'slice' =>    array('name' => t('slice'),   'plural' => t('slices'),   'abbreviation' => t('sli', array(), array('context' => 'abbreviation slice')), 'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
+    'clove' =>    array('name' => t('clove'),   'plural' => t('cloves'),   'abbreviation' => t('clv', array(), array('context' => 'abbreviation clove')), 'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
+    'load' =>     array('name' => t('loaf'),    'plural' => t('loaves'),   'abbreviation' => t('lf', array(), array('context' => 'abbreviation loaf')),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
+    'pinch' =>    array('name' => t('pinch'),   'plural' => t('pinches'),  'abbreviation' => t('pn', array(), array('context' => 'abbreviation pinch')),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
+    'package' =>  array('name' => t('package'), 'plural' => t('packages'), 'abbreviation' => t('pk', array(), array('context' => 'abbreviation package')),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array('pack')),
+    'can' =>      array('name' => t('can'),     'plural' => t('cans'),     'abbreviation' => t('cn', array(), array('context' => 'abbreviation can')),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array('jar')),
+    'drop' =>     array('name' => t('drop'),    'plural' => t('drops'),    'abbreviation' => t('dr', array(), array('context' => 'abbreviation drop')),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
+    'bunch' =>    array('name' => t('bunch'),   'plural' => t('bunches'),  'abbreviation' => t('bn', array(), array('context' => 'abbreviation bunch')),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
+    'dash' =>     array('name' => t('dash'),    'plural' => t('dashes'),   'abbreviation' => t('ds', array(), array('context' => 'abbreviation dash')),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
+    'carton' =>   array('name' => t('carton'),  'plural' => t('cartons'),  'abbreviation' => t('ct', array(), array('context' => 'abbreviation carton')),  'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array()),
 
     'unit' =>     array('name' => t('unit'),    'plural' => t('units'),    'abbreviation' => '', 'system' => 'common', 'type' => t('indefinite'), 'aliases' => array('each', 'ea', 'whole')),
     'unknown' =>  array('name' => t('unknown'), 'plural' => t('unknown'),  'abbreviation' => '', 'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array())
