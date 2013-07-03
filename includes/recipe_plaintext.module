@@ -105,7 +105,7 @@ function recipe_plaintext_import($recipe_txt = NULL) {
         if ( $i['unit_key'] == FALSE ) {
           $i['ingredient_note'] = $i['unit_name'] . '! ' . $i['ingredient_note'];
           $i['unit_key'] = 'unit';
-          drupal_set_message(t('Could not find the ingredient units in :recipe (:line)', array(':recipe' => $recipe['title'], ':line' => $line)), 'warning');
+          drupal_set_message(t('Could not find the ingredient units in %recipe (%line)', array('%recipe' => $recipe['title'], '%line' => $line)), 'warning');
         }
 
         // FALSE if no-match
@@ -126,7 +126,7 @@ function recipe_plaintext_import($recipe_txt = NULL) {
         if ( $i['unit_key'] == FALSE ) {
           $i['ingredient_note'] = $i['unit_name'] . '! ' . $i['ingredient_note'];
           $i['unit_key'] = 'unit';
-          drupal_set_message(t('Could not find the ingredient units in :recipe (:line)', array(':recipe' => $recipe['title'], ':line' => $line)), 'warning');
+          drupal_set_message(t('Could not find the ingredient units in %recipe (%line)', array('%recipe' => $recipe['title'], '%line' => $line)), 'warning');
         }
 
         // FALSE if no-match

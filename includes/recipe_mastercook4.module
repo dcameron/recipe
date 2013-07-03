@@ -394,7 +394,7 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
           if ( $ing['unit_key'] == FALSE ) {
             $ing['ingredient_note'] = '!' . $ing['unit_name'] . ' ' . $ing['ingredient_note'];
             $ing['unit_key'] = 'unit';
-            drupal_set_message(t('Could not find the ingredient units in :recipe (:line)', array(':recipe' => $recipe['title'], ':line' => $line)), 'warning');
+            drupal_set_message(t('Could not find the ingredient units in %recipe (%line)', array('%recipe' => $recipe['title'], '%line' => $line)), 'warning');
           }
 
           // Look up the ingredient, if it is not found it will be added later at node_save.
