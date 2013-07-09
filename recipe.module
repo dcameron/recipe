@@ -98,44 +98,6 @@ function recipe_load($nodes) {
 }
 
 /**
- * Implements hook_link().
- */
-function recipe_link($type, $node = NULL, $teaser = FALSE) {
-  $links = array();
-
-  if ($type == 'node' && $node->type == 'recipe') {
-    if (!$teaser) {
-      $formats = module_invoke_all('recipeio', 'export_single');
-      foreach ($formats as $key => $format) {
-        $perm = isset($format['access arguments']) ? $format['access arguments'] : 'export recipes';
-        if (user_access($perm)) {
-          $links[$key] = array(
-            'title' => $format['format_name'],
-            'href' => "recipe/export/$key/$node->nid/__yield__",
-            'attributes' => array('title' => $format['format_help']),
-          );
-        }
-      }
-    }
-    if ( count($links) > 0 ) {
-      array_unshift($links, array('title' => '<br/>' . t('Export to') . ':', 'html' => TRUE));
-    }
-  }
-
-  // Hook-up magic 'ingredient' CCK content type and link to the by ingredient index page.
-  elseif ($type == 'node' && $node->type == 'ingredient') {
-    $ing = recipe_ingredient_match(trim(strtolower($node->title)));
-    if ($ing) {
-      $links['where_used'] = array(
-        'title' => t('Recipes where used'),
-        'href' => "recipe/by_ing_id/" . $ing['id']
-      );
-    }
-  }
-  return $links;
-}
-
-/**
  * Implements hook_node_info().
  */
 function recipe_node_info() {
