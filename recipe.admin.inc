@@ -14,15 +14,6 @@
  * Page callback: Constructs a form for configuring the Recipe module.
  */
 function recipe_admin_settings() {
-  $form['recipe_help'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Explanation or submission guidelines'),
-    '#default_value' => variable_get('recipe_help', ''),
-    '#cols' => 55,
-    '#rows' => 4,
-    '#description' => t('This text will be displayed at the top of the recipe submission form. Useful for helping or instructing your users.'),
-  );
-
   // Ingredient section
   $form['recipe_ingredients'] = array(
     '#type' => 'fieldset',

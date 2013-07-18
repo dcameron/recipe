@@ -13,8 +13,6 @@ define('RECIPE_BLOCK_SUMMARY', 1);
  */
 function recipe_help($path, $arg) {
   switch ($path) {
-    case 'node/add/recipe':
-      return variable_get('recipe_help', '');
     case 'admin/structure/recipe':
       $output = '<p>' . t('You can enable/disable bulk export formats on the <a href="@modules-page">modules page</a> in the recipes section.', array('@modules-page' => url('admin/modules', array('fragment' => 'edit-modules-recipe')))) . '</p>';
       return $output;

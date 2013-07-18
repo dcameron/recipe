@@ -388,3 +388,18 @@ function recipe_update_7004() {
     rdf_mapping_save(current(recipe_rdf_mapping()));
   }
 }
+
+/**
+ * Migrate the recipe_help variable to the recipe node type help setting.
+ */
+function recipe_update_7200() {
+  $recipe_help = variable_get('recipe_help', '');
+  if (!empty($recipe_help)) {
+    $node_type = node_type_load('recipe');
+    if (empty($node_type->help)) {
+      $node_type->help = $recipe_help;
+      node_type_save($node_type);
+    }
+  }
+  variable_del('recipe_help');
+}
