@@ -6,11 +6,23 @@
  */
 
 /**
+ * Implements hook_install().
+ */
+function recipe_install() {
+  // Set up the recipe node type.
+  require_once(dirname(__FILE__) . '/includes/recipe.node_type.inc');
+  _recipe_install_node_type();
+}
+
+/**
  * Implements hook_uninstall().
  *
  * Automatically drops tables in hook_schema.
  */
 function recipe_uninstall() {
+  // Delete the recipe node fields.
+  require_once(dirname(__FILE__) . '/includes/recipe_node_type.inc');
+  _recipe_uninstall_node_type();
 
   // remove node revisions
   db_query('DELETE FROM {node_revision} WHERE nid in (select nid from {node} WHERE type = :type)', array(':type' => 'recipe'));
@@ -402,4 +414,54 @@ function recipe_update_7200() {
     }
   }
   variable_del('recipe_help');
+}
+
+/**
+ * Installs the default recipe node type.
+ */
+function recipe_update_7201() {
+  // Install the new Recipe node type and its default fields.
+  require_once(dirname(__FILE__) . '/includes/recipe.node_type.inc');
+  _recipe_install_node_type();
+}
+
+/**
+ * Move recipe descriptions in {recipe}.description into the new field.
+ */
+function recipe_update_7202(&$sandbox) {
+  if (!isset($sandbox['progress'])) {
+    $sandbox['progress'] = 0;
+    $sandbox['current_nid'] = 0;
+    $sandbox['max'] = db_query('SELECT COUNT(DISTINCT nid) FROM {recipe} WHERE description IS NOT NULL')->fetchField();
+  }
+
+  $query = db_select('recipe', 'r');
+  $query->join('node', 'n', 'r.nid = n.nid');
+  $query->fields('r', array('nid', 'description'))
+    ->fields('n', array('vid'))
+    ->condition('r.nid', $sandbox['current_nid'], '>')
+    ->isNotNull('description')
+    ->orderBy('nid', 'ASC')
+    ->range(0, 100);
+  $recipes = $query->execute();
+
+  foreach ($recipes as $recipe) {
+    db_insert('field_data_recipe_description')
+      ->fields(array(
+        'entity_type' => 'node',
+        'bundle' => 'recipe',
+        'entity_id' => $recipe->nid,
+        'revision_id' => $recipe->vid,
+        'language' => LANGUAGE_NONE,
+        'delta' => 0,
+        'recipe_description_value' => $recipe->description,
+        'recipe_description_summary' => '',
+        'recipe_description_format' => 'filtered_html',
+      ))
+      ->execute();
+    $sandbox['progress']++;
+    $sandbox['current_nid'] = $recipe->nid;
+  }
+
+  $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
 }

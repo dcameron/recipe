@@ -42,7 +42,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
   public function testRecipeContent() {
     // Generate values for our test node.
     $title = $this->randomName(16);
-    $description = $this->randomName(255);
+    $description = '<em>' . $this->randomName(255) . '</em>';
     $yield_unit = $this->randomName(10);
     $yield = 5;
     $source = $this->randomName(16);
@@ -83,7 +83,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
 
     $edit = array(
       'title' => $title,
-      'recipe_description[value]' => $description,
+      'recipe_description[' . LANGUAGE_NONE . '][0][value]' => $description,
       'recipe_yield_unit' => $yield_unit,
       'recipe_yield' => $yield,
       'recipe_source' => $source,
@@ -118,7 +118,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $this->assertText(t('Recipe @title has been created.', array('@title' => $title)));
 
     // Check the page for the recipe content.
-    $this->assertText($description, 'Found the recipe description.');
+    $this->assertRaw($description, 'Found the recipe description.');
     $this->assertFieldById('edit-custom-yield', $yield, 'Found the recipe yield in the custom yield form.');
     $this->assertText($yield_unit, 'Found the recipe yield unit.');
     $this->assertText($source, 'Found the recipe source.');
@@ -251,7 +251,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
 
     // Check for the recipe data on the MasterCook4 export page.
     $this->drupalGet('recipe/export/mastercook4/1/' . $yield);
-    // The MasterCook4 format does not output the description.
+    $this->assertRaw(format_string('DESCRIPTION : @description', array('@description' => filter_xss($description, array()))), 'Found the recipe description.');
     $this->assertRaw(format_string('Serving Size  : @yield', array('@yield' => $yield)), 'Found the recipe yield.');
     // The MasterCook4 format does not output the yield unit.
     $this->assertRaw(format_string('Recipe By     : @source', array('@source' => $source)), 'Found the recipe source.');
@@ -271,7 +271,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
 
     // Check for the recipe data on the plain text export page.
     $this->drupalGet('recipe/export/plaintext/1/' . $yield);
-    $this->assertRaw($description, 'Found the recipe description.');
+    $this->assertRaw(filter_xss($description, array()), 'Found the recipe description.');
     // The plain text format does not output the yield.
     // The plain text format does not output the yield unit.
     // The plain text format does not output the source.
@@ -288,7 +288,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
 
     // Check for the recipe data on the recipeML export page.
     $this->drupalGet('recipe/export/recipeml/1/' . $yield);
-    $this->assertRaw(format_string('<description>@description</description>', array('@description' => $description)), 'Found the recipe description.');
+    $this->assertRaw(format_string('<description>@description</description>', array('@description' => filter_xss($description, array()))), 'Found the recipe description.');
     $this->assertRaw(format_string('<yield><qty>@yield</qty><unit>@yield_unit</unit></yield>', array('@yield' => $yield, '@yield_unit' => $yield_unit)), 'Found the recipe yield and yield unit.');
     $this->assertRaw(format_string('<source>@source</source>', array('@source' => $source)), 'Found the recipe source.');
     $this->assertRaw(format_string('<note>@notes</note>', array('@notes' => $notes)), 'Found the recipe notes.');
@@ -304,7 +304,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
 
     // Check for the description in the teaser view at /node.
     $this->drupalGet('node');
-    $this->assertText($description, 'Found the recipe description.');
+    $this->assertRaw($description, 'Found the recipe description.');
   }
 
   /**
@@ -332,7 +332,11 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
       'recipe_yield' => $yield_1,
       'recipe_yield_unit' => $yield_unit_1,
       'recipe_description' => array(
-        'value' => $description_1,
+        LANGUAGE_NONE => array(
+          0 => array(
+            'value' => $description_1,
+          ),
+        ),
       ),
       'recipe_instructions' => array(
         'value' => $instructions_1,
@@ -376,7 +380,11 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
       'recipe_yield' => $yield_2,
       'recipe_yield_unit' => $yield_unit_2,
       'recipe_description' => array(
-        'value' => $description_2,
+        LANGUAGE_NONE => array(
+          0 => array(
+            'value' => $description_2,
+          ),
+        ),
       ),
       'recipe_instructions' => array(
         'value' => $instructions_2,
@@ -730,7 +738,7 @@ class RecipeNodeAccessTestCase extends DrupalWebTestCase {
     $this->node_title = $this->randomName(16);
     $edit = array(
       'title' => $this->node_title,
-      'recipe_description[value]' => $this->randomName(16),
+      'recipe_description[' . LANGUAGE_NONE . '][0][value]' => $this->randomName(16),
       'recipe_yield' => 1,
       'private' => TRUE,
     );
@@ -1040,5 +1048,44 @@ class RecipeUnitTestCase extends DrupalUnitTestCase {
       // Verify the fraction result is the same as the original quantity.
       $this->assertEqual($quantity, $fraction);
     }
+  }
+}
+
+/**
+ * Tests the update path for Recipe 7.x-1.3 to 7.x-2.x.
+ *
+ * @see UpdatePathTestCase
+ */
+class RecipeUpdatePathTestCase extends UpdatePathTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Recipe update tests',
+      'description' => 'Tests the update path for Recipe 7.x-1.3 to 7.x-2.x.',
+      'group' => 'Recipe',
+    );
+  }
+
+  public function setUp() {
+    // Load the database dump files.
+    $this->databaseDumpFiles = array(
+      drupal_get_path('module', 'simpletest') . '/tests/upgrade/drupal-7.bare.standard_all.database.php.gz',
+      drupal_get_path('module', 'recipe') . '/tests/upgrade/drupal-7.recipe.database.php',
+    );
+    parent::setUp();
+
+    $this->uninstallModulesExcept(array('field', 'field_sql_storage', 'text', 'recipe'));
+  }
+
+  /**
+   * Tests the Recipe field migration.
+   */
+  public function testRecipeFieldMigration() {
+    // Perform the update.
+    $this->assertTrue($this->performUpgrade(), 'The update was completed successfully.');
+
+    // Check for the migrated recipe fields.
+    $node = node_load(1);
+    $this->assertEqual($node->recipe_description[LANGUAGE_NONE][0]['value'], 'Basic salt water.', 'The recipe description was migrated.');
+    $this->assertEqual($node->recipe_description[LANGUAGE_NONE][0]['format'], 'filtered_html', 'The recipe description text format was set to filtered_html.');
   }
 }

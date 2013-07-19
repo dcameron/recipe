@@ -88,6 +88,11 @@ function recipe_recipeML_export_single($nid = NULL, $yield = NULL, $add_content_
     $cat_string = '<categories>'. $cat_string .'</categories>';
   }
 */
+  $description_items = field_get_items('node', $node, 'recipe_description');
+  $recipe_description = '';
+  if (!empty($description_items[0]['value'])) {
+    $recipe_description = my_xml_escape($description_items[0]['value'], TRUE);
+  }
 
   $output = '';
   if ( $add_content_header == TRUE ) {
@@ -105,7 +110,7 @@ function recipe_recipeML_export_single($nid = NULL, $yield = NULL, $add_content_
     '      <preptime type="cooking"><time><qty>'. $node->recipe_preptime .'</qty><timeunit>minutes</timeunit></time></preptime>'.
     "\n$cat_string".
     '</head>'."\n".
-    '<description>'. my_xml_escape($node->recipe_description) .'</description>'."\n".
+    '<description>' . $recipe_description . '</description>' . "\n" .
     '<ingredients>';
 
   $unit_list = recipe_get_units();
@@ -160,7 +165,10 @@ function recipe_recipeML_export_single($nid = NULL, $yield = NULL, $add_content_
   return $output;
 }
 
-function my_xml_escape($string) {
+function my_xml_escape($string, $remove_html=FALSE) {
+  if ($remove_html) {
+    $string = filter_xss($string, array());
+  }
   $chars = array(
     '&'   => '&amp;',
     '<'   => '&lt;',

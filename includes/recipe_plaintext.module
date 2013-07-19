@@ -189,7 +189,8 @@ function recipe_plaintext_export($nid = NULL, $yield = NULL) {
   $output .= t('Instructions:') ."\n";
   $output .= wordwrap(strip_html_and_encode_entities($node->recipe_instructions), 75, "\n") ."\n\n";
   $output .= t('Description:') ."\n";
-  $output .= strip_html_and_encode_entities($node->recipe_description) ."\n\n";
+  $description_items = field_get_items('node', $node, 'recipe_description');
+  $output .= strip_html_and_encode_entities($description_items[0]['value']) ."\n\n";
   $output .= t('Notes:') ."\n";
   $output .= strip_html_and_encode_entities($node->recipe_notes) ."\n";
 

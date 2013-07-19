@@ -34,14 +34,6 @@ function recipe_theme($existing, $type, $theme, $path) {
     'ingredients_form' => array(
       'render element' => 'form',
     ),
-    'recipe_description' => array(
-      'function' => 'theme_recipe_description',
-      'variables' => array('node' => NULL),
-    ),
-    'recipe_description_summary' => array(
-      'function' => 'theme_recipe_description_summary',
-      'variables' => array('node' => NULL),
-    ),
     'recipe_summary' => array(
       'function' => 'theme_recipe_summary',
       'variables' => array('node' => NULL, 'show_title' => TRUE),
@@ -86,7 +78,6 @@ function recipe_load($nodes) {
     $nodes[$record->nid]->recipe_source = $record->source;
     $nodes[$record->nid]->recipe_yield = $record->yield;
     $nodes[$record->nid]->recipe_yield_unit = $record->yield_unit;
-    $nodes[$record->nid]->recipe_description = $record->description;
     $nodes[$record->nid]->recipe_instructions = $record->instructions;
     $nodes[$record->nid]->recipe_notes = $record->notes;
     $nodes[$record->nid]->recipe_preptime = $record->preptime;
@@ -120,7 +111,6 @@ function recipe_insert($node) {
       'source' => $node->recipe_source,
       'yield' => $node->recipe_yield,
       'yield_unit' => $node->recipe_yield_unit,
-      'description' => $node->recipe_description['value'],
       'instructions' => $node->recipe_instructions['value'],
       'notes' => $node->recipe_notes['value'],
       'preptime' => $node->recipe_preptime,
@@ -143,7 +133,6 @@ function recipe_update($node) {
       'source' => $node->recipe_source,
       'yield' => $node->recipe_yield,
       'yield_unit' => $node->recipe_yield_unit,
-      'description' => is_array($node->recipe_description) ? $node->recipe_description['value'] : $node->recipe_description,
       'instructions' => is_array($node->recipe_instructions) ? $node->recipe_instructions['value'] : $node->recipe_instructions,
       'notes' => is_array($node->recipe_notes) ? $node->recipe_notes['value'] : $node->recipe_notes,
       'preptime' => $node->recipe_preptime,
@@ -265,17 +254,7 @@ function recipe_form($node, &$form_state) {
     '#maxlength' => 255,
   );
 
-  // Special WYSIWYG Section for description, instructions, and notes.
-  $form['recipe_description'] = array(
-    '#title' => t('Description'),
-    '#type' => 'text_format',
-    '#format' => isset($node->format) ? $node->format : NULL,
-    '#default_value' => !empty($node->recipe_description) ? $node->recipe_description : '',
-    '#cols' => 60,
-    '#rows' => 1,
-    '#description' => t('A short description or "teaser" for the recipe.'),
-    '#required' => TRUE,
-  );
+  // Special WYSIWYG Section for instructions, and notes.
   $form['recipe_instructions'] = array(
     '#title' => t('Instructions'),
     '#type' => 'text_format',
@@ -687,17 +666,10 @@ function recipe_view($node, $view_mode) {
   // If it is a teaser, you're done.
   // The teaser should have a full $node object, but not the $node->content render array.
   if ($view_mode == 'teaser') {
-    $node->content['recipe_description'] = array(
-        '#markup' => theme('recipe_description_summary', array('node' => $node)),
-    );
     return $node;
   }
 
   // Begin filling the node->content array with with recipe items.
-  $node->content['recipe_description'] = array(
-      '#markup' => theme('recipe_description', array('node' => $node)),
-  );
-
   $node->content['recipe_ingredients'] = array(
       '#markup' => theme('recipe_ingredients', array('node' => $node)),
   );
@@ -825,44 +797,6 @@ function theme_recipe_ingredients($variables) {
     $output .= '</div>';
   }
   $output .= '</div>';
-  return $output;
-}
-
-/**
- * Returns HTML for displaying the recipe description.
- */
-function theme_recipe_description($variables) {
-  $node = $variables['node'];
-
-  // Wrap description in RDFa markup.
-  if ( !empty($node->rdf_mapping['recipe_description']) ) {
-    $attributes = rdf_rdfa_attributes($node->rdf_mapping['recipe_description']);
-    $attributes['class'] = array('recipe-section');
-    $node->recipe_description = theme('rdf_template_variable_wrapper', array('content' => $node->recipe_description, 'attributes' => $attributes, 'inline' => FALSE));
-  }
-
-  $output = '<div class="recipe-description recipe-section">';
-  $output .= '<h2 class="title">' . t('Description') . '</h2>';
-  $output .= '<div class="section">' . $node->recipe_description . '</div>';
-  $output .= '</div>';
-  return $output;
-}
-
-/**
- * Returns HTML for displaying the recipe description summary.
- */
-function theme_recipe_description_summary($variables) {
-  $node = $variables['node'];
-
-  // Wrap description in RDFa markup.
-  if ( !empty($node->rdf_mapping['recipe_description']) ) {
-    $attributes = rdf_rdfa_attributes($node->rdf_mapping['recipe_description']);
-    $attributes['class'] = array('recipe-section');
-    $node->recipe_description = theme('rdf_template_variable_wrapper', array('content' => $node->recipe_description, 'attributes' => $attributes, 'inline' => FALSE));
-  }
-
-  $output = '';
-  $output .= '<div>' . $node->recipe_description . '</div>';
   return $output;
 }
 
@@ -1295,16 +1229,11 @@ function recipe_node_sanitize(&$node) {
 
   // Preview uses a render array for WYSIWYG fields.
   if (isset($node->in_preview) && $node->in_preview == 1) {
-    $node->recipe_description = $node->recipe_description['value'];
     $node->recipe_instructions = $node->recipe_instructions['value'];
     $node->recipe_notes = $node->recipe_notes['value'];
   }
 
   // Handle WYSIWYG fields first.
-  if (!empty($node->recipe_description)) {
-    $node->recipe_description = check_markup($node->recipe_description, $filter_format_id);
-  }
-
   if (!empty($node->recipe_instructions)) {
     $node->recipe_instructions = check_markup($node->recipe_instructions, $filter_format_id);
   }
@@ -1529,7 +1458,10 @@ function recipe_import_get_node($parsed_recipe_object = FALSE) {
     //recipe stuff
 
     //WYSIWYG fields need an array with a 'value' key.
-    $node->recipe_description = array('value' => $parsed_recipe_object['title'] . ' imported from Recipe Import');
+    $node->recipe_description[LANGUAGE_NONE][0] = array(
+      'value' => $parsed_recipe_object['title'] . ' imported from Recipe Import',
+      'format' => 'filtered_html',
+    );
     $node->recipe_instructions = array('value' => $parsed_recipe_object['instructions']);
     $node->recipe_notes = array('value' => isset($parsed_recipe_object['notes']) ? $parsed_recipe_object['notes'] : '');
 
@@ -1760,77 +1692,67 @@ function recipe_field_extra_fields() {
   $extra = array();
   $extra['node']['recipe'] = array(
     'form' => array(
-      'recipe_description' => array(
-        'label' => t('Description'),
-        'description' => t('Recipe module element'),
-        'weight' => -5,
-      ),
       'recipe_yield' => array(
         'label' => t('Yield'),
         'description' => t('Recipe module element'),
-        'weight' => -4,
+        'weight' => -3,
       ),
       'recipe_yield_unit' => array(
         'label' => t('Yield units'),
         'description' => t('Recipe module element'),
-        'weight' => -4,
+        'weight' => -3,
       ),
       'recipe_ingredients' => array(
         'label' => t('Ingredients'),
         'description' => t('Recipe module element'),
-        'weight' => -3,
+        'weight' => -2,
       ),
       'recipe_instructions' => array(
         'label' => t('Instructions'),
         'description' => t('Recipe module element'),
-        'weight' => -2,
+        'weight' => -1,
       ),
       'recipe_notes' => array(
         'label' => t('Additional notes'),
         'description' => t('Recipe module element'),
-        'weight' => -2,
+        'weight' => -1,
       ),
       'recipe_source' => array(
         'label' => t('Source'),
         'description' => t('Recipe module element'),
-        'weight' => -2,
+        'weight' => -1,
       ),
       'recipe_preptime' => array(
         'label' => t('Preparation time'),
         'description' => t('Recipe module element'),
-        'weight' => -1,
+        'weight' => 0,
       ),
       'recipe_cooktime' => array(
         'label' => t('Cooking time'),
         'description' => t('Recipe module element'),
-        'weight' => -1,
+        'weight' => 0,
       ),
     ),
     'display' => array(
-      'recipe_description' => array(
-        'label' => t('Description'),
-        'description' => t('Recipe module element'),
-        'weight' => -5,
-      ),
       'recipe_ingredients' => array(
         'label' => t('Ingredients'),
         'description' => t('Recipe module element'),
-        'weight' => -3,
+        'weight' => -2,
       ),
       'recipe_instructions' => array(
         'label' => t('Instructions'),
         'description' => t('Recipe module element'),
-        'weight' => -2,
+        'weight' => -1,
       ),
       'recipe_notes' => array(
         'label' => t('Additional notes'),
         'description' => t('Recipe module element'),
-        'weight' => -2,
+        'weight' => -1,
       ),
       'recipe_summary_box' => array(
         'label' => t('Recipe summary box'),
         'description' => t('Recipe module element'),
-        'weight' => -6,
+        'weight' => -7,
       ),
     ),
   );

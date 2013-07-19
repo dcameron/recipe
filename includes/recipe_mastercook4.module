@@ -149,6 +149,15 @@ function merge_template($node) {
   }
   $template = str_replace("<<notes>>", $node->recipe_notes, $template);
 
+  $description_items = field_get_items('node', $node, 'recipe_description');
+  if (!empty($description_items[0]['value'])) {
+    $recipe_description = "DESCRIPTION : " . strip_html_and_encode_entities($description_items[0]['value']) ."\n\n";
+    $template = str_replace("<<description>>", $recipe_description, $template);
+  }
+  else {
+    $template = str_replace("<<description>>\n", "", $template);
+  }
+
   return $template;
 }
 
@@ -171,6 +180,7 @@ Categories    : <<categories>>
                    - - - - - - - - - - - - - - - - - -
 
 <<notes>>
+<<description>>
 ";
 return $template;
 }
