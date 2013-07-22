@@ -2,11 +2,11 @@
 
 /**
  * @file
- * recipe_recipeML.module - Enables importing and exporting of recipeML format recipes.
+ * Enables importing and exporting of recipeML format recipes.
  */
 
 /**
- * Implementation of hook_recipeio($type).
+ * Implements hook_recipeio().
  */
 function recipe_recipeML_recipeio($type) {
   $supported = array(
@@ -26,7 +26,7 @@ function recipe_recipeML_recipeio($type) {
       'format_help' => t('Import recipes from a recipeML based xml file.')
     )
   );
-  if ( isset($supported[$type]) ) {
+  if (isset($supported[$type])) {
     return array('recipeml' => $supported[$type]);
   }
   else {
@@ -35,7 +35,6 @@ function recipe_recipeML_recipeio($type) {
 }
 
 function recipe_recipeML_export_multi() {
-
   $o = '<?xml version="1.0" encoding="UTF-8"?>'."\n".
   '<!DOCTYPE recipeml PUBLIC "-//FormatData//DTD RecipeML 0.5//EN" "http://www.formatdata.com/recipeml/recipeml.dtd">'."\n".
   '<recipeml version="0.5" generator="http://drupal.org/project/recipe">'."\n";
@@ -107,26 +106,26 @@ function recipe_recipeML_export_single($nid = NULL, $yield = NULL, $add_content_
     '<recipeml version="0.5" generator="http://drupal.org/project/recipe">'."\n";
   }
 
-  $output .= '<recipe>'."\n".
-    '<head>'."\n".
-    '<title>'. my_xml_escape($node->title) ."</title>\n".
-    '      <version>'. date('m-d-Y', $node->changed) .'</version>'."\n".
-    '      <source>'. my_xml_escape((($node->recipe_source == '') ? url('node/'.$node->nid, array('absolute' => TRUE)) : $node->recipe_source)) .'</source>'."\n".
-    '      <yield><qty>'. floatval($node->recipe_yield) .'</qty><unit>'. my_xml_escape(($node->recipe_yield_unit == '')?t('Servings'):$node->recipe_yield_unit) .'</unit></yield>'."\n".
-    '      <preptime type="cooking"><time><qty>'. $node->recipe_preptime .'</qty><timeunit>minutes</timeunit></time></preptime>'.
-    "\n$cat_string".
-    '</head>'."\n".
-    '<description>' . $recipe_description . '</description>' . "\n" .
+  $output .= "<recipe>\n" .
+    "<head>\n" .
+    '<title>' . my_xml_escape($node->title) . "</title>\n".
+    '      <version>' . date('m-d-Y', $node->changed) . "</version>\n" .
+    '      <source>' . my_xml_escape((($node->recipe_source == '') ? url('node/'.$node->nid, array('absolute' => TRUE)) : $node->recipe_source)) . "</source>\n" .
+    '      <yield><qty>' . floatval($node->recipe_yield) . '</qty><unit>' . my_xml_escape(($node->recipe_yield_unit == '') ? t('Servings') : $node->recipe_yield_unit) . "</unit></yield>\n" .
+    '      <preptime type="cooking"><time><qty>' . $node->recipe_preptime . '</qty><timeunit>minutes</timeunit></time></preptime>' .
+    "\n$cat_string" .
+    "</head>\n" .
+    '<description>' . $recipe_description . "</description>\n" .
     '<ingredients>';
 
   $unit_list = recipe_get_units();
   foreach ($node->recipe_ingredients['ing'] as $ingredient) {
     $prep = '';
     if (strlen($ingredient['note']) > 0) {
-      $prep = '<prep>'. my_xml_escape($ingredient['note']) .'</prep>';
+      $prep = '<prep>' . my_xml_escape($ingredient['note']) . '</prep>';
     }
 
-    if ( $ingredient['quantity'] > 0 ) {
+    if ($ingredient['quantity'] > 0) {
       $ingredient['quantity'] *= $factor;
     }
 
@@ -137,7 +136,7 @@ function recipe_recipeML_export_single($nid = NULL, $yield = NULL, $add_content_
     else {
       $title = $ingredient['unit_key'];
     }
-    
+
     // Print the abbreviation if recipe_unit_display says to or the abbreviation is blank (ie = Unit, which we don't print).
     if (!isset($ingredient['abbreviation']) && isset($unit_list[$ingredient['unit_key']])) {
       $ingredient['abbreviation'] = $unit_list[$ingredient['unit_key']]['abbreviation'];
@@ -145,23 +144,23 @@ function recipe_recipeML_export_single($nid = NULL, $yield = NULL, $add_content_
     if (empty($ingredient['abbreviation'])) {
       $ingredient['abbreviation'] = ' ';
     }
-    
+
     $ingredient['str_unit'] = '';
-    if ( variable_get('recipe_unit_display', 0) == 0 || $ingredient['abbreviation'] == ' ') {
+    if (variable_get('recipe_unit_display', 0) == 0 || $ingredient['abbreviation'] == ' ') {
       $ingredient['str_unit'] = $ingredient['abbreviation'];
     }
     else {
       $ingredient['str_unit'] = $title;
     }
 
-    $output .= "\n".'<ing><amt><qty>'. $ingredient['quantity'] .'</qty><unit>'. $ingredient['str_unit'] .'</unit></amt><item>'. my_xml_escape($ingredient['name']) ."</item>$prep</ing>";
+    $output .= "\n<ing><amt><qty>" . $ingredient['quantity'] . '</qty><unit>' . $ingredient['str_unit'] . '</unit></amt><item>'. my_xml_escape($ingredient['name']) . "</item>$prep</ing>";
   }
 
-  $output .= "\n".
-    '</ingredients>'."\n".
-    '<directions>' . $recipe_instructions . '</directions>'."\n".
-    '<note>'. my_xml_escape($node->recipe_notes) .'</note>'."\n".
-    '</recipe>'."\n";
+  $output .= "\n" .
+    "</ingredients>\n" .
+    '<directions>' . $recipe_instructions . "</directions>\n" .
+    '<note>' . my_xml_escape($node->recipe_notes) . "</note>\n" .
+    "</recipe>\n";
 
 
   if ( $add_content_header == TRUE) {
@@ -185,12 +184,10 @@ function my_xml_escape($string, $remove_html=FALSE) {
   return str_replace(array_keys($chars), array_values($chars), $string);
 }
 
-
 function recipe_recipeML_import_multi() {
   $o = drupal_get_form('recipe_recipeML_import_form');
   return $o;
 }
-
 
 function recipe_recipeML_import_form($form_state) {
   $form = array();
@@ -208,7 +205,6 @@ function recipe_recipeML_import_form($form_state) {
   );
   return $form;
 }
-
 
 function recipe_recipeML_import_form_submit($form, &$form_state) {
   global $recipes, $recipe, $data_string;
@@ -232,13 +228,12 @@ function recipe_recipeML_import_form_submit($form, &$form_state) {
 
   if (!xml_parse($xml_parser, $data, 1)) {
     watchdog('recipe', 'Failed to parse RecipeML file: @error at line @line.', array(
-                 '@error' => xml_error_string(xml_get_error_code($xml_parser)),
-                 '@line' => xml_get_current_line_number($xml_parser)),
-                 WATCHDOG_WARNING);
+      '@error' => xml_error_string(xml_get_error_code($xml_parser)),
+      '@line' => xml_get_current_line_number($xml_parser)),
+      WATCHDOG_WARNING);
   }
   // Free the parser.
   xml_parser_free($xml_parser);
-
 
   if ($_POST['op'] == t('Import')) {
 
@@ -271,14 +266,12 @@ function recipe_recipeML_import_form_submit($form, &$form_state) {
 
       }
 */
-      if ( ($node = recipe_import_get_node($import_recipe_array)) != FALSE ) {
+      if (($node = recipe_import_get_node($import_recipe_array)) != FALSE) {
         node_save($node);
       }
     }
   }
 }
-
-
 
 /**
  * Call-back function used by the XML parser.
@@ -438,8 +431,6 @@ function recipe_import_element_data($parser, $data) {
   global $data_string;
   $data_string .= $data;
 }
-
-
 
 function recipe_get_term_by_name($name, $vocab_id) {
   $db_result = db_query(db_rewrite_sql("SELECT t.tid, t.* FROM {term_data} t WHERE t.vid=%d and LOWER(t.name) = LOWER('%s')", 't', 'tid'), $vocab_id, trim($name));

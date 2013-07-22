@@ -2,14 +2,15 @@
 
 /**
  * @file
- * recipe_html.module - Enables a print view for recipes.
+ * Enables a print view for recipes.
+ *
  * This supports full 8-1/2" x 11", and 5"x7" and 3"x5" index cards.
  * Some printers may not be able to deal with small page sizes like this.
  * They may have to print on 8-1/2"x11" paper and cut.
  */
 
 /**
- * Implementation of hook_recipeio($type).
+ * Implements hook_recipeio().
  */
 function recipe_html_recipeio($type) {
   $supported = array(
@@ -21,7 +22,7 @@ function recipe_html_recipeio($type) {
     )
   );
 
-  if ( isset($supported[$type]) ) {
+  if (isset($supported[$type])) {
     // Key needs to be lower case.
     return array('recipeprint' => $supported[$type]);
   }
@@ -30,9 +31,8 @@ function recipe_html_recipeio($type) {
   }
 }
 
-
 function recipe_html_export_single($nid = NULL, $yield = NULL) {
-  if ( $nid === NULL ) {
+  if ($nid === NULL) {
     drupal_set_message(t('Recipe not found.'));
     drupal_not_found();
     return;
@@ -46,7 +46,7 @@ function recipe_html_export_single($nid = NULL, $yield = NULL) {
   $node->recipe_show_yield_form = FALSE;
 
   // you should not be able to export unpublished recipes
-  if ( $node->status == 0 ) {
+  if ($node->status == 0) {
     drupal_access_denied();
     return;
   }
@@ -68,9 +68,8 @@ function recipe_html_export_single($nid = NULL, $yield = NULL) {
   return theme('recipe_html_page', array('node' => $node));
 }
 
-
 /**
- * Implementation of hook_theme().
+ * Implements hook_theme().
  */
 function recipe_html_theme() {
   return array(
@@ -85,9 +84,7 @@ function recipe_html_theme() {
   );
 }
 
-
 function template_preprocess_recipe_html_page(&$variables) {
-  // Add recipe.css file since we are bypassing the normal page rendering routinee to get rid of sidebars and headers.
   $css_path = drupal_get_path("module", "recipe") . "/includes/recipe_html.css";
   $variables['styles'] = '<style type="text/css" media="all">@import url("' . file_create_url($css_path) . '");</style>';
 

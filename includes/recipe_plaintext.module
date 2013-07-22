@@ -2,7 +2,7 @@
 
 /**
  * @file
- * recipe_plaintext.module - Support for the plaintext format input and output.
+ * Support for the plaintext format input and output.
  */
 
 $recipe_plaintext_example = '
@@ -19,7 +19,7 @@ Whatever
 ';
 
 /**
- * Implementation of hook_recipeio($type).
+ * Implements hook_recipeio().
  */
 function recipe_plaintext_recipeio($type) {
   global $recipe_plaintext_example;
@@ -41,14 +41,13 @@ function recipe_plaintext_recipeio($type) {
       'format_help' => t('Export all recipes to a plaintext format.')
     )
   );
-  if ( isset($supported[$type]) ) {
+  if (isset($supported[$type])) {
     return array('plaintext' => $supported[$type]);
   }
   else {
     return FALSE;
   }
 }
-
 
 /**
  * Parsing instance for plain text recipes
@@ -78,14 +77,14 @@ function recipe_plaintext_import($recipe_txt = NULL) {
   foreach ($recipe_lines as $line) {
 
     $line = trim($line);
-    if ( $region < DIRECTIONS && $line == '' ) {
+    if ($region < DIRECTIONS && $line == '') {
       $region++;
       continue;
     }
-    if ( $region == TITLE ) {
+    if ($region == TITLE) {
       $recipe['title'] = $line;
     }
-    elseif ( $region == INGREDIENTS ) {
+    elseif ($region == INGREDIENTS) {
 
       // Replace a decimal quantity with a fractional one.  Needs to be done before ' ' to '-' below.
       $line = preg_replace_callback('/^(\d+\.\d+)/', 'decimal_to_fraction_callback', $line);
@@ -94,7 +93,7 @@ function recipe_plaintext_import($recipe_txt = NULL) {
       $line = preg_replace('/^(\d+)[ \-](\d+)[\/](\d+)/', '${1}-${2}/${3}', $line);
 
       // 1 cup flour
-      if ( preg_match('/^([0-9\-\.\/]+) +([A-Za-z\.]+) +(.*)/', $line, $matches)  ) {
+      if (preg_match('/^([0-9\-\.\/]+) +([A-Za-z\.]+) +(.*)/', $line, $matches)) {
         $i = array();
         $i['quantity'] = recipe_ingredient_quantity_from_fraction($matches[1]);
         $i['unit_name'] = $matches[2];
@@ -115,7 +114,7 @@ function recipe_plaintext_import($recipe_txt = NULL) {
       }
 
       // 1 apple
-      elseif ( preg_match('/^([0-9\-\.\/]+) +(.*)/', $line, $matches)  ) {
+      elseif (preg_match('/^([0-9\-\.\/]+) +(.*)/', $line, $matches)) {
         $i = array();
         $i['quantity'] = recipe_ingredient_quantity_from_fraction($matches[1]);
         $i['unit_name'] = 'Unit';
@@ -145,13 +144,12 @@ function recipe_plaintext_import($recipe_txt = NULL) {
         $recipe['ingredients'][] = $i;
       }
     }
-    elseif ( $region == DIRECTIONS ) {
-      $recipe['instructions'] .= $line ."\n";
+    elseif ($region == DIRECTIONS) {
+      $recipe['instructions'] .= $line . "\n";
     }
   }
   return $recipe;
 }
-
 
 function recipe_plaintext_export_multi() {
   // you should not be able to export unpublished recipes
@@ -165,7 +163,6 @@ function recipe_plaintext_export_multi() {
   print $o;
 }
 
-
 function recipe_plaintext_export($nid = NULL, $yield = NULL) {
   if ( $nid === NULL ) {
     drupal_set_message(t('Recipe not found.'));
@@ -175,7 +172,7 @@ function recipe_plaintext_export($nid = NULL, $yield = NULL) {
   $node = node_load($nid);
 
   // you should not be able to export unpublished recipes
-  if ( $node->status == 0 ) {
+  if ($node->status == 0) {
     drupal_access_denied();
     return;
   }
@@ -183,25 +180,23 @@ function recipe_plaintext_export($nid = NULL, $yield = NULL) {
   // Set the custom yield so we can scale up/down the recipe quantities.
   $node->recipe_custom_yield = $yield;
 
-  $output = $node->title ."\n\n";
-  $output .= t('Ingredients:') ."\n";
-  $output .= format_plaintext_ingredients($node) ."\n";
-  $output .= t('Instructions:') ."\n";
+  $output = $node->title . "\n\n";
+  $output .= t('Ingredients:') . "\n";
+  $output .= format_plaintext_ingredients($node) . "\n";
+  $output .= t('Instructions:') . "\n";
   $instructions_items = field_get_items('node', $node, 'recipe_instructions');
-  $output .= wordwrap(strip_html_and_encode_entities($instructions_items[0]['value']), 75, "\n") ."\n\n";
-  $output .= t('Description:') ."\n";
+  $output .= wordwrap(strip_html_and_encode_entities($instructions_items[0]['value']), 75, "\n") . "\n\n";
+  $output .= t('Description:') . "\n";
   $description_items = field_get_items('node', $node, 'recipe_description');
-  $output .= strip_html_and_encode_entities($description_items[0]['value']) ."\n\n";
-  $output .= t('Notes:') ."\n";
-  $output .= strip_html_and_encode_entities($node->recipe_notes) ."\n";
+  $output .= strip_html_and_encode_entities($description_items[0]['value']) . "\n\n";
+  $output .= t('Notes:') . "\n";
+  $output .= strip_html_and_encode_entities($node->recipe_notes) . "\n";
 
   drupal_add_http_header('Content-type', 'text/plain; charset=utf-8');
   return $output;
 }
 
-
 function format_plaintext_ingredients($node = NULL) {
-
   $col_widths = array('quantity' => 0, 'unit' => 0);
 
   //prepare ingredients factor
@@ -225,7 +220,7 @@ function format_plaintext_ingredients($node = NULL) {
     // Strip html entities.
     $i['str_quantity'] = str_replace('&frasl;', '/', $i['str_quantity']);
     // Collect column widths.
-    if ( strlen($i['str_quantity']) > $col_widths['quantity'] ) {
+    if (strlen($i['str_quantity']) > $col_widths['quantity']) {
       $col_widths['quantity'] = strlen($i['str_quantity']);
     }
 
@@ -238,7 +233,7 @@ function format_plaintext_ingredients($node = NULL) {
     else {
       $title = $i['unit_key'];
     }
-    
+
     // Print the abbreviation if recipe_unit_display says to or the abbreviation is blank (ie = Unit, which we don't print).
     if (!isset($i['abbreviation']) && isset($unit_list[$i['unit_key']])) {
       $i['abbreviation'] = $unit_list[$i['unit_key']]['abbreviation'];
@@ -246,16 +241,16 @@ function format_plaintext_ingredients($node = NULL) {
     if (empty($i['abbreviation'])) {
       $i['abbreviation'] = ' ';
     }
-    
+
     $i['str_unit'] = '';
-    if ( variable_get('recipe_unit_display', 0) == 0 || $i['abbreviation'] == ' ') {
+    if (variable_get('recipe_unit_display', 0) == 0 || $i['abbreviation'] == ' ') {
       $i['str_unit'] = $i['abbreviation'];
     }
     else {
       $i['str_unit'] = $title;
     }
 
-    if ( strlen($i['str_unit']) > $col_widths['unit'] ) {
+    if (strlen($i['str_unit']) > $col_widths['unit']) {
       $col_widths['unit'] = strlen($i['str_unit']);
     }
   }

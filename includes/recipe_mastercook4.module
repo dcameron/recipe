@@ -2,12 +2,11 @@
 
 /**
  * @file
- * recipe_mastercook4.module - Enables importing and exporting of MasterCook4 format recipes.
+ * Enables importing and exporting of MasterCook4 format recipes.
  */
 
-
 /**
- * Implementation of hook_recipeio($type).
+ * Implements hook_recipeio().
  */
 function recipe_mastercook4_recipeio($type) {
   $supported = array(
@@ -32,7 +31,7 @@ function recipe_mastercook4_recipeio($type) {
       'format_help' => t('Import recipes from a MasterCook(1-4 .mxp) based text file.')
     )
   );
-  if ( isset($supported[$type]) ) {
+  if (isset($supported[$type])) {
     return array('mastercook4' => $supported[$type]);
   }
   else {
@@ -40,10 +39,9 @@ function recipe_mastercook4_recipeio($type) {
   }
 }
 
-
 function recipe_mastercook4_export_multi() {
   // you should not be able to export unpublished recipes
-  $result = db_query("SELECT n.nid from {node} n WHERE n.type='recipe' and n.status>0 ORDER BY n.title");
+  $result = db_query("SELECT n.nid from {node} n WHERE n.type='recipe' and n.status > 0 ORDER BY n.title");
   $o = '';
   foreach ($result as $record) {
     $o .= recipe_mastercook4_export_single($record->nid);
@@ -53,7 +51,7 @@ function recipe_mastercook4_export_multi() {
 }
 
 function recipe_mastercook4_export_single($nid = NULL, $yield = NULL) {
-  if ( $nid === NULL ) {
+  if ($nid === NULL) {
     drupal_set_message(t('Recipe not found.'));
     drupal_not_found();
     return;
@@ -74,9 +72,7 @@ function recipe_mastercook4_export_single($nid = NULL, $yield = NULL) {
   return merge_template($node);
 }
 
-
 function merge_template($node) {
-
   //prepare prepare time
   $decimal_hours = $node->recipe_preptime/60;
   $hours = floor($decimal_hours);
@@ -99,7 +95,7 @@ function merge_template($node) {
     else {
       $i['quantity'] = ' ';
     }
-    
+
     if (isset($unit_list[$i['unit_key']])) {
       // Print the singular or plural term depending on the quantity.
       $title = $i['quantity'] > 1 ? $unit_list[$i['unit_key']]['plural'] : $unit_list[$i['unit_key']]['name'];
@@ -107,7 +103,7 @@ function merge_template($node) {
     else {
       $title = $i['unit_key'];
     }
-    
+
     // Print the abbreviation if recipe_unit_display says to or the abbreviation is blank (ie = Unit, which we don't print).
     if (!isset($i['abbreviation']) && isset($unit_list[$i['unit_key']])) {
       $i['abbreviation'] = $unit_list[$i['unit_key']]['abbreviation'];
@@ -115,7 +111,7 @@ function merge_template($node) {
     if (empty($i['abbreviation'])) {
       $i['abbreviation'] = ' ';
     }
-    
+
     $i['str_unit'] = '';
     if ( variable_get('recipe_unit_display', 0) == 0 || $i['abbreviation'] == ' ') {
       $i['str_unit'] = $i['abbreviation'];
@@ -166,7 +162,6 @@ function merge_template($node) {
   return $template;
 }
 
-
 function get_template() {
 $template = "
                      *  Exported from  MasterCook  *
@@ -190,7 +185,6 @@ Categories    : <<categories>>
 return $template;
 }
 
-
 function format_mastercook4_ingredient($ingredient = NULL) {
   $ingredient['quantity'] = recipe_ingredient_quantity_from_decimal($ingredient['quantity'], TRUE);
   // no html entities
@@ -202,12 +196,10 @@ function format_mastercook4_ingredient($ingredient = NULL) {
   return $o;
 }
 
-
 function recipe_mastercook4_import_multi() {
   $o = drupal_get_form('recipe_mastercook4_import_form');
   return $o;
 }
-
 
 function recipe_mastercook4_import_form($form_state) {
   $form = array();
@@ -225,9 +217,7 @@ function recipe_mastercook4_import_form($form_state) {
   return $form;
 }
 
-
 function recipe_mastercook4_import_form_submit($form, &$form_state) {
-
   // save to a temp files
   $data = array();
   $validators = array('file_validate_extensions' => array('mxp xml'));
@@ -271,7 +261,6 @@ function recipe_mastercook4_import_form_submit($form, &$form_state) {
 }
 
 function recipe_mastercook4_import_single($recipe_txt = NULL) {
-
   // loose bad characters.
   $recipe_txt = fixEncoding($recipe_txt);
 
@@ -308,18 +297,18 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
     $trimmed_line = trim($line);
 
     // Head
-    if ( $region == $reg['head']) {
+    if ($region == $reg['head']) {
       // blank line in head section, move to next section.
-      if ( $trimmed_line == '' ) {
+      if ($trimmed_line == '') {
         $region++;
         continue;
       }
     }
 
     // Title
-    if ( $region == $reg['title'] ) {
+    if ($region == $reg['title']) {
       // Capture title.
-      if ( $trimmed_line != '' ) {
+      if ($trimmed_line != '') {
         $recipe['title'] = $trimmed_line;
       }
       else {
@@ -329,15 +318,14 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
       }
     }
 
-    if ( $region == $reg['meta'] ) {
-
+    if ($region == $reg['meta']) {
       // Get the source.
       if ( preg_match('/Recipe +By *: *(.*)/i', $line, $matches) ) {
         $recipe['source'] = $matches[1];
       }
 
       // Get the categories.
-      if ( preg_match('/Categories *: *(.*)/i', $line, $matches) ) {
+      if (preg_match('/Categories *: *(.*)/i', $line, $matches)) {
         $cat1 = trim(substr($matches[1], 0, 33));
         $cat2 = trim(substr($matches[1], 33, 33));
         if ( $cat1 != '' ) {
@@ -348,13 +336,13 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
         }
       }
       // Category continuation.
-      if ( count($recipe['categories']) > 0 && preg_match('/^ {16}(.*)/', $line, $matches) ) {
+      if (count($recipe['categories']) > 0 && preg_match('/^ {16}(.*)/', $line, $matches)) {
         $cat1 = trim(substr($matches[1], 0, 33));
         $cat2 = trim(substr($matches[1], 33, 33));
-        if ( $cat1 != '' ) {
+        if ($cat1 != '') {
           $recipe['categories'][] = $cat1;
         }
-        if ( $cat2 != '' ) {
+        if ($cat2 != '') {
           $recipe['categories'][] = $cat2;
         }
       }
@@ -366,15 +354,15 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
       }
     }
 
-    if ( $region == $reg['ingredients'] ) {
+    if ($region == $reg['ingredients']) {
 
-      if ( preg_match('/Amount +Measure +Ingredient +-- +Preparation Method/i', $line) ) {
+      if (preg_match('/Amount +Measure +Ingredient +-- +Preparation Method/i', $line)) {
         // Do nothing.
       }
-      elseif ( preg_match('/-------- +------------ +--------------------------------/', $line) ) {
+      elseif (preg_match('/-------- +------------ +--------------------------------/', $line)) {
         // Do nothing.
       }
-      elseif ( $trimmed_line != '' ) {
+      elseif ($trimmed_line != '') {
 
         $q = trim(substr($line, 0, 8));
         $u = trim(substr($line, 10, 12));
@@ -397,7 +385,7 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
           $ing['quantity'] = recipe_ingredient_quantity_from_fraction($q);
           $ing['unit_name'] = $u;
 
-          if ( preg_match('/(.*?) ?-- ?(.*)/', $i, $matches) ) {
+          if (preg_match('/(.*?) ?-- ?(.*)/', $i, $matches)) {
             $ing['ingredient_name'] = $matches[1];
             $ing['ingredient_note'] = $matches[2];
           }
@@ -406,7 +394,7 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
           }
 
           $ing['unit_key'] = recipe_unit_fuzzymatch($ing['unit_name']);
-          if ( $ing['unit_key'] == FALSE ) {
+          if ($ing['unit_key'] == FALSE) {
             $ing['ingredient_note'] = '!' . $ing['unit_name'] . ' ' . $ing['ingredient_note'];
             $ing['unit_key'] = 'unit';
             drupal_set_message(t('Could not find the ingredient units in %recipe (%line)', array('%recipe' => $recipe['title'], '%line' => $line)), 'warning');
@@ -426,13 +414,13 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
         continue;
       }
     }
-    elseif ( $region == $reg['directions'] ) {
-      if ( preg_match('/- - - - - - - - - - - - - - - - - -/', $line) ) {
+    elseif ($region == $reg['directions']) {
+      if (preg_match('/- - - - - - - - - - - - - - - - - -/', $line)) {
         $region++;
         continue;
       }
 
-      if ( preg_match('/^Notes: +(.*)/i', $line, $matches) ) {
+      if (preg_match('/^Notes: +(.*)/i', $line, $matches)) {
         $recipe['notes'] .= $matches[1] ."\n";
         $region++;
         continue;
@@ -441,7 +429,7 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
         $recipe['instructions'] .= $line ."\n";
       }
     }
-    elseif ( $region == $reg['notes'] ) {
+    elseif ($region == $reg['notes']) {
       $recipe['notes'] .= $line ."\n";
     }
 
