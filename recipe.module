@@ -42,10 +42,6 @@ function recipe_theme($existing, $type, $theme, $path) {
       'function' => 'theme_recipe_notes',
       'variables' => array('node' => NULL),
     ),
-    'recipe_instructions' => array(
-      'function' => 'theme_recipe_instructions',
-      'variables' => array('node' => NULL),
-    ),
     'recipe_ingredients' => array(
       'function' => 'theme_recipe_ingredients',
       'variables' => array('node' => NULL),
@@ -78,7 +74,6 @@ function recipe_load($nodes) {
     $nodes[$record->nid]->recipe_source = $record->source;
     $nodes[$record->nid]->recipe_yield = $record->yield;
     $nodes[$record->nid]->recipe_yield_unit = $record->yield_unit;
-    $nodes[$record->nid]->recipe_instructions = $record->instructions;
     $nodes[$record->nid]->recipe_notes = $record->notes;
     $nodes[$record->nid]->recipe_preptime = $record->preptime;
     $nodes[$record->nid]->recipe_cooktime = $record->cooktime;
@@ -111,7 +106,6 @@ function recipe_insert($node) {
       'source' => $node->recipe_source,
       'yield' => $node->recipe_yield,
       'yield_unit' => $node->recipe_yield_unit,
-      'instructions' => $node->recipe_instructions['value'],
       'notes' => $node->recipe_notes['value'],
       'preptime' => $node->recipe_preptime,
       'cooktime' => $node->recipe_cooktime,
@@ -133,7 +127,6 @@ function recipe_update($node) {
       'source' => $node->recipe_source,
       'yield' => $node->recipe_yield,
       'yield_unit' => $node->recipe_yield_unit,
-      'instructions' => is_array($node->recipe_instructions) ? $node->recipe_instructions['value'] : $node->recipe_instructions,
       'notes' => is_array($node->recipe_notes) ? $node->recipe_notes['value'] : $node->recipe_notes,
       'preptime' => $node->recipe_preptime,
       'cooktime' => $node->recipe_cooktime,
@@ -254,16 +247,7 @@ function recipe_form($node, &$form_state) {
     '#maxlength' => 255,
   );
 
-  // Special WYSIWYG Section for instructions, and notes.
-  $form['recipe_instructions'] = array(
-    '#title' => t('Instructions'),
-    '#type' => 'text_format',
-    '#format' => isset($node->format) ? $node->format : NULL,
-    '#default_value' => !empty($node->recipe_instructions) ? $node->recipe_instructions : '',
-    '#cols' => 60,
-    '#rows' => 10,
-    '#description' => t('Step by step instructions on how to prepare and cook the recipe.'),
-  );
+  // Special WYSIWYG Section for notes.
   $form['recipe_notes'] = array(
     '#title' => t('Additional notes'),
     '#type' => 'text_format',
@@ -674,10 +658,6 @@ function recipe_view($node, $view_mode) {
       '#markup' => theme('recipe_ingredients', array('node' => $node)),
   );
 
-  $node->content['recipe_instructions'] = array(
-      '#markup' => theme('recipe_instructions', array('node' => $node)),
-  );
-
   // Don't show the notes box at all it there are no notes.
   if ( $node->recipe_notes ) {
     $node->content['recipe_notes'] = array(
@@ -808,26 +788,6 @@ function theme_recipe_notes($variables) {
   $output = '<div class="recipe-notes recipe-section">';
   $output .= '<h2 class="title">' . t('Notes') . '</h2>';
   $output .= '<div class="section">' . $node->recipe_notes . '</div>';
-  $output .= '</div>';
-  return $output;
-}
-
-/**
- * Returns HTML for displaying the recipe instructions.
- */
-function theme_recipe_instructions($variables) {
-  $node = $variables['node'];
-
-  // Wrap instructions in RDFa markup.
-  if ( !empty($node->rdf_mapping['recipe_instructions']) ) {
-    $attributes = rdf_rdfa_attributes($node->rdf_mapping['recipe_instructions']);
-    $attributes['class'] = array('recipe-section');
-    $node->recipe_instructions = theme('rdf_template_variable_wrapper', array('content' => $node->recipe_instructions, 'attributes' => $attributes, 'inline' => FALSE));
-  }
-
-  $output = '<div class="recipe-instructions recipe-section">';
-  $output .= '<h2 class="title">' . t('Instructions') . '</h2>';
-  $output .= '<div class="section">' . $node->recipe_instructions . '</div>';
   $output .= '</div>';
   return $output;
 }
@@ -1229,15 +1189,10 @@ function recipe_node_sanitize(&$node) {
 
   // Preview uses a render array for WYSIWYG fields.
   if (isset($node->in_preview) && $node->in_preview == 1) {
-    $node->recipe_instructions = $node->recipe_instructions['value'];
     $node->recipe_notes = $node->recipe_notes['value'];
   }
 
   // Handle WYSIWYG fields first.
-  if (!empty($node->recipe_instructions)) {
-    $node->recipe_instructions = check_markup($node->recipe_instructions, $filter_format_id);
-  }
-
   if (!empty($node->recipe_notes)) {
     $node->recipe_notes = check_markup($node->recipe_notes, $filter_format_id);
   }
@@ -1462,7 +1417,10 @@ function recipe_import_get_node($parsed_recipe_object = FALSE) {
       'value' => $parsed_recipe_object['title'] . ' imported from Recipe Import',
       'format' => 'filtered_html',
     );
-    $node->recipe_instructions = array('value' => $parsed_recipe_object['instructions']);
+    $node->recipe_instructions[LANGUAGE_NONE][0] = array(
+      'value' => $parsed_recipe_object['instructions'],
+      'format' => 'filtered_html',
+    );
     $node->recipe_notes = array('value' => isset($parsed_recipe_object['notes']) ? $parsed_recipe_object['notes'] : '');
 
     $node->recipe_source = $parsed_recipe_object['source'] != '' ? $parsed_recipe_object['source'] : $user->name;
@@ -1707,11 +1665,6 @@ function recipe_field_extra_fields() {
         'description' => t('Recipe module element'),
         'weight' => -2,
       ),
-      'recipe_instructions' => array(
-        'label' => t('Instructions'),
-        'description' => t('Recipe module element'),
-        'weight' => -1,
-      ),
       'recipe_notes' => array(
         'label' => t('Additional notes'),
         'description' => t('Recipe module element'),
@@ -1738,11 +1691,6 @@ function recipe_field_extra_fields() {
         'label' => t('Ingredients'),
         'description' => t('Recipe module element'),
         'weight' => -2,
-      ),
-      'recipe_instructions' => array(
-        'label' => t('Instructions'),
-        'description' => t('Recipe module element'),
-        'weight' => -1,
       ),
       'recipe_notes' => array(
         'label' => t('Additional notes'),

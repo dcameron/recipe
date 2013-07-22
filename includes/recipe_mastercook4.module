@@ -142,7 +142,12 @@ function merge_template($node) {
   // merge ingredients
   $template = str_replace("<<ingredients>>", $ingredients, $template);
   // merge instructions
-  $template = str_replace("<<instructions>>", strip_html_and_encode_entities($node->recipe_instructions), $template);
+  $instructions_items = field_get_items('node', $node, 'recipe_instructions');
+  $recipe_instructions = '';
+  if (!empty($instructions_items[0]['value'])) {
+    $recipe_instructions = strip_html_and_encode_entities($instructions_items[0]['value']);
+  }
+  $template = str_replace("<<instructions>>", $recipe_instructions, $template);
   // merge notes
   if ( $node->recipe_notes != '' ) {
     $node->recipe_notes = "NOTES : " . strip_html_and_encode_entities($node->recipe_notes);
@@ -451,5 +456,4 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
 function recipe_mastercook4_textify(&$node) {
   $node->title = filter_xss($node->title, array());
   $node->recipe_source = filter_xss($node->recipe_source, array());
-  $node->recipe_instructions = filter_xss($node->recipe_instructions, array());
 }

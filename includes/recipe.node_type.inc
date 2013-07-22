@@ -83,6 +83,73 @@ function _recipe_install_node_type() {
     ),
   );
 
+  // field_base: 'recipe_instructions'
+  $field_bases['recipe_instructions'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'recipe_instructions',
+    'foreign keys' => array(
+      'format' => array(
+        'columns' => array(
+          'format' => 'format',
+        ),
+        'table' => 'filter_format',
+      ),
+    ),
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(),
+    'translatable' => 0,
+    'type' => 'text_long',
+  );
+
+  // field_instance: 'node-recipe-recipe_instructions'
+  $field_instances['node-recipe-recipe_instructions'] = array(
+    'bundle' => 'recipe',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => 'Step by step instructions on how to prepare and cook the recipe.',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => -1,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 3,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'recipe_instructions',
+    'label' => 'Instructions',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 1,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'rows' => 10,
+      ),
+      'type' => 'text_textarea',
+      'weight' => -1,
+    ),
+  );
+
   // Create the fields.
   foreach ($field_bases as $field) {
     field_create_field($field);
@@ -99,6 +166,7 @@ function _recipe_install_node_type() {
 function _recipe_uninstall_node_type() {
   $fields = array(
     'recipe_description',
+    'recipe_instructions',
   );
   foreach ($fields as $field) {
     field_delete_field($field);
