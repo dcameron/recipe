@@ -46,7 +46,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $yield_unit = $this->randomName(10);
     $yield = 5;
     $source = $this->randomName(16);
-    $notes = $this->randomName(255);
+    $notes = '<em>' . $this->randomName(255) . '</em>';
     $instructions = '<em>' . $this->randomname(255) . '</em>';
     $preptime = 60;
     $cooktime = 15;
@@ -87,7 +87,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
       'recipe_yield_unit' => $yield_unit,
       'recipe_yield' => $yield,
       'recipe_source' => $source,
-      'recipe_notes[value]' => $notes,
+      'recipe_notes[' . LANGUAGE_NONE . '][0][value]' => $notes,
       'recipe_instructions[' . LANGUAGE_NONE . '][0][value]' => $instructions,
       'recipe_preptime' => $preptime,
       'recipe_cooktime' => $cooktime,
@@ -122,7 +122,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $this->assertFieldById('edit-custom-yield', $yield, 'Found the recipe yield in the custom yield form.');
     $this->assertText($yield_unit, 'Found the recipe yield unit.');
     $this->assertText($source, 'Found the recipe source.');
-    $this->assertText($notes, 'Found the recipe notes.');
+    $this->assertRaw($notes, 'Found the recipe notes.');
     $this->assertRaw($instructions, 'Found the recipe instructions');
     $this->assertText($this->formatTime($preptime), 'Found the recipe prep time.');
     $this->assertText($this->formatTime($cooktime), 'Found the recipe cook time.');
@@ -255,7 +255,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $this->assertRaw(format_string('Serving Size  : @yield', array('@yield' => $yield)), 'Found the recipe yield.');
     // The MasterCook4 format does not output the yield unit.
     $this->assertRaw(format_string('Recipe By     : @source', array('@source' => $source)), 'Found the recipe source.');
-    $this->assertRaw($notes, 'Found the recipe notes.');
+    $this->assertRaw(filter_xss($notes, array()), 'Found the recipe notes.');
     $this->assertRaw(filter_xss($instructions, array()), 'Found the recipe instructions');
     $hours = (int) ($preptime / 60);
     $minutes = $preptime % 60;
@@ -275,7 +275,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     // The plain text format does not output the yield.
     // The plain text format does not output the yield unit.
     // The plain text format does not output the source.
-    $this->assertRaw($notes, 'Found the recipe notes.');
+    $this->assertRaw(filter_xss($notes, array()), 'Found the recipe notes.');
     $this->assertRaw(filter_xss($instructions, array()), 'Found the recipe instructions');
     // The plain text format does not output the prep time.
     // The plain text format does not output the cook time.
@@ -291,7 +291,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $this->assertRaw(format_string('<description>@description</description>', array('@description' => filter_xss($description, array()))), 'Found the recipe description.');
     $this->assertRaw(format_string('<yield><qty>@yield</qty><unit>@yield_unit</unit></yield>', array('@yield' => $yield, '@yield_unit' => $yield_unit)), 'Found the recipe yield and yield unit.');
     $this->assertRaw(format_string('<source>@source</source>', array('@source' => $source)), 'Found the recipe source.');
-    $this->assertRaw(format_string('<note>@notes</note>', array('@notes' => $notes)), 'Found the recipe notes.');
+    $this->assertRaw(format_string('<note>@notes</note>', array('@notes' => filter_xss($notes, array()))), 'Found the recipe notes.');
     $this->assertRaw(format_string('<directions>@instructions</directions>', array('@instructions' => filter_xss($instructions, array()))), 'Found the recipe instructions');
     $this->assertRaw(format_string('<preptime type="cooking"><time><qty>@preptime</qty><timeunit>minutes</timeunit></time></preptime>', array('@preptime' => $preptime)), 'Found the recipe prep time.');
     // The recipeML format does not output the cook time.
@@ -346,7 +346,11 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
         ),
       ),
       'recipe_notes' => array(
-        'value' => $notes_1,
+        LANGUAGE_NONE => array(
+          0 => array(
+            'value' => $notes_1,
+          ),
+        ),
       ),
       'recipe_preptime' => $preptime_1,
       'recipe_cooktime' => $cooktime_1,
@@ -398,7 +402,11 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
         ),
       ),
       'recipe_notes' => array(
-        'value' => $notes_2,
+        LANGUAGE_NONE => array(
+          0 => array(
+            'value' => $notes_2,
+          ),
+        ),
       ),
       'recipe_preptime' => $preptime_2,
       'recipe_cooktime' => $cooktime_2,
@@ -1097,5 +1105,7 @@ class RecipeUpdatePathTestCase extends UpdatePathTestCase {
     $this->assertEqual($node->recipe_description[LANGUAGE_NONE][0]['format'], 'filtered_html', 'The recipe description text format was set to filtered_html.');
     $this->assertEqual($node->recipe_instructions[LANGUAGE_NONE][0]['value'], "Combine water and salt in a glass.\r\n\r\nStir.", 'The recipe instructions was migrated.');
     $this->assertEqual($node->recipe_instructions[LANGUAGE_NONE][0]['format'], 'filtered_html', 'The recipe instructions text format was set to filtered_html.');
+    $this->assertEqual($node->recipe_notes[LANGUAGE_NONE][0]['value'], "Do not consume!", 'The recipe notes was migrated.');
+    $this->assertEqual($node->recipe_notes[LANGUAGE_NONE][0]['format'], 'filtered_html', 'The recipe notes text format was set to filtered_html.');
   }
 }

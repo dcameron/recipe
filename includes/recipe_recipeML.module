@@ -99,6 +99,12 @@ function recipe_recipeML_export_single($nid = NULL, $yield = NULL, $add_content_
     $recipe_instructions = my_xml_escape($instructions_items[0]['value'], TRUE);
   }
 
+  $notes_items = field_get_items('node', $node, 'recipe_notes');
+  $recipe_notes = '';
+  if (!empty($notes_items[0]['value'])) {
+    $recipe_notes = my_xml_escape($notes_items[0]['value'], TRUE);
+  }
+
   $output = '';
   if ( $add_content_header == TRUE ) {
     $output .= '<?xml version="1.0" encoding="UTF-8"?>'."\n".
@@ -159,9 +165,8 @@ function recipe_recipeML_export_single($nid = NULL, $yield = NULL, $add_content_
   $output .= "\n" .
     "</ingredients>\n" .
     '<directions>' . $recipe_instructions . "</directions>\n" .
-    '<note>' . my_xml_escape($node->recipe_notes) . "</note>\n" .
+    '<note>' . $recipe_notes . "</note>\n" .
     "</recipe>\n";
-
 
   if ( $add_content_header == TRUE) {
     $output .= '</recipeml>';

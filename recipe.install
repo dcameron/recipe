@@ -505,3 +505,43 @@ function recipe_update_7203(&$sandbox) {
 
   $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
 }
+
+/**
+ * Move recipe notes in {recipe}.notes into the new field.
+ */
+function recipe_update_7204(&$sandbox) {
+  if (!isset($sandbox['progress'])) {
+    $sandbox['progress'] = 0;
+    $sandbox['current_nid'] = 0;
+    $sandbox['max'] = db_query('SELECT COUNT(DISTINCT nid) FROM {recipe} WHERE notes IS NOT NULL')->fetchField();
+  }
+
+  $query = db_select('recipe', 'r');
+  $query->join('node', 'n', 'r.nid = n.nid');
+  $query->fields('r', array('nid', 'notes'))
+    ->fields('n', array('vid'))
+    ->condition('r.nid', $sandbox['current_nid'], '>')
+    ->isNotNull('notes')
+    ->orderBy('nid', 'ASC')
+    ->range(0, 100);
+  $recipes = $query->execute();
+
+  foreach ($recipes as $recipe) {
+    db_insert('field_data_recipe_notes')
+      ->fields(array(
+        'entity_type' => 'node',
+        'bundle' => 'recipe',
+        'entity_id' => $recipe->nid,
+        'revision_id' => $recipe->vid,
+        'language' => LANGUAGE_NONE,
+        'delta' => 0,
+        'recipe_notes_value' => $recipe->notes,
+        'recipe_notes_format' => 'filtered_html',
+      ))
+      ->execute();
+    $sandbox['progress']++;
+    $sandbox['current_nid'] = $recipe->nid;
+  }
+
+  $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
+}

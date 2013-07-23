@@ -145,10 +145,12 @@ function merge_template($node) {
   }
   $template = str_replace("<<instructions>>", $recipe_instructions, $template);
   // merge notes
-  if ( $node->recipe_notes != '' ) {
-    $node->recipe_notes = "NOTES : " . strip_html_and_encode_entities($node->recipe_notes);
+  $notes_items = field_get_items('node', $node, 'recipe_notes');
+  $recipe_notes = '';
+  if (!empty($notes_items[0]['value'])) {
+    $recipe_notes = 'NOTES : ' . strip_html_and_encode_entities($notes_items[0]['value']);
   }
-  $template = str_replace("<<notes>>", $node->recipe_notes, $template);
+  $template = str_replace("<<notes>>", $recipe_notes, $template);
 
   $description_items = field_get_items('node', $node, 'recipe_description');
   if (!empty($description_items[0]['value'])) {

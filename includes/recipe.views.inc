@@ -108,23 +108,6 @@ function recipe_views_data() {
     ),
   );
 
-  $data['recipe']['notes'] = array(
-    'title' => t('Notes'),
-    'help' => t("The notes for this recipe."),
-    'field' => array(
-      'handler' => 'views_handler_field_xss',
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument_string',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_string',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
   $data['recipe']['preptime'] = array(
     'title' => t('Prep time'),
     'help' => t("The prep time for this recipe."),

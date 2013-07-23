@@ -190,7 +190,8 @@ function recipe_plaintext_export($nid = NULL, $yield = NULL) {
   $description_items = field_get_items('node', $node, 'recipe_description');
   $output .= strip_html_and_encode_entities($description_items[0]['value']) . "\n\n";
   $output .= t('Notes:') . "\n";
-  $output .= strip_html_and_encode_entities($node->recipe_notes) . "\n";
+  $notes_items = field_get_items('node', $node, 'recipe_notes');
+  $output .= strip_html_and_encode_entities($notes_items[0]['value']) . "\n";
 
   drupal_add_http_header('Content-type', 'text/plain; charset=utf-8');
   return $output;
