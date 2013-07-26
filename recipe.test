@@ -45,7 +45,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $description = '<em>' . $this->randomName(255) . '</em>';
     $yield_unit = $this->randomName(10);
     $yield = 5;
-    $source = $this->randomName(16);
+    $source = '<a href="http://www.example.com">' . $this->randomName(16) . '</a>';
     $notes = '<em>' . $this->randomName(255) . '</em>';
     $instructions = '<em>' . $this->randomname(255) . '</em>';
     $preptime = 60;
@@ -86,7 +86,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
       'recipe_description[' . LANGUAGE_NONE . '][0][value]' => $description,
       'recipe_yield_unit' => $yield_unit,
       'recipe_yield' => $yield,
-      'recipe_source' => $source,
+      'recipe_source[' . LANGUAGE_NONE . '][0][value]' => $source,
       'recipe_notes[' . LANGUAGE_NONE . '][0][value]' => $notes,
       'recipe_instructions[' . LANGUAGE_NONE . '][0][value]' => $instructions,
       'recipe_preptime' => $preptime,
@@ -121,7 +121,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $this->assertRaw($description, 'Found the recipe description.');
     $this->assertFieldById('edit-custom-yield', $yield, 'Found the recipe yield in the custom yield form.');
     $this->assertText($yield_unit, 'Found the recipe yield unit.');
-    $this->assertText($source, 'Found the recipe source.');
+    $this->assertRaw($source, 'Found the recipe source.');
     $this->assertRaw($notes, 'Found the recipe notes.');
     $this->assertRaw($instructions, 'Found the recipe instructions');
     $this->assertText($this->formatTime($preptime), 'Found the recipe prep time.');
@@ -254,7 +254,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $this->assertRaw(format_string('DESCRIPTION : @description', array('@description' => filter_xss($description, array()))), 'Found the recipe description.');
     $this->assertRaw(format_string('Serving Size  : @yield', array('@yield' => $yield)), 'Found the recipe yield.');
     // The MasterCook4 format does not output the yield unit.
-    $this->assertRaw(format_string('Recipe By     : @source', array('@source' => $source)), 'Found the recipe source.');
+    $this->assertRaw(format_string('Recipe By     : @source', array('@source' => filter_xss($source, array()))), 'Found the recipe source.');
     $this->assertRaw(filter_xss($notes, array()), 'Found the recipe notes.');
     $this->assertRaw(filter_xss($instructions, array()), 'Found the recipe instructions');
     $hours = (int) ($preptime / 60);
@@ -290,7 +290,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $this->drupalGet('recipe/export/recipeml/1/' . $yield);
     $this->assertRaw(format_string('<description>@description</description>', array('@description' => filter_xss($description, array()))), 'Found the recipe description.');
     $this->assertRaw(format_string('<yield><qty>@yield</qty><unit>@yield_unit</unit></yield>', array('@yield' => $yield, '@yield_unit' => $yield_unit)), 'Found the recipe yield and yield unit.');
-    $this->assertRaw(format_string('<source>@source</source>', array('@source' => $source)), 'Found the recipe source.');
+    $this->assertRaw(format_string('<source>@source</source>', array('@source' => filter_xss($source, array()))), 'Found the recipe source.');
     $this->assertRaw(format_string('<note>@notes</note>', array('@notes' => filter_xss($notes, array()))), 'Found the recipe notes.');
     $this->assertRaw(format_string('<directions>@instructions</directions>', array('@instructions' => filter_xss($instructions, array()))), 'Found the recipe instructions');
     $this->assertRaw(format_string('<preptime type="cooking"><time><qty>@preptime</qty><timeunit>minutes</timeunit></time></preptime>', array('@preptime' => $preptime)), 'Found the recipe prep time.');
@@ -328,7 +328,13 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $edit = array(
       'type' => 'recipe',
       'title' => $node_title_1,
-      'recipe_source' => $source_1,
+      'recipe_source' => array(
+        LANGUAGE_NONE => array(
+          0 => array(
+            'value' => $source_1,
+          ),
+        ),
+      ),
       'recipe_yield' => $yield_1,
       'recipe_yield_unit' => $yield_unit_1,
       'recipe_description' => array(
@@ -384,7 +390,13 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $edit = array(
       'type' => 'recipe',
       'title' => $node_title_2,
-      'recipe_source' => $source_2,
+      'recipe_source' => array(
+        LANGUAGE_NONE => array(
+          0 => array(
+            'value' => $source_2,
+          ),
+        ),
+      ),
       'recipe_yield' => $yield_2,
       'recipe_yield_unit' => $yield_unit_2,
       'recipe_description' => array(
@@ -583,7 +595,9 @@ class RecipeYieldFormTestCase extends RecipeWebTestCase {
     $edit = array(
       'type' => 'recipe',
       'title' => $node_title,
-      'recipe_source' => '',
+      'recipe_source' => array(
+        'value' => '',
+      ),
       'recipe_yield' => $yield,
       'recipe_yield_unit' => '',
       'recipe_description' => array(
@@ -673,7 +687,9 @@ class RecipeLandingPageTestCase extends RecipeWebTestCase {
     $edit = array(
       'type' => 'recipe',
       'title' => $node_title,
-      'recipe_source' => '',
+      'recipe_source' => array(
+        'value' => '',
+      ),
       'recipe_yield' => 1,
       'recipe_yield_unit' => '',
       'recipe_description' => array(
@@ -1107,5 +1123,7 @@ class RecipeUpdatePathTestCase extends UpdatePathTestCase {
     $this->assertEqual($node->recipe_instructions[LANGUAGE_NONE][0]['format'], 'filtered_html', 'The recipe instructions text format was set to filtered_html.');
     $this->assertEqual($node->recipe_notes[LANGUAGE_NONE][0]['value'], "Do not consume!", 'The recipe notes was migrated.');
     $this->assertEqual($node->recipe_notes[LANGUAGE_NONE][0]['format'], 'filtered_html', 'The recipe notes text format was set to filtered_html.');
+    $this->assertEqual($node->recipe_source[LANGUAGE_NONE][0]['value'], "John Doe", 'The recipe source was migrated.');
+    $this->assertEqual($node->recipe_source[LANGUAGE_NONE][0]['format'], 'filtered_html', 'The recipe source text format was set to filtered_html.');
   }
 }

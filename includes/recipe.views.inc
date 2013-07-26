@@ -57,23 +57,6 @@ function recipe_views_data() {
   );
 
   // Fields
-  $data['recipe']['source'] = array(
-    'title' => t('Source'),
-    'help' => t("Optional. Does anyone else deserve credit for this recipe?"),
-    'field' => array(
-      'handler' => 'views_handler_field',
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument_string',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_string',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
   $data['recipe']['yield'] = array(
     'title' => t('Yield'),
     'help' => t("The number of servings for this recipe."),

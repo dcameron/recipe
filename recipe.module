@@ -67,7 +67,6 @@ function recipe_permission() {
 function recipe_load($nodes) {
   $result = db_query('SELECT * FROM {recipe} WHERE nid IN (:nids)', array(':nids' => array_keys($nodes)));
   foreach ($result as $record) {
-    $nodes[$record->nid]->recipe_source = $record->source;
     $nodes[$record->nid]->recipe_yield = $record->yield;
     $nodes[$record->nid]->recipe_yield_unit = $record->yield_unit;
     $nodes[$record->nid]->recipe_preptime = $record->preptime;
@@ -98,7 +97,6 @@ function recipe_insert($node) {
   db_insert('recipe')
     ->fields(array(
       'nid' => $node->nid,
-      'source' => $node->recipe_source,
       'yield' => $node->recipe_yield,
       'yield_unit' => $node->recipe_yield_unit,
       'preptime' => $node->recipe_preptime,
@@ -118,7 +116,6 @@ function recipe_insert($node) {
 function recipe_update($node) {
   db_update('recipe')
     ->fields(array(
-      'source' => $node->recipe_source,
       'yield' => $node->recipe_yield,
       'yield_unit' => $node->recipe_yield_unit,
       'preptime' => $node->recipe_preptime,
@@ -365,14 +362,6 @@ function recipe_form($node, &$form_state) {
     ),
   );
 
-  $form['recipe_source'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Source'),
-    '#default_value' => !empty($node->recipe_source) ? $node->recipe_source : '',
-    '#size' => 60,
-    '#maxlength' => 127,
-    '#description' => t('Optional. Does anyone else deserve credit for this recipe?'),
-  );
   $form['recipe_preptime'] = array(
     '#type' => 'textfield',
     '#size' => 10,
@@ -773,9 +762,6 @@ function theme_recipe_summary($variables) {
   $yield_form = drupal_get_form('recipe_yield_form', $node, $show_yield_form);
   $output .= '<tr><th class="summary-title">' . t('Yield') . '</th><td class="summary-data">' . drupal_render($yield_form) . '</td></tr>';
 
-  if ($node->recipe_source) {
-    $output .= '<tr><th>' . t('Source') . '</th><td>' . $node->recipe_source . '</td></tr>';
-  }
   if (isset($node->recipe_preptime)) {
     $_o_minutes = $node->recipe_preptime;
     $_hours = floor($_o_minutes / 60);
@@ -1090,10 +1076,6 @@ function recipe_validate($node, $form, &$form_state) {
  * All recipe fields should be run through one of the Drupal data checks.
  */
 function recipe_node_sanitize(&$node) {
-  // Handle the rest of the recipe table fields.
-  if (!empty($node->recipe_source)) {
-    $node->recipe_source = filter_xss($node->recipe_source, array('a'));
-  }
   if (!empty($node->recipe_yield_unit)) {
     $node->recipe_yield_unit = filter_xss($node->recipe_yield_unit, array());
   }
@@ -1287,11 +1269,6 @@ function recipe_field_extra_fields() {
         'label' => t('Ingredients'),
         'description' => t('Recipe module element'),
         'weight' => -2,
-      ),
-      'recipe_source' => array(
-        'label' => t('Source'),
-        'description' => t('Recipe module element'),
-        'weight' => -1,
       ),
       'recipe_preptime' => array(
         'label' => t('Preparation time'),

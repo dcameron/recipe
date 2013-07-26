@@ -57,7 +57,6 @@ function recipe_mastercook4_export_single($nid = NULL, $yield = NULL) {
     return;
   }
   $node = node_load($nid);
-  recipe_mastercook4_textify($node);
 
   // you should not be able to export unpublished recipes
   if ( $node->status == 0 ) {
@@ -126,9 +125,14 @@ function merge_template($node) {
   // get the template string
   $template = get_template();
   // merge title
-  $template = str_replace("<<title>>", $node->title, $template);
+  $template = str_replace("<<title>>", filter_xss($node->title, array()), $template);
   // merge recipe by
-  $template = str_replace("<<recipeby>>", $node->recipe_source, $template);
+  $source_items = field_get_items('node', $node, 'recipe_source');
+  $recipe_source = '';
+  if (!empty($source_items[0]['value'])) {
+    $recipe_source = strip_html_and_encode_entities($source_items[0]['value']);
+  }
+  $template = str_replace("<<recipeby>>", $recipe_source, $template);
   // merge serving size
   $template = str_replace("<<servingsize>>", $node->recipe_yield, $template);
   // merge preptime
@@ -438,12 +442,4 @@ function recipe_mastercook4_import_single($recipe_txt = NULL) {
   }
 
   return $recipe;
-}
-
-/*
- * Mastercook is an old style text format, remove html.
- */
-function recipe_mastercook4_textify(&$node) {
-  $node->title = filter_xss($node->title, array());
-  $node->recipe_source = filter_xss($node->recipe_source, array());
 }

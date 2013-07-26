@@ -332,7 +332,6 @@ function recipe_import_get_node($parsed_recipe_object = FALSE) {
 
     //recipe stuff
 
-    //WYSIWYG fields need an array with a 'value' key.
     $node->recipe_description[LANGUAGE_NONE][0] = array(
       'value' => $parsed_recipe_object['title'] . ' imported from Recipe Import',
       'format' => 'filtered_html',
@@ -345,8 +344,11 @@ function recipe_import_get_node($parsed_recipe_object = FALSE) {
       'value' => isset($parsed_recipe_object['notes']) ? $parsed_recipe_object['notes'] : '',
       'format' => 'filtered_html',
     );
+    $node->recipe_source[LANGUAGE_NONE][0] = array(
+      'value' => $parsed_recipe_object['source'] != '' ? $parsed_recipe_object['source'] : $user->name,
+      'format' => 'filtered_html',
+    );
 
-    $node->recipe_source = $parsed_recipe_object['source'] != '' ? $parsed_recipe_object['source'] : $user->name;
     $node->recipe_yield = $parsed_recipe_object['yield'];
     $node->recipe_yield_unit = $parsed_recipe_object['yield_unit'];
     $node->recipe_preptime = $parsed_recipe_object['preptime'] != '' ? $parsed_recipe_object['preptime'] : 30;

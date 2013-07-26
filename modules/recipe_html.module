@@ -113,12 +113,6 @@ function theme_recipe_html_summary_box($variables) {
     $cols++;
   }
 
-  if (!empty($node->recipe_source)) {
-    $output .= '<tr><td colspan="' . $cols . '">';
-    $output .= t('Source') . ": " . $node->recipe_source;
-    $output .= '<td></tr>';
-  }
-
   if ( $cols > 0 ) {
     $output .= '<tr>';
   }

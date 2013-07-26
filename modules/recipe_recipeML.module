@@ -105,6 +105,15 @@ function recipe_recipeML_export_single($nid = NULL, $yield = NULL, $add_content_
     $recipe_notes = my_xml_escape($notes_items[0]['value'], TRUE);
   }
 
+  $source_items = field_get_items('node', $node, 'recipe_source');
+  $recipe_source = '';
+  if (!empty($source_items[0]['value'])) {
+    $recipe_source = my_xml_escape($source_items[0]['value'], TRUE);
+  }
+  else {
+    $recipe_source = url('node/' . $node->nid, array('absolute' => TRUE));
+  }
+
   $output = '';
   if ( $add_content_header == TRUE ) {
     $output .= '<?xml version="1.0" encoding="UTF-8"?>'."\n".
@@ -116,7 +125,7 @@ function recipe_recipeML_export_single($nid = NULL, $yield = NULL, $add_content_
     "<head>\n" .
     '<title>' . my_xml_escape($node->title) . "</title>\n".
     '      <version>' . date('m-d-Y', $node->changed) . "</version>\n" .
-    '      <source>' . my_xml_escape((($node->recipe_source == '') ? url('node/'.$node->nid, array('absolute' => TRUE)) : $node->recipe_source)) . "</source>\n" .
+    '      <source>' . $recipe_source . '</source>' . "\n" .
     '      <yield><qty>' . floatval($node->recipe_yield) . '</qty><unit>' . my_xml_escape(($node->recipe_yield_unit == '') ? t('Servings') : $node->recipe_yield_unit) . "</unit></yield>\n" .
     '      <preptime type="cooking"><time><qty>' . $node->recipe_preptime . '</qty><timeunit>minutes</timeunit></time></preptime>' .
     "\n$cat_string" .

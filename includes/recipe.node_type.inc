@@ -217,6 +217,73 @@ function _recipe_install_node_type() {
     ),
   );
 
+  // field_base: 'recipe_source'
+  $field_bases['recipe_source'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'recipe_source',
+    'foreign keys' => array(
+      'format' => array(
+        'columns' => array(
+          'format' => 'format',
+        ),
+        'table' => 'filter_format',
+      ),
+    ),
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(),
+    'translatable' => 0,
+    'type' => 'text_long',
+  );
+
+  // field_instance: 'node-recipe-recipe_source'
+  $field_instances['node-recipe-recipe_source'] = array(
+    'bundle' => 'recipe',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => 'Does anyone else deserve credit for this recipe?',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 0,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'recipe_source',
+    'label' => 'Source',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 1,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'rows' => 3,
+      ),
+      'type' => 'text_textarea',
+      'weight' => -1,
+    ),
+  );
+
   // Create the fields.
   foreach ($field_bases as $field) {
     field_create_field($field);
@@ -235,6 +302,7 @@ function _recipe_uninstall_node_type() {
     'recipe_description',
     'recipe_instructions',
     'recipe_notes',
+    'recipe_source',
   );
   foreach ($fields as $field) {
     field_delete_field($field);
