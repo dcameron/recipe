@@ -8,3 +8,4 @@ configure = admin/config/system/recipe
 files[] = recipe.test
 
 dependencies[] = text
+dependencies[] = number

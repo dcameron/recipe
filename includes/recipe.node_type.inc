@@ -284,6 +284,118 @@ function _recipe_install_node_type() {
     ),
   );
 
+  // field_base: 'recipe_preparation_time'
+  $field_bases['recipe_prep_time'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'recipe_prep_time',
+    'foreign keys' => array(),
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'number',
+    'settings' => array(),
+    'translatable' => 0,
+    'type' => 'number_integer',
+  );
+
+  // field_instance: 'node-recipe-recipe_prep_time'
+  $field_instances['node-recipe-recipe_prep_time'] = array(
+    'bundle' => 'recipe',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => 'How long does this recipe take to prepare, in <strong>minutes</strong>?',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'recipe',
+        'type' => 'recipe_duration',
+        'weight' => -3,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'recipe_prep_time',
+    'label' => 'Preparation time',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => 0,
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 0,
+    ),
+  );
+
+  // field_base: 'recipe_cook_time'
+  $field_bases['recipe_cook_time'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'recipe_cook_time',
+    'foreign keys' => array(),
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'number',
+    'settings' => array(),
+    'translatable' => 0,
+    'type' => 'number_integer',
+  );
+
+  // field_instance: 'node-recipe-recipe_cook_time'
+  $field_instances['node-recipe-recipe_cook_time'] = array(
+    'bundle' => 'recipe',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => 'How long does this recipe take to cook, in <strong>minutes</strong>?',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'recipe',
+        'type' => 'recipe_duration',
+        'weight' => -2,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'recipe_cook_time',
+    'label' => 'Cooking time',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => 0,
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 0,
+    ),
+  );
+
   // Create the fields.
   foreach ($field_bases as $field) {
     field_create_field($field);
@@ -303,6 +415,8 @@ function _recipe_uninstall_node_type() {
     'recipe_instructions',
     'recipe_notes',
     'recipe_source',
+    'recipe_prep_time',
+    'recipe_cook_time',
   );
   foreach ($fields as $field) {
     field_delete_field($field);

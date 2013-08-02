@@ -348,11 +348,15 @@ function recipe_import_get_node($parsed_recipe_object = FALSE) {
       'value' => $parsed_recipe_object['source'] != '' ? $parsed_recipe_object['source'] : $user->name,
       'format' => 'filtered_html',
     );
+    $node->recipe_prep_time[LANGUAGE_NONE][0] = array(
+      'value' => $parsed_recipe_object['preptime'] != '' ? $parsed_recipe_object['preptime'] : 30,
+    );
+    $node->recipe_cook_time[LANGUAGE_NONE][0] = array(
+      'value' => $parsed_recipe_object['cooktime'] != '' ? $parsed_recipe_object['cooktime'] : 30,
+    );
 
     $node->recipe_yield = $parsed_recipe_object['yield'];
     $node->recipe_yield_unit = $parsed_recipe_object['yield_unit'];
-    $node->recipe_preptime = $parsed_recipe_object['preptime'] != '' ? $parsed_recipe_object['preptime'] : 30;
-    $node->recipe_cooktime = $parsed_recipe_object['cooktime'] != '' ? $parsed_recipe_object['cooktime'] : 30;
 
     //ingredients, have to change them into node->ingredients format
     $ingredient_list = array();

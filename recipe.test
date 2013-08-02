@@ -49,7 +49,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $notes = '<em>' . $this->randomName(255) . '</em>';
     $instructions = '<em>' . $this->randomname(255) . '</em>';
     $preptime = 60;
-    $cooktime = 15;
+    $cooktime = 135;
 
     // Ingredient with quantity == 1 and unit tablespoon with note.
     $ing_0_quantity = 1;
@@ -89,8 +89,8 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
       'recipe_source[' . LANGUAGE_NONE . '][0][value]' => $source,
       'recipe_notes[' . LANGUAGE_NONE . '][0][value]' => $notes,
       'recipe_instructions[' . LANGUAGE_NONE . '][0][value]' => $instructions,
-      'recipe_preptime' => $preptime,
-      'recipe_cooktime' => $cooktime,
+      'recipe_prep_time[' . LANGUAGE_NONE . '][0][value]' => $preptime,
+      'recipe_cook_time[' . LANGUAGE_NONE . '][0][value]' => $cooktime,
       'recipe_ingredients[ing][0][quantity]' => $ing_0_quantity,
       'recipe_ingredients[ing][0][unit_key]' => $ing_0_unit,
       'recipe_ingredients[ing][0][name]' => $ing_0_name,
@@ -124,9 +124,9 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $this->assertRaw($source, 'Found the recipe source.');
     $this->assertRaw($notes, 'Found the recipe notes.');
     $this->assertRaw($instructions, 'Found the recipe instructions');
-    $this->assertText($this->formatTime($preptime), 'Found the recipe prep time.');
-    $this->assertText($this->formatTime($cooktime), 'Found the recipe cook time.');
-    $this->assertText($this->formatTime($preptime + $cooktime), 'Found the recipe total time.');
+    $this->assertText('1 hour', 'Found the recipe prep time.');
+    $this->assertText('2 hours, 15 minutes', 'Found the recipe cook time.');
+    $this->assertText('3 hours, 15 minutes', 'Found the recipe total time.');
 
     $this->assertText(t('@quantity @unit', array('@quantity' => $ing_0_quantity, '@unit' => $this->unit_list[$ing_0_unit]['abbreviation'])), 'Found ingredient 0 quantity and abbreviation.');
     $this->assertText(format_string('@name (@note)', array('@name' => $ing_0_name, '@note' => $ing_0_note)), 'Found ingredient 0 name and note.');
@@ -158,6 +158,16 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     );
     foreach ($properties as $property) {
       $this->assertRaw($property, format_string('Found the RDF property "@property" in the recipe node HTML.', array('@property' => $property)));
+    }
+
+    // Check the page HTML for the ISO 8601 recipe durations.
+    $durations = array(
+      'prep_time' => 'PT1H',
+      'cook_time' => 'PT2H15M',
+      'total_time' => 'PT3H15M',
+    );
+    foreach ($durations as $duration) {
+      $this->assertRaw($duration, format_string('Found the ISO 8601 duration "@duration" in the recipe node HTML.', array('@duration' => $duration)));
     }
 
     // Change the Recipe module settings.
@@ -230,9 +240,9 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $this->assertRaw($source, 'Found the recipe source.');
     $this->assertRaw($notes, 'Found the recipe notes.');
     $this->assertRaw($instructions, 'Found the recipe instructions');
-    $this->assertRaw(t('Prep time: @time', array('@time' => $this->formatHTMLTime($preptime))), 'Found the recipe prep time.');
-    $this->assertRaw(t('Cooking time: @time', array('@time' => $this->formatHTMLTime($cooktime))), 'Found the recipe cook time.');
-    $this->assertRaw(t('Total time: !time', array('!time' => $this->formatHTMLTime($preptime + $cooktime))), 'Found the recipe total time.');
+    $this->assertRaw('1 hour', 'Found the recipe prep time.');
+    $this->assertRaw('2 hours, 15 minutes', 'Found the recipe cook time.');
+    $this->assertRaw('3 hours, 15 minutes', 'Found the recipe total time.');
 
     $this->assertRaw(format_string('@quantity @unit', array('@quantity' => $ing_0_quantity, '@unit' => $this->unit_list[$ing_0_unit]['name'])), 'Found ingredient 0 quantity and unit name.');
     $this->assertRaw(format_string('@name (@note)', array('@name' => $ing_0_name, '@note' => $ing_0_note)), 'Found ingredient 0 name and note.');
@@ -257,10 +267,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $this->assertRaw(format_string('Recipe By     : @source', array('@source' => filter_xss($source, array()))), 'Found the recipe source.');
     $this->assertRaw(filter_xss($notes, array()), 'Found the recipe notes.');
     $this->assertRaw(filter_xss($instructions, array()), 'Found the recipe instructions');
-    $hours = (int) ($preptime / 60);
-    $minutes = $preptime % 60;
-    $mastercook_time = $hours . ':' . $minutes;
-    $this->assertRaw(format_string('Preparation Time :@time', array('@time' => $mastercook_time)), 'Found the recipe prep time.');
+    $this->assertRaw('Preparation Time : 1:00', 'Found the recipe prep time.');
     // The MasterCook4 format does not output the cook time.
     // The MasterCook4 format does not output the total time.
     $this->assertRaw(format_string('@quantity  @unit    @name -- @note', array('@quantity' => $ing_0_quantity, '@unit' => $this->unit_list[$ing_0_unit]['name'], '@name' => $ing_0_name, '@note' => $ing_0_note)), 'Found ingredient 0.');
@@ -358,8 +365,20 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
           ),
         ),
       ),
-      'recipe_preptime' => $preptime_1,
-      'recipe_cooktime' => $cooktime_1,
+      'recipe_prep_time' => array(
+        LANGUAGE_NONE => array(
+          0 => array(
+            'value' => $preptime_1,
+          ),
+        ),
+      ),
+      'recipe_cook_time' => array(
+        LANGUAGE_NONE => array(
+          0 => array(
+            'value' => $cooktime_1,
+          ),
+        ),
+      ),
       'recipe_ingredients' => array(
         'ing' => array(
           0 => array(
@@ -420,8 +439,20 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
           ),
         ),
       ),
-      'recipe_preptime' => $preptime_2,
-      'recipe_cooktime' => $cooktime_2,
+      'recipe_prep_time' => array(
+        LANGUAGE_NONE => array(
+          0 => array(
+            'value' => $preptime_2,
+          ),
+        ),
+      ),
+      'recipe_cook_time' => array(
+        LANGUAGE_NONE => array(
+          0 => array(
+            'value' => $cooktime_2,
+          ),
+        ),
+      ),
       'recipe_ingredients' => array(
         'ing' => array(
           0 => array(
@@ -451,10 +482,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $this->assertRaw(format_string('Recipe By     : @source', array('@source' => $source_1)), 'Found the recipe source.');
     $this->assertRaw($notes_1, 'Found the recipe notes.');
     $this->assertRaw($instructions_1, 'Found the recipe instructions');
-    $hours = (int) ($preptime_1 / 60);
-    $minutes = $preptime_1 % 60;
-    $mastercook_time = $hours . ':' . $minutes;
-    $this->assertRaw(format_string('Preparation Time :@time', array('@time' => $mastercook_time)), 'Found the recipe prep time.' . $mastercook_time);
+    $this->assertRaw('Preparation Time : 0:30', 'Found the recipe prep time.');
     // The MasterCook4 format does not output the cook time.
     // The MasterCook4 format does not output the total time.
     $this->assertRaw(format_string('@quantity  @unit             @name -- @note', array('@quantity' => $quantity_1, '@unit' => $this->unit_list[$unit_key_1]['abbreviation'], '@name' => $ingredient_name_1, '@note' => $ingredient_note_1)), 'Found ingredient 0.');
@@ -466,10 +494,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $this->assertRaw(format_string('Recipe By     : @source', array('@source' => $source_2)), 'Found the recipe source.');
     $this->assertRaw($notes_2, 'Found the recipe notes.');
     $this->assertRaw($instructions_2, 'Found the recipe instructions');
-    $hours = (int) ($preptime_2 / 60);
-    $minutes = $preptime_2 % 60;
-    $mastercook_time = $hours . ':' . $minutes;
-    $this->assertRaw(format_string('Preparation Time :@time', array('@time' => $mastercook_time)), 'Found the recipe prep time.' . $mastercook_time);
+    $this->assertRaw('Preparation Time : 0:15', 'Found the recipe prep time.');
     // The MasterCook4 format does not output the cook time.
     // The MasterCook4 format does not output the total time.
     $this->assertRaw(format_string('@quantity  @unit             @name -- @note', array('@quantity' => $quantity_2, '@unit' => $this->unit_list[$unit_key_2]['abbreviation'], '@name' => $ingredient_name_2, '@note' => $ingredient_note_2)), 'Found ingredient 0.');
@@ -524,46 +549,6 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     // The recipeML format does not output the total time.
     $this->assertRaw(format_string('<ing><amt><qty>@quantity</qty><unit>@unit</unit></amt><item>@name</item><prep>@note</prep></ing>', array('@quantity' => $quantity_2, '@unit' => $this->unit_list[$unit_key_2]['abbreviation'], '@name' => $ingredient_name_2, '@note' => $ingredient_note_2)), 'Found ingredient 0.');
   }
-
-  /**
-   * Format recipe times for display.
-   *
-   * @todo This function and the code its copied from in theme_recipe_summary()
-   * need to be replaced with an equivalent function in recipe.module.
-   */
-  protected function formatTime($time) {
-    $_o_minutes = $time;
-    $_hours = floor($_o_minutes / 60);
-    $_minutes = $_o_minutes - ($_hours * 60);
-    $_text = '';
-    if ($_hours > 0) {
-      $_text = format_plural($_hours, '1 hour', '@count hours');
-    }
-    if ($_minutes > 0) {
-      if (strlen($_text) > 0) {
-        $_text .= ', ';
-      }
-      $_text .= format_plural($_minutes, '1 minute', '@count minutes');
-    }
-    return $_text;
-  }
-
-  /**
-   * Format recipe times for display on the HTML export.
-   *
-   * @todo This horrible time display logic needs to be eliminated.
-   */
-  protected function formatHTMLTime($time) {
-    if ($time < 60) {
-      return format_plural($time, '1 minute', '@count minutes');
-    }
-    elseif ($time % 60 == 0) {
-      return format_plural($time / 60, '1 hour', '@count hours');
-    }
-    else {
-      return t('!time hours', array('!time' => recipe_ingredient_quantity_from_decimal($time / 60)));
-    }
-  }
 }
 
 /**
@@ -609,8 +594,20 @@ class RecipeYieldFormTestCase extends RecipeWebTestCase {
       'recipe_notes' => array(
         'value' => '',
       ),
-      'recipe_preptime' => 1,
-      'recipe_cooktime' => 1,
+      'recipe_prep_time' => array(
+        LANGUAGE_NONE => array(
+          0 => array(
+            'value' => 1,
+          ),
+        ),
+      ),
+      'recipe_cook_time' => array(
+        LANGUAGE_NONE => array(
+          0 => array(
+            'value' => 1,
+          ),
+        ),
+      ),
       'recipe_ingredients' => array(
         'ing' => array(
           0 => array(
@@ -701,8 +698,20 @@ class RecipeLandingPageTestCase extends RecipeWebTestCase {
       'recipe_notes' => array(
         'value' => '',
       ),
-      'recipe_preptime' => 1,
-      'recipe_cooktime' => 1,
+      'recipe_prep_time' => array(
+        LANGUAGE_NONE => array(
+          0 => array(
+            'value' => 1,
+          ),
+        ),
+      ),
+      'recipe_cook_time' => array(
+        LANGUAGE_NONE => array(
+          0 => array(
+            'value' => 1,
+          ),
+        ),
+      ),
       'recipe_ingredients' => array(
         'ing' => array(),
       ),
@@ -1105,7 +1114,7 @@ class RecipeUpdatePathTestCase extends UpdatePathTestCase {
     );
     parent::setUp();
 
-    $this->uninstallModulesExcept(array('field', 'field_sql_storage', 'text', 'recipe'));
+    $this->uninstallModulesExcept(array('field', 'field_sql_storage', 'text', 'number', 'recipe'));
   }
 
   /**
@@ -1125,5 +1134,7 @@ class RecipeUpdatePathTestCase extends UpdatePathTestCase {
     $this->assertEqual($node->recipe_notes[LANGUAGE_NONE][0]['format'], 'filtered_html', 'The recipe notes text format was set to filtered_html.');
     $this->assertEqual($node->recipe_source[LANGUAGE_NONE][0]['value'], "John Doe", 'The recipe source was migrated.');
     $this->assertEqual($node->recipe_source[LANGUAGE_NONE][0]['format'], 'filtered_html', 'The recipe source text format was set to filtered_html.');
+    $this->assertEqual($node->recipe_prep_time[LANGUAGE_NONE][0]['value'], 1, 'The recipe preparation time was migrated.');
+    $this->assertEqual($node->recipe_cook_time[LANGUAGE_NONE][0]['value'], 2, 'The recipe cooking time was migrated.');
   }
 }

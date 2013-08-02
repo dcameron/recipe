@@ -114,6 +114,12 @@ function recipe_recipeML_export_single($nid = NULL, $yield = NULL, $add_content_
     $recipe_source = url('node/' . $node->nid, array('absolute' => TRUE));
   }
 
+  $prep_time_items = field_get_items('node', $node, 'recipe_prep_time');
+  $recipe_prep_time = 0;
+  if (!empty($prep_time_items[0]['value'])) {
+    $recipe_prep_time = $prep_time_items[0]['value'];
+  }
+
   $output = '';
   if ( $add_content_header == TRUE ) {
     $output .= '<?xml version="1.0" encoding="UTF-8"?>'."\n".
@@ -127,7 +133,7 @@ function recipe_recipeML_export_single($nid = NULL, $yield = NULL, $add_content_
     '      <version>' . date('m-d-Y', $node->changed) . "</version>\n" .
     '      <source>' . $recipe_source . '</source>' . "\n" .
     '      <yield><qty>' . floatval($node->recipe_yield) . '</qty><unit>' . my_xml_escape(($node->recipe_yield_unit == '') ? t('Servings') : $node->recipe_yield_unit) . "</unit></yield>\n" .
-    '      <preptime type="cooking"><time><qty>' . $node->recipe_preptime . '</qty><timeunit>minutes</timeunit></time></preptime>' .
+    '      <preptime type="cooking"><time><qty>' . $recipe_prep_time . '</qty><timeunit>minutes</timeunit></time></preptime>' .
     "\n$cat_string" .
     "</head>\n" .
     '<description>' . $recipe_description . "</description>\n" .

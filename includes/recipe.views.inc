@@ -91,40 +91,6 @@ function recipe_views_data() {
     ),
   );
 
-  $data['recipe']['preptime'] = array(
-    'title' => t('Prep time'),
-    'help' => t("The prep time for this recipe."),
-    'field' => array(
-      'handler' => 'views_handler_field',
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument_numeric',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_numeric',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  $data['recipe']['cooktime'] = array(
-    'title' => t('Cook time'),
-    'help' => t("The cook time for this recipe."),
-    'field' => array(
-      'handler' => 'views_handler_field',
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument_numeric',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_numeric',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
   /*
    * Ingredient table section.
    */

@@ -72,11 +72,6 @@ function recipe_mastercook4_export_single($nid = NULL, $yield = NULL) {
 }
 
 function merge_template($node) {
-  //prepare prepare time
-  $decimal_hours = $node->recipe_preptime/60;
-  $hours = floor($decimal_hours);
-  $minutes = sprintf("%02d", floor(($decimal_hours - $hours)*60));
-  $preptime = "$hours:$minutes";
   $categories = '';
   //prepare ingredients
   $factor = 1;
@@ -136,7 +131,15 @@ function merge_template($node) {
   // merge serving size
   $template = str_replace("<<servingsize>>", $node->recipe_yield, $template);
   // merge preptime
-  $template = str_replace("<<preptime>>", $preptime, $template);
+  $prep_time_items = field_get_items('node', $node, 'recipe_prep_time');
+  $recipe_prep_time = '0:00';
+  if (!empty($prep_time_items[0]['value'])) {
+    $duration = $prep_time_items[0]['value'];
+    $hours = floor($duration / 60);
+    $minutes = sprintf("%02d", $duration % 60);
+    $recipe_prep_time = $hours . ':' . $minutes;
+  }
+  $template = str_replace("<<preptime>>", $recipe_prep_time, $template);
   // merge categories
   $template = str_replace("<<categories>>", $categories, $template);
   // merge ingredients
@@ -175,7 +178,7 @@ $template = "
 <<title>>
 
 Recipe By     : <<recipeby>>
-Serving Size  : <<servingsize>>   Preparation Time :<<preptime>>
+Serving Size  : <<servingsize>>   Preparation Time : <<preptime>>
 Categories    : <<categories>>
 
   Amount  Measure       Ingredient -- Preparation Method

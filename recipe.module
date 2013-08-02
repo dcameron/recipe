@@ -38,6 +38,9 @@ function recipe_theme($existing, $type, $theme, $path) {
       'function' => 'theme_recipe_summary',
       'variables' => array('node' => NULL, 'show_title' => TRUE),
     ),
+    'recipe_duration' => array(
+      'variables' => array('duration' => 0),
+    ),
     'recipe_ingredients' => array(
       'function' => 'theme_recipe_ingredients',
       'variables' => array('node' => NULL),
@@ -69,8 +72,6 @@ function recipe_load($nodes) {
   foreach ($result as $record) {
     $nodes[$record->nid]->recipe_yield = $record->yield;
     $nodes[$record->nid]->recipe_yield_unit = $record->yield_unit;
-    $nodes[$record->nid]->recipe_preptime = $record->preptime;
-    $nodes[$record->nid]->recipe_cooktime = $record->cooktime;
     $nodes[$record->nid]->recipe_ingredients['ing'] = recipe_load_ingredients($record->nid);
   }
 }
@@ -99,8 +100,6 @@ function recipe_insert($node) {
       'nid' => $node->nid,
       'yield' => $node->recipe_yield,
       'yield_unit' => $node->recipe_yield_unit,
-      'preptime' => $node->recipe_preptime,
-      'cooktime' => $node->recipe_cooktime,
     ))
     ->execute();
 
@@ -118,8 +117,6 @@ function recipe_update($node) {
     ->fields(array(
       'yield' => $node->recipe_yield,
       'yield_unit' => $node->recipe_yield_unit,
-      'preptime' => $node->recipe_preptime,
-      'cooktime' => $node->recipe_cooktime,
     ))
     ->condition('nid', $node->nid)
     ->execute();
@@ -360,23 +357,6 @@ function recipe_form($node, &$form_state) {
       'wrapper' => 'ingredients-wrapper',
       'effect' => 'fade',
     ),
-  );
-
-  $form['recipe_preptime'] = array(
-    '#type' => 'textfield',
-    '#size' => 10,
-    '#maxlength' => 10,
-    '#title' => t('Preparation time'),
-    '#default_value' => !empty($node->recipe_preptime) ? $node->recipe_preptime : 0,
-    '#description' => t('How long does this recipe take to prepare, in <strong>minutes</strong>.  Utilize 0 for N/A.'),
-  );
-  $form['recipe_cooktime'] = array(
-    '#type' => 'textfield',
-    '#size' => 10,
-    '#maxlength' => 10,
-    '#title' => t('Cooking time'),
-    '#default_value' => !empty($node->recipe_cooktime) ? $node->recipe_cooktime : 0,
-    '#description' => t('How long does this recipe take to cook, in <strong>minutes</strong>. Utilize 0 for N/A.'),
   );
 
   return $form;
@@ -672,6 +652,53 @@ function recipe_node_view($node, $view_mode) {
 }
 
 /**
+ * Implements hook_field_formatter_info().
+ */
+function recipe_field_formatter_info() {
+  return array(
+    'recipe_duration' => array(
+      'label' => t('Recipe duration'),
+      'field types' => array('number_integer'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function recipe_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $elements = array();
+  switch ($display['type']) {
+    case 'recipe_duration':
+      foreach ($items as $delta => $item) {
+        $elements[$delta] = array(
+          '#theme' => $display['type'],
+          '#duration' => $item['value'],
+        );
+      }
+      break;
+  }
+  return $elements;
+}
+
+/**
+ * Returns a string for displaying an integer field as a recipe duration.
+ */
+function theme_recipe_duration($variables) {
+  $duration = $variables['duration'];
+  $hours = floor($duration / 60);
+  $minutes = $duration % 60;
+  $output = array();
+  if ($hours > 0) {
+    $output['hours'] = format_plural($hours, '1 hour', '@count hours');
+  }
+  if ($minutes > 0 || $duration == 0) {
+    $output['minutes'] = format_plural($minutes, '1 minute', '@count minutes');
+  }
+  return implode(', ', $output);
+}
+
+/**
  * Returns HTML for displaying the table of ingredients.
  */
 function theme_recipe_ingredients($variables) {
@@ -762,76 +789,14 @@ function theme_recipe_summary($variables) {
   $yield_form = drupal_get_form('recipe_yield_form', $node, $show_yield_form);
   $output .= '<tr><th class="summary-title">' . t('Yield') . '</th><td class="summary-data">' . drupal_render($yield_form) . '</td></tr>';
 
-  if (isset($node->recipe_preptime)) {
-    $_o_minutes = $node->recipe_preptime;
-    $_hours = floor($_o_minutes / 60);
-    $_minutes = $_o_minutes - ($_hours * 60);
-    $_text = '';
-    if ($_hours > 0) {
-      $_text = format_plural($_hours, '1 hour', '@count hours');
-    }
-    if ($_minutes > 0) {
-      if (strlen($_text) > 0) {
-        $_text .= ', ';
-      }
-      $_text .= format_plural($_minutes, '1 minute', '@count minutes');
-    }
-
-
-    // Wrap description in RDFa markup.
-    if ( !empty($node->rdf_mapping['recipe_preptime']) ) {
-      $attributes = rdf_rdfa_attributes($node->rdf_mapping['recipe_preptime']);
-      $attributes['content'] = array(recipe_duration_iso8601($_o_minutes));
-      $_text = theme('rdf_template_variable_wrapper', array('content' => $_text, 'attributes' => $attributes, 'inline' => FALSE));
-    }
-
-    $output .= '<tr><th>' . t('Prep time') . '</th><td>' . $_text . '</td></tr>';
-  }
-
-  if (isset($node->recipe_cooktime)) {
-    $_o_minutes = $node->recipe_cooktime;
-    $_hours = floor($_o_minutes / 60);
-    $_minutes = $_o_minutes - ($_hours * 60);
-    $_text = '';
-    if ($_hours > 0) {
-      $_text = format_plural($_hours, '1 hour', '@count hours');
-    }
-    if ($_minutes > 0) {
-      if (strlen($_text) > 0) {
-        $_text .= ', ';
-      }
-      $_text .= format_plural($_minutes, '1 minute', '@count minutes');
-    }
-
-    // Wrap description in RDFa markup.
-    if ( !empty($node->rdf_mapping['recipe_cooktime']) ) {
-      $attributes = rdf_rdfa_attributes($node->rdf_mapping['recipe_cooktime']);
-      $attributes['content'] = array(recipe_duration_iso8601($_o_minutes));
-      $_text = theme('rdf_template_variable_wrapper', array('content' => $_text, 'attributes' => $attributes, 'inline' => FALSE));
-    }
-
-    $output .= '<tr><th>' . t('Cooking time') . '</th><td>' . $_text . '</td></tr>';
-  }
-
-  if (isset($node->recipe_cooktime) && isset($node->recipe_preptime)) {
-    $_o_minutes = $node->recipe_cooktime + $node->recipe_preptime;
-    $_hours = floor($_o_minutes / 60);
-    $_minutes = $_o_minutes - ($_hours * 60);
-    $_text = '';
-    if ($_hours > 0) {
-      $_text = format_plural($_hours, '1 hour', '@count hours');
-    }
-    if ($_minutes > 0) {
-      if (strlen($_text) > 0) {
-        $_text .= ', ';
-      }
-      $_text .= format_plural($_minutes, '1 minute', '@count minutes');
-    }
-
-    // Wrap description in RDFa markup.
-    if ( !empty($node->rdf_mapping['recipe_totaltime']) ) {
+  // Print the total time if the prep and cook times are set.
+  if (isset($node->recipe_cook_time[LANGUAGE_NONE][0]['value']) && isset($node->recipe_prep_time[LANGUAGE_NONE][0]['value'])) {
+    $duration = $node->recipe_cook_time[LANGUAGE_NONE][0]['value'] + $node->recipe_prep_time[LANGUAGE_NONE][0]['value'];
+    $_text = theme('recipe_duration', array('duration' => $duration));
+    // Wrap the total time in RDFa markup.
+    if (!empty($node->rdf_mapping['recipe_totaltime'])) {
       $attributes = rdf_rdfa_attributes($node->rdf_mapping['recipe_totaltime']);
-      $attributes['content'] = array(recipe_duration_iso8601($_o_minutes));
+      $attributes['content'] = array(recipe_duration_iso8601($duration));
       $_text = theme('rdf_template_variable_wrapper', array('content' => $_text, 'attributes' => $attributes, 'inline' => FALSE));
     }
 
@@ -1058,15 +1023,6 @@ function recipe_validate($node, $form, &$form_state) {
     }
   }
 
-  if (!is_numeric($form_state['values']['recipe_preptime']) || $form_state['values']['recipe_preptime'] < 0) {
-    form_set_error('recipe_preptime', t('Preparation time must be a valid positive integer. Utilize 0 for N/A.'));
-    $return = FALSE;
-  }
-  if (!is_numeric($form_state['values']['recipe_cooktime']) || $form_state['values']['recipe_cooktime'] < 0) {
-    form_set_error('recipe_cooktime', t('Cooking time must be a valid positive integer. Utilize 0 for N/A.'));
-    $return = FALSE;
-  }
-
   return $return;
 }
 
@@ -1270,16 +1226,6 @@ function recipe_field_extra_fields() {
         'description' => t('Recipe module element'),
         'weight' => -2,
       ),
-      'recipe_preptime' => array(
-        'label' => t('Preparation time'),
-        'description' => t('Recipe module element'),
-        'weight' => 0,
-      ),
-      'recipe_cooktime' => array(
-        'label' => t('Cooking time'),
-        'description' => t('Recipe module element'),
-        'weight' => 0,
-      ),
     ),
     'display' => array(
       'recipe_ingredients' => array(
@@ -1344,11 +1290,15 @@ function recipe_rdf_mapping() {
         'recipe_description' => array(
           'predicates' => array('schema:summary'),
         ),
-        'recipe_preptime' => array(
+        'recipe_prep_time' => array(
           'predicates' => array('schema:prepTime'),
+          'datatype' => 'xsd:duration',
+          'callback' => 'recipe_duration_iso8601',
         ),
-        'recipe_cooktime' => array(
+        'recipe_cook_time' => array(
           'predicates' => array('schema:cookTime'),
+          'datatype' => 'xsd:duration',
+          'callback' => 'recipe_duration_iso8601',
         ),
         'recipe_totaltime' => array(
           'predicates' => array('schema:totalTime'),
@@ -1362,12 +1312,27 @@ function recipe_rdf_mapping() {
 }
 
 /**
- * Wraps a duration string in ISO-8859 format.
+ * Returns a duration string in ISO 8601 format.
  *
- * This is used for RDFa duration elements.
+ * @param $duration
+ *   An integer or array with 'value' element representing a time duration.
+ * @return string
+ *   A string representing a time duration in ISO 8601 format.
  */
-function recipe_duration_iso8601($data = '') {
-  return 'PT' . $data . 'M';
+function recipe_duration_iso8601($duration = 0) {
+  if (is_array($duration) && isset($duration['value'])) {
+    $duration = $duration['value'];
+  }
+  $hours = floor($duration / 60);
+  $minutes = $duration % 60;
+  $output = '';
+  if ($hours > 0) {
+    $output .= $hours . 'H';
+  }
+  if ($minutes > 0) {
+    $output .= $minutes . 'M';
+  }
+  return empty($output) ? 'PT0M' : 'PT' . $output;
 }
 
 /**

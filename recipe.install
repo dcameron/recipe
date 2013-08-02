@@ -585,3 +585,87 @@ function recipe_update_7205(&$sandbox) {
 
   $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
 }
+
+/**
+ * Move recipe preparation times in {recipe}.preptime into the new field.
+ */
+function recipe_update_7206(&$sandbox) {
+  // Don't migrate prep times that are equal to 0. Version 7.x-1.x did not
+  // display 0-value prep times, which should be replaced by an empty field.
+  if (!isset($sandbox['progress'])) {
+    $sandbox['progress'] = 0;
+    $sandbox['current_nid'] = 0;
+    $sandbox['max'] = db_query('SELECT COUNT(DISTINCT nid) FROM {recipe} WHERE preptime IS NOT NULL && preptime != 0')->fetchField();
+  }
+
+  $query = db_select('recipe', 'r');
+  $query->join('node', 'n', 'r.nid = n.nid');
+  $query->fields('r', array('nid', 'preptime'))
+    ->fields('n', array('vid'))
+    ->condition('r.nid', $sandbox['current_nid'], '>')
+    ->condition('r.preptime', 0, '!=')
+    ->isNotNull('preptime')
+    ->orderBy('nid', 'ASC')
+    ->range(0, 100);
+  $recipes = $query->execute();
+
+  foreach ($recipes as $recipe) {
+    db_insert('field_data_recipe_prep_time')
+      ->fields(array(
+        'entity_type' => 'node',
+        'bundle' => 'recipe',
+        'entity_id' => $recipe->nid,
+        'revision_id' => $recipe->vid,
+        'language' => LANGUAGE_NONE,
+        'delta' => 0,
+        'recipe_prep_time_value' => $recipe->preptime,
+      ))
+      ->execute();
+    $sandbox['progress']++;
+    $sandbox['current_nid'] = $recipe->nid;
+  }
+
+  $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
+}
+
+/**
+ * Move recipe cooking times in {recipe}.cooktime into the new field.
+ */
+function recipe_update_7207(&$sandbox) {
+  // Don't migrate cook times that are equal to 0. Version 7.x-1.x did not
+  // display 0-value cook times, which should be replaced by an empty field.
+  if (!isset($sandbox['progress'])) {
+    $sandbox['progress'] = 0;
+    $sandbox['current_nid'] = 0;
+    $sandbox['max'] = db_query('SELECT COUNT(DISTINCT nid) FROM {recipe} WHERE cooktime IS NOT NULL && cooktime != 0')->fetchField();
+  }
+
+  $query = db_select('recipe', 'r');
+  $query->join('node', 'n', 'r.nid = n.nid');
+  $query->fields('r', array('nid', 'cooktime'))
+    ->fields('n', array('vid'))
+    ->condition('r.nid', $sandbox['current_nid'], '>')
+    ->condition('r.cooktime', 0, '!=')
+    ->isNotNull('cooktime')
+    ->orderBy('nid', 'ASC')
+    ->range(0, 100);
+  $recipes = $query->execute();
+
+  foreach ($recipes as $recipe) {
+    db_insert('field_data_recipe_cook_time')
+      ->fields(array(
+        'entity_type' => 'node',
+        'bundle' => 'recipe',
+        'entity_id' => $recipe->nid,
+        'revision_id' => $recipe->vid,
+        'language' => LANGUAGE_NONE,
+        'delta' => 0,
+        'recipe_cook_time_value' => $recipe->cooktime,
+      ))
+      ->execute();
+    $sandbox['progress']++;
+    $sandbox['current_nid'] = $recipe->nid;
+  }
+
+  $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
+}
