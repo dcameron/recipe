@@ -76,7 +76,7 @@ function recipe_html_theme() {
 }
 
 function template_preprocess_recipe_html_page(&$variables) {
-  $css_path = drupal_get_path("module", "recipe") . "/includes/recipe_html.css";
+  $css_path = drupal_get_path("module", "recipe") . "/modules/recipe_html.css";
   $variables['styles'] = '<style type="text/css" media="all">@import url("' . file_create_url($css_path) . '");</style>';
 
   $variables['title'] = check_plain($variables['node']->title);
