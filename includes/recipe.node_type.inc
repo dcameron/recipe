@@ -396,6 +396,77 @@ function _recipe_install_node_type() {
     ),
   );
 
+  // field_base: 'recipe_ingredient'
+  $field_bases['recipe_ingredient'] = array(
+    'active' => 1,
+    'cardinality' => -1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'recipe_ingredient',
+    'foreign keys' => array(
+      'iid' => array(
+        'columns' => array(
+          'iid' => 'id',
+        ),
+        'table' => 'recipe_ingredient',
+      ),
+    ),
+    'indexes' => array(
+      'iid' => array(
+        0 => 'iid',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'recipe',
+    'settings' => array(
+      'ingredient_name_normalize' => variable_get('recipe_ingredient_name_normalize', 0),
+    ),
+    'translatable' => 0,
+    'type' => 'ingredient_reference',
+  );
+
+  // field_instance: 'node-page-recipe_ingredient'
+  $field_instances['node-page-recipe_ingredient'] = array(
+    'bundle' => 'recipe',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'recipe',
+        'settings' => array(
+          'fraction_format' => variable_get('recipe_fraction_display', '{%d }%d&frasl;%d'),
+          'unit_abbreviation' => variable_get('recipe_unit_display', 0),
+        ),
+        'type' => 'recipe_ingredient_default',
+        'weight' => -2,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'recipe_ingredient',
+    'label' => 'Ingredients',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'recipe',
+      'settings' => array(
+        'default_unit' => variable_get('recipe_default_unit', ''),
+      ),
+      'type' => 'recipe_ingredient_autocomplete',
+      'weight' => -2,
+    ),
+  );
+
   // Create the fields.
   foreach ($field_bases as $field) {
     field_create_field($field);
@@ -417,6 +488,7 @@ function _recipe_uninstall_node_type() {
     'recipe_source',
     'recipe_prep_time',
     'recipe_cook_time',
+    'recipe_ingredient',
   );
   foreach ($fields as $field) {
     field_delete_field($field);

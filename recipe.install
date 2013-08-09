@@ -85,53 +85,6 @@ function recipe_schema() {
     'primary key' => array('nid'),
   );
 
-  $schema['recipe_node_ingredient'] = array(
-    'description' => 'The base table for recipe ingredients.',
-    'fields' => array(
-      'id' => array(
-        'description' => 'The primary identifier for a recipe ingredient.',
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'nid' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'unit_key' => array(
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Untranslated unit key from the units array.',
-      ),
-      'quantity' => array(
-        'type' => 'float',
-        'not null' => FALSE,
-      ),
-      'ingredient_id' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'weight' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => 'Ingredient weight within recipe.',
-      ),
-      'note' => array(
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Ingredient processing or notes related to recipe.',
-      ),
-    ),
-    'primary key' => array('id'),
-  );
-
   $schema['recipe_ingredient'] = array(
     'description' => 'The base table for recipe ingredients.',
     'fields' => array(
@@ -155,6 +108,49 @@ function recipe_schema() {
   );
 
   return $schema;
+}
+
+/**
+ * Implements hook_field_schema().
+ */
+function recipe_field_schema($field) {
+  return array(
+    'columns' => array(
+      'iid' => array(
+        'description' => 'The {recipe_ingredient}.id referenced by field.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+      ),
+      'quantity' => array(
+        'type' => 'float',
+        'not null' => FALSE,
+      ),
+      'unit_key' => array(
+        'description' => 'Untranslated unit key from the units array.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'note' => array(
+        'description' => 'Ingredient processing or notes related to recipe.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'indexes' => array(
+      'iid' => array('iid'),
+    ),
+    'foreign keys' => array(
+      'iid' => array(
+        'table' => 'recipe_ingredient',
+        'columns' => array('iid' => 'id'),
+      ),
+    ),
+  );
 }
 
 /**
@@ -668,4 +664,70 @@ function recipe_update_7207(&$sandbox) {
   }
 
   $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
+}
+
+/**
+ * Move ingredient references in {recipe_node_ingredient} into the new field.
+ */
+function recipe_update_7208(&$sandbox) {
+  if (!isset($sandbox['progress'])) {
+    $sandbox['progress'] = 0;
+    $sandbox['current_nid'] = 0;
+    $sandbox['max'] = db_query('SELECT COUNT(DISTINCT id) FROM {recipe_node_ingredient} WHERE ingredient_id IS NOT NULL')->fetchField();
+  }
+
+  $query = db_select('recipe_node_ingredient', 'r');
+  $query->join('node', 'n', 'r.nid = n.nid');
+  $query->fields('r', array('nid', 'unit_key', 'quantity', 'ingredient_id', 'note'))
+    ->fields('n', array('vid'))
+    ->condition('r.nid', $sandbox['current_nid'], '>')
+    ->isNotNull('ingredient_id')
+    ->orderBy('nid', 'ASC')
+    ->range(0, 100);
+  $ingredient_references = $query->execute();
+
+  // Track the last delta given to a node's field value.
+  // {recipe_node_ingredient}.weight can't be copied over since it may have
+  // duplicate values, which would violate the field's primary index unique
+  // integrity.
+  $last_deltas = array();
+  foreach ($ingredient_references as $ingredient_reference) {
+    $nid = $ingredient_reference->nid;
+    if (isset($last_deltas[$nid])) {
+      $last_deltas[$nid]++;
+    }
+    else {
+      $last_deltas[$nid] = 0;
+    }
+
+    db_insert('field_data_recipe_ingredient')
+      ->fields(array(
+        'entity_type' => 'node',
+        'bundle' => 'recipe',
+        'entity_id' => $nid,
+        'revision_id' => $ingredient_reference->vid,
+        'language' => LANGUAGE_NONE,
+        'delta' => $last_deltas[$nid],
+        'recipe_ingredient_iid' => $ingredient_reference->ingredient_id,
+        'recipe_ingredient_quantity' => $ingredient_reference->quantity,
+        'recipe_ingredient_unit_key' => $ingredient_reference->unit_key,
+        'recipe_ingredient_note' => $ingredient_reference->note,
+      ))
+      ->execute();
+    $sandbox['progress']++;
+    $sandbox['current_nid'] = $ingredient_reference->nid;
+  }
+
+  $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
+}
+
+/**
+ * Delete {recipe_node_ingredient} and remove old setting variables.
+ */
+function recipe_update_7209(&$sandbox) {
+  db_drop_table('recipe_node_ingredient');
+  variable_del('recipe_fraction_display');
+  variable_del('recipe_unit_display');
+  variable_del('recipe_default_unit');
+  variable_del('recipe_add_more_count');
 }

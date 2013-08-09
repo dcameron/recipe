@@ -98,19 +98,6 @@ function recipe_views_data() {
   // Group
   $data['recipe_ingredient']['table']['group'] = t('Recipe');
 
-  // Joins
-  $data['recipe_ingredient']['table']['join']['node'] = array(
-    'left_table' => 'recipe_node_ingredient',
-    'left_field'    => 'ingredient_id',
-    'field'         => 'id',
-  );
-
-  $data['recipe_node_ingredient']['table']['join']['node'] = array(
-    'left_field'    => 'nid',
-    'field'         => 'nid',
-  );
-
-
   // Fields
   $data['recipe_ingredient']['id'] = array(
     'title' => t('Ingredient ID'),

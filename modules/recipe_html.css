@@ -17,21 +17,14 @@ h2 {
 .recipe-section {
 	margin-top: 2pt;
 }
-.recipe-ingredients {
-  padding-left: 40pt;
-  text-indent: -40pt;
-}
-.recipe-ingredients .section {
-	margin-left: 10pt
-}
 
 .recipe-instructions ol {
 	margin-left: 20pt;
 }
 
-.recipe-ingredients .quantity-unit {
-  float: left;
-  width: 45pt;
+.field-type-ingredient-reference .quantity-unit {
+  display: inline-block;
+  width: 7em;
   letter-spacing: 1.5pt;
 }
 

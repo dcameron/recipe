@@ -182,7 +182,7 @@ function recipe_plaintext_export($nid = NULL, $yield = NULL) {
 
   $output = $node->title . "\n\n";
   $output .= t('Ingredients:') . "\n";
-  $output .= format_plaintext_ingredients($node) . "\n";
+  $output .= recipe_plaintext_format_ingredients($node) . "\n";
   $output .= t('Instructions:') . "\n";
   $instructions_items = field_get_items('node', $node, 'recipe_instructions');
   $output .= wordwrap(strip_html_and_encode_entities($instructions_items[0]['value']), 75, "\n") . "\n\n";
@@ -197,7 +197,15 @@ function recipe_plaintext_export($nid = NULL, $yield = NULL) {
   return $output;
 }
 
-function format_plaintext_ingredients($node = NULL) {
+/**
+ * Formats an ingredient for display as a MasterCook4 recipe.
+ *
+ * @param stdClass $node
+ *   The node being displayed.
+ * @return string
+ *   The formatted ingredients.
+ */
+function recipe_plaintext_format_ingredients($node = NULL) {
   $col_widths = array('quantity' => 0, 'unit' => 0);
 
   //prepare ingredients factor
@@ -208,59 +216,73 @@ function format_plaintext_ingredients($node = NULL) {
   }
 
   $unit_list = recipe_get_units();
-  foreach ( $node->recipe_ingredients['ing'] as $key => &$i ) {
-    // Translate decimal quantity to text fraction.
-    if ($i['quantity'] > 0) {
-      $i['quantity'] *= $factor;
+
+  $ingredient_items = field_get_items('node', $node, 'recipe_ingredient');
+  $ingredient_instance = field_read_instance('node', 'recipe_ingredient', 'recipe');
+  $quantity_format = $ingredient_instance['display']['default']['settings']['fraction_format'];
+  $abbreviation_setting = $ingredient_instance['display']['default']['settings']['unit_abbreviation'];
+  $recipe_ingredients = array();
+
+  foreach ($ingredient_items as $item) {
+    // Load the ingredient so we can print its name.
+    $ingredient = recipe_load_ingredient($item['iid']);
+    $item['name'] = $ingredient->name;
+
+    // Sanitize the name and note.
+    $name = filter_xss($item['name'], array());
+    $note = filter_xss($item['note'], array());
+
+    // Format the ingredient quantity.
+    if ($item['quantity'] > 0) {
+      $quantity = recipe_ingredient_quantity_from_decimal($item['quantity'] * $factor, $quantity_format, TRUE);
+      $quantity = str_replace('&frasl;', '/', $quantity);
     }
     else {
-      $i['quantity'] = ' ';
+      $quantity = ' ';
     }
 
-    $i['str_quantity'] = recipe_ingredient_quantity_from_decimal($i['quantity'], TRUE);
-    // Strip html entities.
-    $i['str_quantity'] = str_replace('&frasl;', '/', $i['str_quantity']);
     // Collect column widths.
-    if (strlen($i['str_quantity']) > $col_widths['quantity']) {
-      $col_widths['quantity'] = strlen($i['str_quantity']);
+    if (strlen($quantity) > $col_widths['quantity']) {
+      $col_widths['quantity'] = strlen($quantity);
     }
 
-    $i['str_ingredient'] = strlen($i['note']) > 0 ? $i['name'] . ' (' . $i['note'] .')' : $i['name'];
-
-    if (isset($unit_list[$i['unit_key']])) {
-      // Print the singular or plural term depending on the quantity.
-      $title = $i['quantity'] > 1 ? $unit_list[$i['unit_key']]['plural'] : $unit_list[$i['unit_key']]['name'];
-    }
-    else {
-      $title = $i['unit_key'];
+    // Concatenate the ingredient note to the name, if set.
+    if (!empty($note)) {
+      $name .= ' (' . $note . ')';
     }
 
-    // Print the abbreviation if recipe_unit_display says to or the abbreviation is blank (ie = Unit, which we don't print).
-    if (!isset($i['abbreviation']) && isset($unit_list[$i['unit_key']])) {
-      $i['abbreviation'] = $unit_list[$i['unit_key']]['abbreviation'];
-    }
-    if (empty($i['abbreviation'])) {
-      $i['abbreviation'] = ' ';
+    // Print the unit unless it has no abbreviation. Those units do not get
+    // printed in any case.
+    $unit_display = '';
+    $item['unit'] = isset($unit_list[$item['unit_key']]) ? $unit_list[$item['unit_key']] : array();
+    if (!empty($item['unit']['abbreviation'])) {
+      // Print the abbreviation if recipe_unit_display == 0.
+      if ($abbreviation_setting == 0) {
+        $unit_display = $item['unit']['abbreviation'];
+      }
+      else {
+        $unit_display = $item['quantity'] > 1 ? $item['unit']['plural'] : $item['unit']['name'];
+      }
+
+      if (strlen($unit_display) > $col_widths['unit']) {
+        $col_widths['unit'] = strlen($unit_display);
+      }
     }
 
-    $i['str_unit'] = '';
-    if (variable_get('recipe_unit_display', 0) == 0 || $i['abbreviation'] == ' ') {
-      $i['str_unit'] = $i['abbreviation'];
-    }
-    else {
-      $i['str_unit'] = $title;
-    }
-
-    if (strlen($i['str_unit']) > $col_widths['unit']) {
-      $col_widths['unit'] = strlen($i['str_unit']);
-    }
+    $recipe_ingredients[]  = array(
+      'quantity' => $quantity,
+      'unit' => $unit_display,
+      'name' => $name,
+    );
   }
 
   // Render output with the correct column padding.
   $output = '';
   $wrap_pad = str_repeat(" ", $col_widths['unit'] + $col_widths['quantity'] + 2);
-  foreach ( $node->recipe_ingredients['ing'] as $key => $j ) {
-    $output .= wordwrap(sprintf("%". $col_widths['quantity'] ."s %-". $col_widths['unit'] . "s %s\n", $j['str_quantity'], $j['str_unit'], $j['str_ingredient']), 75, "\n$wrap_pad");
+  foreach ($recipe_ingredients as $ingredient) {
+    // Format the ingredient display.
+    $ingredient_display = sprintf("%". $col_widths['quantity'] ."s %-". $col_widths['unit'] . "s %s\n", $ingredient['quantity'], $ingredient['unit'], $ingredient['name']);
+    $output .= wordwrap($ingredient_display, 75, "\n$wrap_pad");
   }
 
   return $output;

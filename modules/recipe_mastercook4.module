@@ -80,42 +80,7 @@ function merge_template($node) {
     $node->recipe_yield = $node->recipe_custom_yield;
   }
 
-  $ingredients = '';
   $unit_list = recipe_get_units();
-  foreach ( $node->recipe_ingredients['ing'] as $key => $i ) {
-    if ($i['quantity'] > 0) {
-      $i['quantity'] *= $factor;
-    }
-    else {
-      $i['quantity'] = ' ';
-    }
-
-    if (isset($unit_list[$i['unit_key']])) {
-      // Print the singular or plural term depending on the quantity.
-      $title = $i['quantity'] > 1 ? $unit_list[$i['unit_key']]['plural'] : $unit_list[$i['unit_key']]['name'];
-    }
-    else {
-      $title = $i['unit_key'];
-    }
-
-    // Print the abbreviation if recipe_unit_display says to or the abbreviation is blank (ie = Unit, which we don't print).
-    if (!isset($i['abbreviation']) && isset($unit_list[$i['unit_key']])) {
-      $i['abbreviation'] = $unit_list[$i['unit_key']]['abbreviation'];
-    }
-    if (empty($i['abbreviation'])) {
-      $i['abbreviation'] = ' ';
-    }
-
-    $i['str_unit'] = '';
-    if ( variable_get('recipe_unit_display', 0) == 0 || $i['abbreviation'] == ' ') {
-      $i['str_unit'] = $i['abbreviation'];
-    }
-    else {
-      $i['str_unit'] = $title;
-    }
-
-    $ingredients .= format_mastercook4_ingredient($i);
-  }
 
   // get the template string
   $template = get_template();
@@ -143,7 +108,47 @@ function merge_template($node) {
   // merge categories
   $template = str_replace("<<categories>>", $categories, $template);
   // merge ingredients
-  $template = str_replace("<<ingredients>>", $ingredients, $template);
+  $ingredient_items = field_get_items('node', $node, 'recipe_ingredient');
+  $ingredient_instance = field_read_instance('node', 'recipe_ingredient', 'recipe');
+  $quantity_format = $ingredient_instance['display']['default']['settings']['fraction_format'];
+  $abbreviation_setting = $ingredient_instance['display']['default']['settings']['unit_abbreviation'];
+  $recipe_ingredients = '';
+  foreach ($ingredient_items as $item) {
+    // Load the ingredient so we can print its name.
+    $ingredient = recipe_load_ingredient($item['iid']);
+    $item['name'] = $ingredient->name;
+
+    // Sanitize the name and note.
+    $name = filter_xss($item['name'], array());
+    $note = filter_xss($item['note'], array());
+
+    // Format the ingredient quantity.
+    if ($item['quantity'] > 0) {
+      $quantity = recipe_ingredient_quantity_from_decimal($item['quantity'] * $factor, $quantity_format, TRUE);
+      $quantity = str_replace('&frasl;', '/', $quantity);
+    }
+    else {
+      $quantity = ' ';
+    }
+
+    // Print the unit unless it has no abbreviation. Those units do not get
+    // printed in any case.
+    $unit_display = '';
+    $item['unit'] = isset($unit_list[$item['unit_key']]) ? $unit_list[$item['unit_key']] : array();
+    if (!empty($item['unit']['abbreviation'])) {
+      // Print the abbreviation if recipe_unit_display == 0.
+      if ($abbreviation_setting == 0) {
+        $unit_display = $item['unit']['abbreviation'];
+      }
+      else {
+        $unit_display = $item['quantity'] > 1 ? $item['unit']['plural'] : $item['unit']['name'];
+      }
+    }
+
+    // Add the ingredient text to the output.
+    $recipe_ingredients .= recipe_mastercook4_format_ingredient($name, $quantity, $unit_display, $note);
+  }
+  $template = str_replace("<<ingredients>>", $recipe_ingredients, $template);
   // merge instructions
   $instructions_items = field_get_items('node', $node, 'recipe_instructions');
   $recipe_instructions = '';
@@ -194,15 +199,28 @@ Categories    : <<categories>>
 return $template;
 }
 
-function format_mastercook4_ingredient($ingredient = NULL) {
-  $ingredient['quantity'] = recipe_ingredient_quantity_from_decimal($ingredient['quantity'], TRUE);
-  // no html entities
-  $ingredient['quantity'] = str_replace('&frasl;', '/', $ingredient['quantity']);
-  $fullingredient = strlen($ingredient['note']) > 0 ? $ingredient['name'] . ' -- ' . $ingredient['note'] : $ingredient['name'];
-  $fullingredient = strip_html_and_encode_entities($fullingredient);
-  $fullingredient = wordwrap($fullingredient, 66, "\n                        ");
-  $o = sprintf("%8s  %-12s  %s\n", $ingredient['quantity'], $ingredient['str_unit'], $fullingredient);
-  return $o;
+/**
+ * Formats an ingredient for display as a MasterCook4 recipe.
+ *
+ * @param string $name
+ *   The ingredient name.
+ * @param string $quantity
+ *   The ingredient quantity.
+ * @param string $unit
+ *   The units for the ingredient quantity.
+ * @param string $note
+ *   The ingredient preparation note.
+ * @return string
+ *   The formatted ingredient.
+ */
+function recipe_mastercook4_format_ingredient($name, $quantity = ' ', $unit = '', $note = '') {
+  // Concatenate the ingredient note to the name, if set.
+  if (!empty($note)) {
+    $name .= ' -- ' . $note;
+  }
+  $name = wordwrap($name, 66, "\n                        ");
+  $output = sprintf("%8s  %-12s  %s\n", $quantity, $unit, $name);
+  return $output;
 }
 
 function recipe_mastercook4_import_multi() {

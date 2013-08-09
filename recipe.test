@@ -91,30 +91,36 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
       'recipe_instructions[' . LANGUAGE_NONE . '][0][value]' => $instructions,
       'recipe_prep_time[' . LANGUAGE_NONE . '][0][value]' => $preptime,
       'recipe_cook_time[' . LANGUAGE_NONE . '][0][value]' => $cooktime,
-      'recipe_ingredients[ing][0][quantity]' => $ing_0_quantity,
-      'recipe_ingredients[ing][0][unit_key]' => $ing_0_unit,
-      'recipe_ingredients[ing][0][name]' => $ing_0_name,
-      'recipe_ingredients[ing][0][note]' => $ing_0_note,
-      'recipe_ingredients[ing][1][quantity]' => $ing_1_quantity,
-      'recipe_ingredients[ing][1][unit_key]' => $ing_1_unit,
-      'recipe_ingredients[ing][1][name]' => $ing_1_name,
-      'recipe_ingredients[ing][1][note]' => $ing_1_note,
-      'recipe_ingredients[ing][2][quantity]' => $ing_2_quantity,
-      'recipe_ingredients[ing][2][unit_key]' => $ing_2_unit,
-      'recipe_ingredients[ing][2][name]' => $ing_2_name,
-      'recipe_ingredients[ing][2][note]' => $ing_2_note,
-      'recipe_ingredients[ing][3][quantity]' => $ing_3_quantity,
-      'recipe_ingredients[ing][3][unit_key]' => $ing_3_unit,
-      'recipe_ingredients[ing][3][name]' => $ing_3_name,
-      'recipe_ingredients[ing][3][note]' => $ing_3_note,
-      'recipe_ingredients[ing][4][quantity]' => $ing_4_quantity,
-      'recipe_ingredients[ing][4][unit_key]' => $ing_4_unit,
-      'recipe_ingredients[ing][4][name]' => $ing_4_name,
-      'recipe_ingredients[ing][4][note]' => $ing_4_note,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][0][quantity]' => $ing_0_quantity,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][0][unit_key]' => $ing_0_unit,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][0][name]' => $ing_0_name,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][0][note]' => $ing_0_note,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][1][quantity]' => $ing_1_quantity,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][1][unit_key]' => $ing_1_unit,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][1][name]' => $ing_1_name,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][1][note]' => $ing_1_note,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][2][quantity]' => $ing_2_quantity,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][2][unit_key]' => $ing_2_unit,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][2][name]' => $ing_2_name,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][2][note]' => $ing_2_note,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][3][quantity]' => $ing_3_quantity,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][3][unit_key]' => $ing_3_unit,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][3][name]' => $ing_3_name,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][3][note]' => $ing_3_note,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][4][quantity]' => $ing_4_quantity,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][4][unit_key]' => $ing_4_unit,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][4][name]' => $ing_4_name,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][4][note]' => $ing_4_note,
     );
 
+    $this->drupalGet('node/add/recipe');
+    // Add four recipe_ingredient widgets.
+    $this->drupalPost(NULL, array(), t('Add another item'));
+    $this->drupalPost(NULL, array(), t('Add another item'));
+    $this->drupalPost(NULL, array(), t('Add another item'));
+    $this->drupalPost(NULL, array(), t('Add another item'));
     // Post the values to the node form.
-    $this->drupalPost('node/add/recipe', $edit, t('Save'));
+    $this->drupalPost(NULL, $edit, t('Save'));
     $this->assertText(t('Recipe @title has been created.', array('@title' => $title)));
 
     // Check the page for the recipe content.
@@ -140,7 +146,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $this->assertText(t('@quantity @unit', array('@quantity' => $ing_3_quantity, '@unit' => $this->unit_list[$ing_3_unit]['abbreviation'])), 'Found ingredient 3 quantity and abbreviation.');
     $this->assertNoText(format_string('@name (@note)', array('@name' => $ing_3_name, '@note' => $ing_3_note)), 'Did not find ingredient 3 name with blank note field, "()".');
 
-    $this->assertRaw(format_string('<div class="quantity-unit" property="schema:amount"> @quantity </div>', array('@quantity' => $ing_4_quantity)), 'Found ingredient 4 quantity with no unit.');
+    $this->assertRaw(format_string('<span class="quantity-unit" property="schema:amount"> @quantity </span>', array('@quantity' => $ing_4_quantity)), 'Found ingredient 4 quantity with no unit.');
     $this->assertText(format_string('@name (@note)', array('@name' => $ing_4_name, '@note' => $ing_4_note)), 'Found ingredient 4 name and note.');
 
     // Check the page HTML for the recipe RDF properties.
@@ -170,14 +176,15 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
       $this->assertRaw($duration, format_string('Found the ISO 8601 duration "@duration" in the recipe node HTML.', array('@duration' => $duration)));
     }
 
+    // Change the ingredient field settings.
+    $instance = field_read_instance('node', 'recipe_ingredient', 'recipe');
+    // Enable full unit name display.
+    $instance['display']['default']['settings']['unit_abbreviation'] = 1;
+    field_update_instance($instance);
+
     // Change the Recipe module settings.
     $summary_title = $this->randomName(16);
     $edit = array(
-      // Enable full unit name display.
-      'recipe_unit_display' => 1,
-      // Enable lowercase normalization of ingredient names.
-      // @todo The ingredient name normalization setting currently does nothing.
-      //'recipe_ingredient_name_normalize' => 1,
       // Hide the recipe summary.
       // @todo The recipe summary location setting currently does nothing.
       //'recipe_summary_location' => 2,
@@ -194,12 +201,6 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $this->assertText(t('@quantity @unit', array('@quantity' => $ing_0_quantity, '@unit' => $this->unit_list[$ing_0_unit]['name'])), 'Found ingredient 0 quantity and singular unit name.');
 
     $this->assertText(t('@quantity @unit', array('@quantity' => $ing_1_quantity, '@unit' => $this->unit_list[$ing_1_unit]['plural'])), 'Found ingredient 1 quantity and plural unit name.');
-
-    //$this->assertText(strtolower($ing_0_name), 'Found normalized ingredient 0 name.');
-    //$this->assertText(strtolower($ing_1_name), 'Found normalized ingredient 1 name.');
-    //$this->assertText(strtolower($ing_2_name), 'Found normalized ingredient 2 name.');
-    //$this->assertText(strtolower($ing_3_name), 'Found normalized ingredient 3 name.');
-    //$this->assertText(strtolower($ing_4_name), 'Found normalized ingredient 4 name.');
 
     //$this->assertNoText(t('Summary'), 'Did not find the recipe summary.');
 
@@ -256,7 +257,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $this->assertRaw(format_string('@quantity @unit', array('@quantity' => $ing_3_quantity, '@unit' => $this->unit_list[$ing_3_unit]['name'])), 'Found ingredient 3 quantity and unit name.');
     $this->assertRaw($ing_3_name, 'Found ingredient 3 name.');
 
-    $this->assertRaw(format_string('<div class="quantity-unit" property="schema:amount"> @quantity </div>', array('@quantity' => $ing_4_quantity)), 'Found ingredient 4 quantity and with no unit.');
+    $this->assertRaw(format_string('<span class="quantity-unit" property="schema:amount"> @quantity </span>', array('@quantity' => $ing_4_quantity)), 'Found ingredient 4 quantity and with no unit.');
     $this->assertRaw(format_string('@name (@note)', array('@name' => $ing_4_name, '@note' => $ing_4_note)), 'Found ingredient 4 name and note.');
 
     // Check for the recipe data on the MasterCook4 export page.
@@ -379,14 +380,13 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
           ),
         ),
       ),
-      'recipe_ingredients' => array(
-        'ing' => array(
+      'recipe_ingredient' => array(
+        LANGUAGE_NONE => array(
           0 => array(
+            'iid' => recipe_ingredient_id_from_name($ingredient_name_1),
             'quantity' => $quantity_1,
             'unit_key' => $unit_key_1,
-            'name' => $ingredient_name_1,
             'note' => $ingredient_note_1,
-            'weight' => 0,
           ),
         ),
       ),
@@ -453,14 +453,13 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
           ),
         ),
       ),
-      'recipe_ingredients' => array(
-        'ing' => array(
+      'recipe_ingredient' => array(
+        LANGUAGE_NONE => array(
           0 => array(
+            'iid' => recipe_ingredient_id_from_name($ingredient_name_2),
             'quantity' => $quantity_2,
             'unit_key' => $unit_key_2,
-            'name' => $ingredient_name_2,
             'note' => $ingredient_note_2,
-            'weight' => 0,
           ),
         ),
       ),
@@ -608,14 +607,13 @@ class RecipeYieldFormTestCase extends RecipeWebTestCase {
           ),
         ),
       ),
-      'recipe_ingredients' => array(
-        'ing' => array(
+      'recipe_ingredient' => array(
+        LANGUAGE_NONE => array(
           0 => array(
+            'iid' => recipe_ingredient_id_from_name($ingredient_name),
             'quantity' => $quantity,
             'unit_key' => $unit_key,
-            'name' => $ingredient_name,
             'note' => '',
-            'weight' => 0,
           ),
         ),
       ),
@@ -647,6 +645,95 @@ class RecipeYieldFormTestCase extends RecipeWebTestCase {
     $this->drupalPost(NULL, $edit, 'Change');
     $this->assertFieldById('edit-custom-yield', $yield * 3, 'Found the tripled recipe yield in the custom yield form.');
     $this->assertText(format_string('@quantity @unit', array('@quantity' => $quantity * 3, '@unit' => $this->unit_list[$unit_key]['abbreviation'])), 'Found the tripled recipe quantity.');
+  }
+}
+
+/**
+ * Tests the functionality of the ingredient field settings.
+ */
+class RecipeIngredientSettingsTestCase extends RecipeWebTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Recipe ingredient settings',
+      'description' => 'Ensure that the ingredient field settings function properly.',
+      'group' => 'Recipe',
+    );
+  }
+
+  public function setUp() {
+    // Enable modules required for testing.
+    parent::setUp(array('recipe'));
+
+    // Create a new content type for testing.
+    $content_type = $this->drupalCreateContentType(array('type' => 'test_bundle'));
+
+    // Create and log in the admin user with Recipe content permissions.
+    $this->admin_user = $this->drupalCreateUser(array('create test_bundle content', 'administer site configuration'));
+    $this->drupalLogin($this->admin_user);
+  }
+
+  /**
+   * Tests ingredient field settings.
+   */
+  public function testIngredientFieldSettings() {
+    // Create the field.
+    $field = array(
+      'cardinality' => -1,
+      'field_name' => 'ingredient',
+      'module' => 'recipe',
+      'settings' => array(
+        'ingredient_name_normalize' => 1,
+      ),
+      'type' => 'ingredient_reference',
+    );
+    field_create_field($field);
+
+    // Create the field instance.
+    $instance = array(
+      'bundle' => 'test_bundle',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'recipe',
+          'settings' => array(
+            'fraction_format' => '{%d }%d&frasl;%d',
+            'unit_abbreviation' => 0,
+          ),
+          'type' => 'recipe_ingredient_default',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'ingredient',
+      'label' => 'Ingredients',
+      'widget' => array(
+        'active' => 0,
+        'module' => 'recipe',
+        'settings' => array(
+          'default_unit' => 'cup',
+        ),
+        'type' => 'recipe_ingredient_autocomplete',
+        'weight' => 0,
+      ),
+    );
+    field_create_instance($instance);
+
+    $edit = array(
+      'title' => $this->randomName(16),
+      'ingredient[' . LANGUAGE_NONE . '][0][quantity]' => 4,
+      'ingredient[' . LANGUAGE_NONE . '][0][unit_key]' => 'us gallon',
+      'ingredient[' . LANGUAGE_NONE . '][0][name]' => 'TeSt InGrEdIeNt',
+      'ingredient[' . LANGUAGE_NONE . '][0][note]' => '',
+    );
+
+    $this->drupalGet('node/add/test_bundle');
+    // Assert that the default element, 'cup', is selected.
+    $this->assertOptionSelected('edit-ingredient-und-0-unit-key', 'cup', 'The default unit was selected.');
+    // Post the values to the node form.
+    $this->drupalPost(NULL, $edit, t('Save'));
+
+    // Assert that the normalized ingredient name can be found on the node page.
+    $this->assertText('test ingredient', 'Found the normalized ingredient name.');
   }
 }
 
@@ -712,8 +799,8 @@ class RecipeLandingPageTestCase extends RecipeWebTestCase {
           ),
         ),
       ),
-      'recipe_ingredients' => array(
-        'ing' => array(),
+      'recipe_ingredient' => array(
+        LANGUAGE_NONE => array(),
       ),
     );
     $this->drupalCreateNode($edit);
@@ -976,7 +1063,7 @@ Stir.', 'Found recipe instructions.');
     $this->assertText('Jane Doe', 'Found the recipe source.');
     $this->assertText('2 q', 'Found ingredent 0 quantity and unit.');
     $this->assertText('water (hot)', 'Found ingredient 0 name and note.');
-    $this->assertRaw('<div class="quantity-unit" property="schema:amount"> 4 </div>', 'Found ingredient 1 quantity with no unit.');
+    $this->assertRaw('<span class="quantity-unit" property="schema:amount"> 4 </span>', 'Found ingredient 1 quantity with no unit.');
     $this->assertText('eggs', 'Found ingredient 1 name.');
     $this->assertText('Boil the water.', 'Found the first instruction.');
     $this->assertText('Put the eggs in the boiling water for 5 minutes.', 'Found the second instruction.');
@@ -1021,7 +1108,7 @@ Stir.', 'Found recipe instructions.');
     $this->assertText('Jane Doe', 'Found the recipe source.');
     $this->assertText('2 q', 'Found ingredent 0 quantity and unit.');
     $this->assertText('water (hot)', 'Found ingredient 0 name and note.');
-    $this->assertRaw('<div class="quantity-unit" property="schema:amount"> 4 </div>', 'Found ingredient 1 quantity with no unit.');
+    $this->assertRaw('<span class="quantity-unit" property="schema:amount"> 4 </span>', 'Found ingredient 1 quantity with no unit.');
     $this->assertText('eggs', 'Found ingredient 1 name.');
     $this->assertText('Boil the water.', 'Found the first instruction.');
     $this->assertText('Put the eggs in the boiling water for 5 minutes.', 'Found the second instruction.');
@@ -1136,5 +1223,13 @@ class RecipeUpdatePathTestCase extends UpdatePathTestCase {
     $this->assertEqual($node->recipe_source[LANGUAGE_NONE][0]['format'], 'filtered_html', 'The recipe source text format was set to filtered_html.');
     $this->assertEqual($node->recipe_prep_time[LANGUAGE_NONE][0]['value'], 1, 'The recipe preparation time was migrated.');
     $this->assertEqual($node->recipe_cook_time[LANGUAGE_NONE][0]['value'], 2, 'The recipe cooking time was migrated.');
+    $this->assertEqual($node->recipe_ingredient[LANGUAGE_NONE][0]['iid'], 1, 'The first recipe ingredient reference was migrated.');
+    $this->assertEqual($node->recipe_ingredient[LANGUAGE_NONE][0]['quantity'], 2, 'The first recipe ingredient quantity was migrated.');
+    $this->assertEqual($node->recipe_ingredient[LANGUAGE_NONE][0]['unit_key'], 'cup', 'The first recipe ingredient unit_key was migrated.');
+    $this->assertEqual($node->recipe_ingredient[LANGUAGE_NONE][0]['note'], 'cold', 'The first recipe ingredient note was migrated.');
+    $this->assertEqual($node->recipe_ingredient[LANGUAGE_NONE][1]['iid'], 2, 'The second recipe ingredient reference was migrated.');
+    $this->assertEqual($node->recipe_ingredient[LANGUAGE_NONE][1]['quantity'], 1, 'The second recipe ingredient quantity was migrated.');
+    $this->assertEqual($node->recipe_ingredient[LANGUAGE_NONE][1]['unit_key'], 'tablespoon', 'The second recipe ingredient unit_key was migrated.');
+    $this->assertEqual($node->recipe_ingredient[LANGUAGE_NONE][1]['note'], '', 'The second recipe ingredient note was migrated.');
   }
 }
