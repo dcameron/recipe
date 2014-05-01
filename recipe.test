@@ -81,6 +81,18 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     $ing_4_name = $this->randomName(16);
     $ing_4_note = $this->randomName(16);
 
+    // Ingredient with fractional quantity and unit tablespoon.
+    $ing_5_quantity = '1/4';
+    $ing_5_unit = 'tablespoon';
+    $ing_5_name = $this->randomName(16);
+    $ing_5_note = '';
+
+    // Ingredient with mixed fractional quantity and unit tablespoon.
+    $ing_6_quantity = '2 2/3';
+    $ing_6_unit = 'tablespoon';
+    $ing_6_name = $this->randomName(16);
+    $ing_6_note = '';
+
     $edit = array(
       'title' => $title,
       'recipe_description[' . LANGUAGE_NONE . '][0][value]' => $description,
@@ -111,10 +123,20 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
       'recipe_ingredient[' . LANGUAGE_NONE . '][4][unit_key]' => $ing_4_unit,
       'recipe_ingredient[' . LANGUAGE_NONE . '][4][name]' => $ing_4_name,
       'recipe_ingredient[' . LANGUAGE_NONE . '][4][note]' => $ing_4_note,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][5][quantity]' => $ing_5_quantity,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][5][unit_key]' => $ing_5_unit,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][5][name]' => $ing_5_name,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][5][note]' => $ing_5_note,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][6][quantity]' => $ing_6_quantity,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][6][unit_key]' => $ing_6_unit,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][6][name]' => $ing_6_name,
+      'recipe_ingredient[' . LANGUAGE_NONE . '][6][note]' => $ing_6_note,
     );
 
     $this->drupalGet('node/add/recipe');
-    // Add four recipe_ingredient widgets.
+    // Add six recipe_ingredient widgets.
+    $this->drupalPost(NULL, array(), t('Add another item'));
+    $this->drupalPost(NULL, array(), t('Add another item'));
     $this->drupalPost(NULL, array(), t('Add another item'));
     $this->drupalPost(NULL, array(), t('Add another item'));
     $this->drupalPost(NULL, array(), t('Add another item'));
@@ -148,6 +170,10 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
 
     $this->assertRaw(format_string('<span class="quantity-unit" property="schema:amount"> @quantity </span>', array('@quantity' => $ing_4_quantity)), 'Found ingredient 4 quantity with no unit.');
     $this->assertText(format_string('@name (@note)', array('@name' => $ing_4_name, '@note' => $ing_4_note)), 'Found ingredient 4 name and note.');
+
+    $this->assertRaw(str_replace('/', '&frasl;', $ing_5_quantity), 'Found ingredient 5 quantity.');
+
+    $this->assertRaw(str_replace('/', '&frasl;', $ing_6_quantity), 'Found ingredient 6 quantity.');
 
     // Check the page HTML for the recipe RDF properties.
     $properties = array(

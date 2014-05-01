@@ -593,6 +593,20 @@ function recipe_field_is_empty($item, $field) {
 }
 
 /**
+ * Implements hook_field_presave().
+ */
+function recipe_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  switch ($field['type']) {
+    case 'ingredient_reference':
+      foreach ($items as $delta => $item) {
+        // Convert fractional ingredient quantities to decimal.
+        $items[$delta]['quantity'] = round(recipe_ingredient_quantity_from_fraction($item['quantity']), 6);
+      }
+      break;
+  }
+}
+
+/**
  * Implements hook_field_formatter_info().
  */
 function recipe_field_formatter_info() {
