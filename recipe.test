@@ -219,7 +219,7 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     );
 
     // Post the values to the settings form.
-    $this->drupalPost('admin/config/system/recipe', $edit, t('Save configuration'));
+    $this->drupalPost('admin/config/content/recipe', $edit, t('Save configuration'));
 
     // Check the recipe node display again.
     $this->drupalGet('node/1');
@@ -841,7 +841,7 @@ class RecipeLandingPageTestCase extends RecipeWebTestCase {
       'recipe_recent_box_title' => $recent_recipe_title,
       'recipe_recent_display' => 0,
     );
-    $this->drupalPost('admin/config/system/recipe', $edit, t('Save configuration'));
+    $this->drupalPost('admin/config/content/recipe', $edit, t('Save configuration'));
 
     // Check that the recipe title is not displayed.
     $this->drupalGet('recipe');
@@ -852,7 +852,7 @@ class RecipeLandingPageTestCase extends RecipeWebTestCase {
     $edit = array(
       'recipe_recent_box_enable' => FALSE,
     );
-    $this->drupalPost('admin/config/system/recipe', $edit, t('Save configuration'));
+    $this->drupalPost('admin/config/content/recipe', $edit, t('Save configuration'));
 
     // Check that the Recent Recipe box is disabled.
     $this->drupalGet('recipe');
