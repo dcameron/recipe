@@ -16,7 +16,7 @@ class RecipeWebTestCase extends DrupalWebTestCase {
     parent::setUp(array('recipe', 'recipe_plaintext', 'recipe_html', 'recipe_recipeML', 'recipe_mastercook4'));
 
     // Create and log in the admin user with Recipe content permissions.
-    $this->admin_user = $this->drupalCreateUser(array('create recipe content', 'import recipes', 'export recipes', 'administer site configuration', 'administer blocks'));
+    $this->admin_user = $this->drupalCreateUser(array('create recipe content', 'edit any recipe content', 'import recipes', 'export recipes', 'administer site configuration', 'administer blocks'));
     $this->drupalLogin($this->admin_user);
 
     // Populate the unit list.
@@ -339,6 +339,11 @@ class RecipeNodeTestCase extends RecipeWebTestCase {
     // Check for the description in the teaser view at /node.
     $this->drupalGet('node');
     $this->assertRaw($description, 'Found the recipe description.');
+
+    // Check for fractional quantities when editing the node.
+    $this->drupalGet('node/1/edit');
+    $this->assertFieldById('edit-recipe-ingredient-' . LANGUAGE_NONE . '-5-quantity', $ing_5_quantity, 'Found fractional quantity in the 5th ingredient field on the node edit form.');
+    $this->assertFieldById('edit-recipe-ingredient-' . LANGUAGE_NONE . '-6-quantity', $ing_6_quantity, 'Found fractional quantity in the 6th ingredient field on the node edit form.');
   }
 
   /**

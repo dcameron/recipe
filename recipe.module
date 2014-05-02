@@ -507,7 +507,7 @@ function recipe_field_widget_form(&$form, &$form_state, $field, $instance, $lang
   switch ($instance['widget']['type']) {
     case 'recipe_ingredient_autocomplete':
       // Strange, but html_entity_decode() doesn't handle &frasl;
-      $quantity = isset($items[$delta]['quantity']) ? preg_replace('/\&frasl;/', '/', recipe_ingredient_quantity_from_decimal($items[$delta]['quantity'], TRUE)) : '';
+      $quantity = isset($items[$delta]['quantity']) ? preg_replace('/\&frasl;/', '/', recipe_ingredient_quantity_from_decimal($items[$delta]['quantity'], '{%d} %d&frasl;%d', TRUE)) : '';
       $element['quantity'] = array(
         '#type' => 'textfield',
         '#title' => t('Quantity'),
