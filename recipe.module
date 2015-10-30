@@ -578,6 +578,7 @@ function recipe_ingredient_autocomplete_validate($element, &$form_state) {
       'iid' => recipe_ingredient_id_from_name($name),
       'name' => $name,
       'note' => $element['note']['#value'],
+      '_weight' => $element['_weight']['#value'],
     );
   }
 
