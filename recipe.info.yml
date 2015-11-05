@@ -1,0 +1,10 @@
+name: Recipe
+type: module
+description: 'Collect and display recipes.'
+package: Recipe
+core: 8.x
+configure: recipe.admin
+dependencies:
+  - node
+  - path
+  - text
