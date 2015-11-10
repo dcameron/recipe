@@ -5,6 +5,10 @@
  * Contains \Drupal\recipe\Tests\RecipeNodeTest
  */
 
+namespace Drupal\recipe\Tests;
+
+use Drupal\recipe\Tests\RecipeTestBase;
+
 /**
  * Tests the functionality of the Recipe content type and Recipe blocks.
  *
