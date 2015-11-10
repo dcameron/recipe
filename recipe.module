@@ -77,19 +77,6 @@ function recipe_load($nodes) {
 }
 
 /**
- * Implements hook_node_info().
- */
-function recipe_node_info() {
-  return array(
-    'recipe' => array(
-      'name' => t('Recipe'),
-      'base' => 'recipe',
-      'description' => t('Share your favorite recipes with your fellow cooks.'),
-    )
-  );
-}
-
-/**
  * Implements hook_insert().
  *
  * Insert a new recipe into the database.

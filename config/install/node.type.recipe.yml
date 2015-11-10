@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - recipe
+name: 'Recipe'
+type: recipe
+description: 'Share your favorite recipes with your fellow cooks.'
+help: ''
+new_revision: false
+preview_mode: 1
+display_submitted: true
