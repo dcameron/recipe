@@ -10,8 +10,8 @@
  */
 function recipe_install() {
   // Set up the recipe node type.
-  require_once(dirname(__FILE__) . '/includes/recipe.node_type.inc');
-  _recipe_install_node_type();
+  //require_once(dirname(__FILE__) . '/includes/recipe.node_type.inc');
+  //_recipe_install_node_type();
 }
 
 /**
@@ -21,16 +21,16 @@ function recipe_install() {
  */
 function recipe_uninstall() {
   // Delete the recipe node fields.
-  require_once(dirname(__FILE__) . '/includes/recipe_node_type.inc');
-  _recipe_uninstall_node_type();
+  //require_once(dirname(__FILE__) . '/includes/recipe_node_type.inc');
+  //_recipe_uninstall_node_type();
 
   // remove node revisions
-  db_query('DELETE FROM {node_revision} WHERE nid in (select nid from {node} WHERE type = :type)', array(':type' => 'recipe'));
+  //db_query('DELETE FROM {node_revision} WHERE nid in (select nid from {node} WHERE type = :type)', array(':type' => 'recipe'));
   // remove recipe nodes
-  db_query('DELETE FROM {node} WHERE type = :type', array(':type' => 'recipe'));
+  //db_query('DELETE FROM {node} WHERE type = :type', array(':type' => 'recipe'));
 
   // remove variables
-  db_query('DELETE FROM {variable} WHERE name like :type', array(':type' => 'recipe_%'));
+  //db_query('DELETE FROM {variable} WHERE name like :type', array(':type' => 'recipe_%'));
 }
 
 /**
