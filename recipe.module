@@ -1346,6 +1346,8 @@ function recipe_duration_iso8601($duration = 0) {
  *   An array of units.  $units = array('unit key'=> array(name=>, plural=>, abbreviation=>, system=>, type=>, aliases=>))
  */
 function recipe_get_units($limit_to_preferred = 0) {
+  $config = \Drupal::config('recipe.settings');
+
   $us_units = array(
     'cup' =>             array('name' => t('cup'),         'plural' => t('cups'),         'abbreviation' => t('c', array(), array('context' => 'abbreviation cup')),     'system' => 'us customary', 'type' => t('volume'), 'aliases' => array()),
     'us liquid pint' =>  array('name' => t('pint'),        'plural' => t('pints'),        'abbreviation' => t('pt', array(), array('context' => 'abbreviation pint')),    'system' => 'us customary', 'type' => t('volume'), 'aliases' => array()),
@@ -1386,7 +1388,7 @@ function recipe_get_units($limit_to_preferred = 0) {
     'unknown' =>  array('name' => t('unknown'), 'plural' => t('unknown'),  'abbreviation' => '', 'system' => 'common', 'type' => t('indefinite'), 'aliases' =>  array())
   );
 
-  if ( variable_get('recipe_preferred_system_of_measure', 0) == 0 ) {
+  if ($config->get('recipe_preferred_system_of_measure') == 0 ) {
     // US system preferred.
     $units = array_merge($us_units, $common_units);
     if ($limit_to_preferred == 0) {

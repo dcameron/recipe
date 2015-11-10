@@ -7,6 +7,7 @@
 
 namespace Drupal\recipe\Tests;
 
+use Drupal\Core\Language\Language;
 use Drupal\recipe\Tests\RecipeTestBase;
 
 /**
@@ -81,19 +82,20 @@ class RecipeIngredientSettingsTest extends RecipeTestBase {
     );
     field_create_instance($instance);
 
+    $language = Language::LANGCODE_NOT_SPECIFIED;
     $edit = array(
-      'title' => $this->randomName(16),
-      'ingredient[' . LANGUAGE_NONE . '][0][quantity]' => 4,
-      'ingredient[' . LANGUAGE_NONE . '][0][unit_key]' => 'us gallon',
-      'ingredient[' . LANGUAGE_NONE . '][0][name]' => 'TeSt InGrEdIeNt',
-      'ingredient[' . LANGUAGE_NONE . '][0][note]' => '',
+      'title' => $this->randomString(16),
+      'ingredient[' . $language . '][0][quantity]' => 4,
+      'ingredient[' . $language . '][0][unit_key]' => 'us gallon',
+      'ingredient[' . $language . '][0][name]' => 'TeSt InGrEdIeNt',
+      'ingredient[' . $language . '][0][note]' => '',
     );
 
     $this->drupalGet('node/add/test_bundle');
     // Assert that the default element, 'cup', is selected.
     $this->assertOptionSelected('edit-ingredient-und-0-unit-key', 'cup', 'The default unit was selected.');
     // Post the values to the node form.
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
 
     // Assert that the normalized ingredient name can be found on the node page.
     $this->assertText('test ingredient', 'Found the normalized ingredient name.');
