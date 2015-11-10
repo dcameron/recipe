@@ -3,7 +3,7 @@ type: module
 description: 'Collect and display recipes.'
 package: Recipe
 core: 8.x
-configure: recipe.admin
+configure: recipe.settings
 dependencies:
   - node
   - path
