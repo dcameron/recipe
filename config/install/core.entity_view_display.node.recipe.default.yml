@@ -1,0 +1,23 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.recipe.recipe_description
+    - node.type.recipe
+  module:
+    - text
+    - user
+id: node.recipe.default
+targetEntityType: node
+bundle: recipe
+mode: default
+content:
+  recipe_description:
+    label: above
+    type: text_default
+    weight: -4
+    settings: {  }
+    third_party_settings: {  }
+  links:
+    weight: 101
+hidden: {  }
