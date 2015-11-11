@@ -78,8 +78,8 @@ class RecipeNodeTest extends RecipeTestBase {
       'recipe_description[0][value]' => $description,
 /*      'recipe_yield_unit' => $yield_unit,
       'recipe_yield' => $yield,
-      'recipe_source[0][value]' => $source,
-      'recipe_notes[0][value]' => $notes,*/
+      'recipe_source[0][value]' => $source,*/
+      'recipe_notes[0][value]' => $notes,
       'recipe_instructions[0][value]' => $instructions,
 /*      'recipe_prep_time[0][value]' => $preptime,
       'recipe_cook_time[0][value]' => $cooktime,

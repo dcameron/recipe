@@ -4,6 +4,7 @@ dependencies:
   config:
     - field.field.node.recipe.recipe_description
     - field.field.node.recipe.recipe_instructions
+    - field.field.node.recipe.recipe_notes
     - node.type.recipe
   module:
     - text
@@ -20,6 +21,12 @@ content:
     settings: {  }
     third_party_settings: {  }
   recipe_instructions:
+    label: above
+    type: text_default
+    weight: -1
+    settings: {  }
+    third_party_settings: {  }
+  recipe_notes:
     label: above
     type: text_default
     weight: -1
