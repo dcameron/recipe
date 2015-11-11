@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - field.field.node.recipe.recipe_description
+    - field.field.node.recipe.recipe_instructions
     - node.type.recipe
   module:
     - path
@@ -18,6 +19,13 @@ content:
     settings:
       rows: 1
       summary_rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  recipe_instructions:
+    type: text_textarea
+    weight: -1
+    settings:
+      rows: 10
       placeholder: ''
     third_party_settings: {  }
   created:
