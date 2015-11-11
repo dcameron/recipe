@@ -7,7 +7,6 @@
 
 namespace Drupal\recipe\Tests;
 
-use Drupal\Core\Language\Language;
 use Drupal\recipe\Tests\RecipeTestBase;
 
 /**
@@ -82,13 +81,12 @@ class RecipeIngredientSettingsTest extends RecipeTestBase {
     );
     field_create_instance($instance);
 
-    $language = Language::LANGCODE_NOT_SPECIFIED;
     $edit = array(
-      'title' => $this->randomString(16),
-      'ingredient[' . $language . '][0][quantity]' => 4,
-      'ingredient[' . $language . '][0][unit_key]' => 'us gallon',
-      'ingredient[' . $language . '][0][name]' => 'TeSt InGrEdIeNt',
-      'ingredient[' . $language . '][0][note]' => '',
+      'title[0][value]' => $this->randomMachineName(16),
+      'ingredient[0][quantity]' => 4,
+      'ingredient[0][unit_key]' => 'us gallon',
+      'ingredient[0][name]' => 'TeSt InGrEdIeNt',
+      'ingredient[0][note]' => '',
     );
 
     $this->drupalGet('node/add/test_bundle');

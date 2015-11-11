@@ -7,7 +7,6 @@
 
 namespace Drupal\recipe\Tests;
 
-use Drupal\Core\Language\Language;
 use Drupal\recipe\Tests\RecipeTestBase;
 
 /**
@@ -22,97 +21,96 @@ class RecipeNodeTest extends RecipeTestBase {
    */
   public function testRecipeContent() {
     // Generate values for our test node.
-    $title = $this->randomString(16);
-    $description = '<em>' . $this->randomString(255) . '</em>';
-    $yield_unit = $this->randomString(10);
+    $title = $this->randomMachineName(16);
+    $description = $this->randomMachineName(255);
+    $yield_unit = $this->randomMachineName(10);
     $yield = 5;
-    $source = '<a href="http://www.example.com">' . $this->randomString(16) . '</a>';
-    $notes = '<em>' . $this->randomString(255) . '</em>';
-    $instructions = '<em>' . $this->randomString(255) . '</em>';
+    $source = 'http://www.example.com';
+    $notes = $this->randomMachineName(255);
+    $instructions = $this->randomMachineName(255);
     $preptime = 60;
     $cooktime = 135;
 
     // Ingredient with quantity == 1 and unit tablespoon with note.
     $ing_0_quantity = 1;
     $ing_0_unit = 'tablespoon';
-    $ing_0_name = $this->randomString(16);
-    $ing_0_note = $this->randomString(16);
+    $ing_0_name = $this->randomMachineName(16);
+    $ing_0_note = $this->randomMachineName(16);
 
     // Ingredient with quantity > 1 and unit tablespoon with note.
     $ing_1_quantity = 2;
     $ing_1_unit = 'tablespoon';
-    $ing_1_name = $this->randomString(16);
-    $ing_1_note = $this->randomString(16);
+    $ing_1_name = $this->randomMachineName(16);
+    $ing_1_note = $this->randomMachineName(16);
 
     // Ingredient with quantity == 0 and unit tablespoon with note.
     $ing_2_quantity = 0;
     $ing_2_unit = 'tablespoon';
-    $ing_2_name = $this->randomString(16);
-    $ing_2_note = $this->randomString(16);
+    $ing_2_name = $this->randomMachineName(16);
+    $ing_2_note = $this->randomMachineName(16);
 
     // Ingredient without note.
     $ing_3_quantity = 1;
     $ing_3_unit = 'tablespoon';
-    $ing_3_name = $this->randomString(16);
+    $ing_3_name = $this->randomMachineName(16);
     $ing_3_note = '';
 
     // Ingredient with unit that has no abbreviation.
     $ing_4_quantity = 10;
     $ing_4_unit = 'unit';
-    $ing_4_name = $this->randomString(16);
-    $ing_4_note = $this->randomString(16);
+    $ing_4_name = $this->randomMachineName(16);
+    $ing_4_note = $this->randomMachineName(16);
 
     // Ingredient with fractional quantity and unit tablespoon.
     $ing_5_quantity = '1/4';
     $ing_5_unit = 'tablespoon';
-    $ing_5_name = $this->randomString(16);
+    $ing_5_name = $this->randomMachineName(16);
     $ing_5_note = '';
 
     // Ingredient with mixed fractional quantity and unit tablespoon.
     $ing_6_quantity = '2 2/3';
     $ing_6_unit = 'tablespoon';
-    $ing_6_name = $this->randomString(16);
+    $ing_6_name = $this->randomMachineName(16);
     $ing_6_note = '';
 
-    $language = Language::LANGCODE_NOT_SPECIFIED;
     $edit = array(
-      'title' => $title,
-      'recipe_description[' . $language . '][0][value]' => $description,
-      'recipe_yield_unit' => $yield_unit,
+      'title[0][value]' => $title,
+      'recipe_description[0][value]' => $description,
+/*      'recipe_yield_unit' => $yield_unit,
       'recipe_yield' => $yield,
-      'recipe_source[' . $language . '][0][value]' => $source,
-      'recipe_notes[' . $language . '][0][value]' => $notes,
-      'recipe_instructions[' . $language . '][0][value]' => $instructions,
-      'recipe_prep_time[' . $language . '][0][value]' => $preptime,
-      'recipe_cook_time[' . $language . '][0][value]' => $cooktime,
-      'recipe_ingredient[' . $language . '][0][quantity]' => $ing_0_quantity,
-      'recipe_ingredient[' . $language . '][0][unit_key]' => $ing_0_unit,
-      'recipe_ingredient[' . $language . '][0][name]' => $ing_0_name,
-      'recipe_ingredient[' . $language . '][0][note]' => $ing_0_note,
-      'recipe_ingredient[' . $language . '][1][quantity]' => $ing_1_quantity,
-      'recipe_ingredient[' . $language . '][1][unit_key]' => $ing_1_unit,
-      'recipe_ingredient[' . $language . '][1][name]' => $ing_1_name,
-      'recipe_ingredient[' . $language . '][1][note]' => $ing_1_note,
-      'recipe_ingredient[' . $language . '][2][quantity]' => $ing_2_quantity,
-      'recipe_ingredient[' . $language . '][2][unit_key]' => $ing_2_unit,
-      'recipe_ingredient[' . $language . '][2][name]' => $ing_2_name,
-      'recipe_ingredient[' . $language . '][2][note]' => $ing_2_note,
-      'recipe_ingredient[' . $language . '][3][quantity]' => $ing_3_quantity,
-      'recipe_ingredient[' . $language . '][3][unit_key]' => $ing_3_unit,
-      'recipe_ingredient[' . $language . '][3][name]' => $ing_3_name,
-      'recipe_ingredient[' . $language . '][3][note]' => $ing_3_note,
-      'recipe_ingredient[' . $language . '][4][quantity]' => $ing_4_quantity,
-      'recipe_ingredient[' . $language . '][4][unit_key]' => $ing_4_unit,
-      'recipe_ingredient[' . $language . '][4][name]' => $ing_4_name,
-      'recipe_ingredient[' . $language . '][4][note]' => $ing_4_note,
-      'recipe_ingredient[' . $language . '][5][quantity]' => $ing_5_quantity,
-      'recipe_ingredient[' . $language . '][5][unit_key]' => $ing_5_unit,
-      'recipe_ingredient[' . $language . '][5][name]' => $ing_5_name,
-      'recipe_ingredient[' . $language . '][5][note]' => $ing_5_note,
-      'recipe_ingredient[' . $language . '][6][quantity]' => $ing_6_quantity,
-      'recipe_ingredient[' . $language . '][6][unit_key]' => $ing_6_unit,
-      'recipe_ingredient[' . $language . '][6][name]' => $ing_6_name,
-      'recipe_ingredient[' . $language . '][6][note]' => $ing_6_note,
+      'recipe_source[0][value]' => $source,
+      'recipe_notes[0][value]' => $notes,
+      'recipe_instructions[0][value]' => $instructions,
+      'recipe_prep_time[0][value]' => $preptime,
+      'recipe_cook_time[0][value]' => $cooktime,
+      'recipe_ingredient[0][quantity]' => $ing_0_quantity,
+      'recipe_ingredient[0][unit_key]' => $ing_0_unit,
+      'recipe_ingredient[0][name]' => $ing_0_name,
+      'recipe_ingredient[0][note]' => $ing_0_note,
+      'recipe_ingredient[1][quantity]' => $ing_1_quantity,
+      'recipe_ingredient[1][unit_key]' => $ing_1_unit,
+      'recipe_ingredient[1][name]' => $ing_1_name,
+      'recipe_ingredient[1][note]' => $ing_1_note,
+      'recipe_ingredient[2][quantity]' => $ing_2_quantity,
+      'recipe_ingredient[2][unit_key]' => $ing_2_unit,
+      'recipe_ingredient[2][name]' => $ing_2_name,
+      'recipe_ingredient[2][note]' => $ing_2_note,
+      'recipe_ingredient[3][quantity]' => $ing_3_quantity,
+      'recipe_ingredient[3][unit_key]' => $ing_3_unit,
+      'recipe_ingredient[3][name]' => $ing_3_name,
+      'recipe_ingredient[3][note]' => $ing_3_note,
+      'recipe_ingredient[4][quantity]' => $ing_4_quantity,
+      'recipe_ingredient[4][unit_key]' => $ing_4_unit,
+      'recipe_ingredient[4][name]' => $ing_4_name,
+      'recipe_ingredient[4][note]' => $ing_4_note,
+      'recipe_ingredient[5][quantity]' => $ing_5_quantity,
+      'recipe_ingredient[5][unit_key]' => $ing_5_unit,
+      'recipe_ingredient[5][name]' => $ing_5_name,
+      'recipe_ingredient[5][note]' => $ing_5_note,
+      'recipe_ingredient[6][quantity]' => $ing_6_quantity,
+      'recipe_ingredient[6][unit_key]' => $ing_6_unit,
+      'recipe_ingredient[6][name]' => $ing_6_name,
+      'recipe_ingredient[6][note]' => $ing_6_note,*/
     );
 
     $this->drupalGet('node/add/recipe');
@@ -131,7 +129,7 @@ class RecipeNodeTest extends RecipeTestBase {
     $this->assertRaw($description, 'Found the recipe description.');
     $this->assertFieldById('edit-custom-yield', $yield, 'Found the recipe yield in the custom yield form.');
     $this->assertText($yield_unit, 'Found the recipe yield unit.');
-    $this->assertRaw($source, 'Found the recipe source.');
+    $this->assertRaw('<a href="http://www.example.com">http://www.example.com</a>', 'Found the recipe source.');
     $this->assertRaw($notes, 'Found the recipe notes.');
     $this->assertRaw($instructions, 'Found the recipe instructions');
     $this->assertText('1 hour', 'Found the recipe prep time.');
@@ -191,7 +189,7 @@ class RecipeNodeTest extends RecipeTestBase {
     field_update_instance($instance);
 
     // Change the Recipe module settings.
-    $summary_title = $this->randomString(16);
+    $summary_title = $this->randomMachineName(16);
     $edit = array(
       // Hide the recipe summary.
       // @todo The recipe summary location setting currently does nothing.
@@ -239,7 +237,7 @@ class RecipeNodeTest extends RecipeTestBase {
 
     // Check for fractional quantities when editing the node.
     $this->drupalGet('node/1/edit');
-    $this->assertFieldById('edit-recipe-ingredient-' . $language . '-5-quantity', $ing_5_quantity, 'Found fractional quantity in the 5th ingredient field on the node edit form.');
-    $this->assertFieldById('edit-recipe-ingredient-' . $language . '-6-quantity', $ing_6_quantity, 'Found fractional quantity in the 6th ingredient field on the node edit form.');
+    $this->assertFieldById('edit-recipe-ingredient-5-quantity', $ing_5_quantity, 'Found fractional quantity in the 5th ingredient field on the node edit form.');
+    $this->assertFieldById('edit-recipe-ingredient-6-quantity', $ing_6_quantity, 'Found fractional quantity in the 6th ingredient field on the node edit form.');
   }
 }
