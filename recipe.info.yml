@@ -5,6 +5,7 @@ package: Recipe
 core: 8.x
 configure: recipe.settings
 dependencies:
+  - ingredient
   - node
   - path
   - text

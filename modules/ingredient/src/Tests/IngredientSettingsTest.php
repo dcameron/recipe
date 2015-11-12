@@ -7,6 +7,8 @@
 
 namespace Drupal\ingredient\Tests;
 
+use Drupal\simpletest\WebTestBase;
+
 /**
  * Tests the functionality of the ingredient field settings.
  *

@@ -1,0 +1,220 @@
+<?php
+
+/**
+ * @file
+ * Contains \Drupal\ingredient\Tests\IngredientTest
+ */
+
+namespace Drupal\ingredient\Tests;
+
+use Drupal\ingredient\Entity\Ingredient;
+use Drupal\simpletest\WebTestBase;
+
+/**
+ * Tests Ingredient CRUD functions.
+ *
+ * @group recipe
+ */
+class IngredientTest extends WebTestBase {
+
+  /**
+   * Modules to enable.
+   *
+   * @var array
+   */
+  public static $modules = array('block', 'ingredient', 'field_ui');
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    // Install Drupal.
+    parent::setUp();
+    // Add the system menu blocks to appropriate regions.
+    $this->setupIngredientMenus();
+  }
+
+  /**
+   * Set up menus and tasks in their regions.
+   */
+  protected function setupIngredientMenus() {
+    $this->drupalPlaceBlock('local_tasks_block', ['region' => 'secondary_menu']);
+    $this->drupalPlaceBlock('local_actions_block', ['region' => 'content']);
+    $this->drupalPlaceBlock('page_title_block', ['region' => 'content']);
+  }
+
+  /**
+   * Basic tests for Content Entity Example.
+   */
+  public function testIngredient() {
+    $web_user = $this->drupalCreateUser(array(
+      'add ingredient',
+      'edit ingredient',
+      'view ingredient',
+      'delete ingredient',
+      'administer ingredient',
+      'administer ingredient_ingredient display',
+      'administer ingredient_ingredient fields',
+      'administer ingredient_ingredient form display'));
+
+    $this->drupalLogin($web_user);
+
+    // Web_user user has the right to view listing.
+    $this->drupalGet('ingredient/list');
+
+    // WebUser can add entity content.
+    $this->assertLink(t('Add Ingredient'));
+
+    $this->clickLink(t('Add Ingredient'));
+
+    $this->assertFieldByName('name[0][value]', '', 'Name Field, empty');
+
+    // Post content, save an instance. Go back to list after saving.
+    $edit = array(
+      'name[0][value]' => 'test name',
+    );
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+
+    // Entity listed.
+    $this->assertLink(t('Edit'));
+    $this->assertLink(t('Delete'));
+
+    $this->clickLink('test name');
+
+    // Entity shown.
+    $this->assertText(t('test name'));
+    $this->assertLink(t('Add Ingredient'));
+    $this->assertLink(t('Edit'));
+    $this->assertLink(t('Delete'));
+
+    // Delete the entity.
+    $this->clickLink('Delete');
+
+    // Confirm deletion.
+    $this->assertLink(t('Cancel'));
+    $this->drupalPostForm(NULL, array(), 'Delete');
+
+    // Back to list, must be empty.
+    $this->assertNoText('test name');
+
+    // Settings page.
+    $this->drupalGet('admin/structure/ingredient_settings');
+    $this->assertText(t('Ingredient Settings'));
+
+    // Make sure the field manipulation links are available.
+    $this->assertLink(t('Settings'));
+    $this->assertLink(t('Manage fields'));
+    $this->assertLink(t('Manage form display'));
+    $this->assertLink(t('Manage display'));
+  }
+
+  /**
+   * Test all paths exposed by the module, by permission.
+   */
+  public function testPaths() {
+    // Generate an ingredient so that we can test the paths against it.
+    $ingredient = Ingredient::create(
+      array(
+        'name' => 'test name',
+      )
+    );
+    $ingredient->save();
+
+    // Gather the test data.
+    $data = $this->providerTestPaths($ingredient->id());
+
+    // Run the tests.
+    foreach ($data as $datum) {
+      // drupalCreateUser() doesn't know what to do with an empty permission
+      // array, so we help it out.
+      if ($datum[2]) {
+        $user = $this->drupalCreateUser(array($datum[2]));
+        $this->drupalLogin($user);
+      }
+      else {
+        $user = $this->drupalCreateUser();
+        $this->drupalLogin($user);
+      }
+      $this->drupalGet($datum[1]);
+      $this->assertResponse($datum[0]);
+    }
+  }
+
+  /**
+   * Data provider for testPaths.
+   *
+   * @param int $ingredient_id
+   *   The id of an existing Ingredient entity.
+   *
+   * @return array
+   *   Nested array of testing data. Arranged like this:
+   *   - Expected response code.
+   *   - Path to request.
+   *   - Permission for the user.
+   */
+  protected function providerTestPaths($ingredient_id) {
+    return array(
+      array(
+        200,
+        '/ingredient/' . $ingredient_id,
+        'view ingredient',
+      ),
+      array(
+        403,
+        '/ingredient/' . $ingredient_id,
+        '',
+      ),
+      array(
+        200,
+        '/ingredient/list',
+        'view ingredient',
+      ),
+      array(
+        403,
+        '/ingredient/list',
+        '',
+      ),
+      array(
+        200,
+        '/ingredient/add',
+        'add ingredient',
+      ),
+      array(
+        403,
+        '/ingredient/add',
+        '',
+      ),
+      array(
+        200,
+        '/ingredient/' . $ingredient_id . '/edit',
+        'edit ingredient',
+      ),
+      array(
+        403,
+        '/ingredient/' . $ingredient_id . '/edit',
+        '',
+      ),
+      array(
+        200,
+        '/ingredient/' . $ingredient_id . '/delete',
+        'delete ingredient',
+      ),
+      array(
+        403,
+        '/ingredient/' . $ingredient_id . '/delete',
+        '',
+      ),
+      array(
+        200,
+        'admin/structure/ingredient_settings',
+        'administer ingredient',
+      ),
+      array(
+        403,
+        'admin/structure/ingredient_settings',
+        '',
+      ),
+    );
+  }
+
+}
