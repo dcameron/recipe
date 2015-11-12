@@ -2,12 +2,6 @@ recipe.settings:
   type: config_object
   label: 'Recipe settings'
   mapping:
-    recipe_preferred_system_of_measure:
-      type: integer
-      label: 'Preferred system of measure'
-    recipe_preferred_system_of_measure_limit:
-      type: integer
-      label: 'Limit the UI to the preferred system of measure'
     recipe_summary_location:
       type: integer
       label: 'Recipe summary location'
