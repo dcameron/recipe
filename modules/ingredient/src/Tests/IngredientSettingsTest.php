@@ -2,35 +2,39 @@
 
 /*
  * @file
- * Contains \Drupal\recipe\Tests\RecipeIngredientSettingsTest
+ * Contains \Drupal\ingredient\Tests\IngredientSettingsTest
  */
 
-namespace Drupal\recipe\Tests;
-
-use Drupal\recipe\Tests\RecipeTestBase;
+namespace Drupal\ingredient\Tests;
 
 /**
  * Tests the functionality of the ingredient field settings.
  *
  * @group recipe
  */
-class RecipeIngredientSettingsTest extends RecipeTestBase {
+class IngredientSettingsTest extends WebTestBase {
 
   /**
    * Modules to enable.
    *
    * @var array
    */
-  public static $modules = array('recipe');
+  public static $modules = array('ingredient');
+
+  /**
+   * A test user with administrative privileges.
+   *
+   * @var \Drupal\user\UserInterface
+   */
+  protected $admin_user;
 
   public function setUp() {
-    // Enable modules required for testing.
     parent::setUp();
 
     // Create a new content type for testing.
     $content_type = $this->drupalCreateContentType(array('type' => 'test_bundle'));
 
-    // Create and log in the admin user with Recipe content permissions.
+    // Create and log in the admin user.
     $this->admin_user = $this->drupalCreateUser(array('create test_bundle content', 'administer site configuration'));
     $this->drupalLogin($this->admin_user);
   }
