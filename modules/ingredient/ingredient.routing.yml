@@ -1,0 +1,47 @@
+entity.ingredient_ingredient.canonical:
+  path: '/ingredient/{ingredient_ingredient}'
+  defaults:
+    _entity_view: 'ingredient_ingredient'
+    _title: 'Ingredient Content'
+  requirements:
+    _entity_access: 'ingredient_ingredient.view'
+
+entity.ingredient_ingredient.collection:
+  path: '/ingredient/list'
+  defaults:
+    _entity_list: 'ingredient_ingredient'
+    _title: 'Ingredient List'
+  requirements:
+    _permission: 'view ingredient'
+
+ingredient.ingredient_add:
+  path: '/ingredient/add'
+  defaults:
+    _entity_form: ingredient_ingredient.add
+    _title: 'Add Ingredient'
+  requirements:
+    _entity_create_access: 'ingredient_ingredient'
+
+entity.ingredient_ingredient.edit_form:
+  path: '/ingredient/{ingredient_ingredient}/edit'
+  defaults:
+    _entity_form: ingredient_ingredient.edit
+    _title: 'Edit Ingredient'
+  requirements:
+    _entity_access: 'ingredient_ingredient.edit'
+
+entity.ingredient_ingredient.delete_form:
+  path: '/ingredient/{ingredient_ingredient}/delete'
+  defaults:
+    _entity_form: ingredient_ingredient.delete
+    _title: 'Delete Ingredient'
+  requirements:
+    _entity_access: 'ingredient_ingredient.delete'
+
+ingredient.ingredient_settings:
+  path: 'admin/structure/ingredient_settings'
+  defaults:
+    _form: '\Drupal\ingredient\Form\IngredientSettingsForm'
+    _title: 'Ingredient Settings'
+  requirements:
+    _permission: 'administer ingredient'
