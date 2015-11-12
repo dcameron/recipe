@@ -5,6 +5,7 @@ dependencies:
     - field.field.node.recipe.recipe_description
     - field.field.node.recipe.recipe_instructions
     - field.field.node.recipe.recipe_notes
+    - field.field.node.recipe.recipe_source
     - node.type.recipe
   module:
     - text
@@ -30,6 +31,12 @@ content:
     label: above
     type: text_default
     weight: -1
+    settings: {  }
+    third_party_settings: {  }
+  recipe_source:
+    label: above
+    type: text_default
+    weight: 0
     settings: {  }
     third_party_settings: {  }
   links:

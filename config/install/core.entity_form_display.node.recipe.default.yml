@@ -5,6 +5,7 @@ dependencies:
     - field.field.node.recipe.recipe_description
     - field.field.node.recipe.recipe_instructions
     - field.field.node.recipe.recipe_notes
+    - field.field.node.recipe.recipe_source
     - node.type.recipe
   module:
     - path
@@ -34,6 +35,13 @@ content:
     weight: -1
     settings:
       rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  recipe_source:
+    type: text_textarea
+    weight: -1
+    settings:
+      rows: 3
       placeholder: ''
     third_party_settings: {  }
   created:
