@@ -1,0 +1,5 @@
+ingredient_ingredient.admin.structure.settings:
+  title: Ingredients
+  description: 'Configure Ingredient entities'
+  route_name:  ingredient.ingredient_settings
+  parent: system.admin_structure

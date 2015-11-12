@@ -1,0 +1,6 @@
+ingredient.ingredient_add:
+  route_name: ingredient.ingredient_add
+  title: 'Add Ingredient'
+  appears_on:
+    - entity.ingredient_ingredient.collection
+    - entity.ingredient_ingredient.canonical
