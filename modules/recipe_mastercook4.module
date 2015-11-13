@@ -80,7 +80,7 @@ function merge_template($node) {
     $node->recipe_yield = $node->recipe_custom_yield;
   }
 
-  $unit_list = recipe_get_units();
+  $unit_list = ingredient_get_units();
 
   // get the template string
   $template = get_template();

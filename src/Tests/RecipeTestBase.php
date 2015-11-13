@@ -43,6 +43,6 @@ class RecipeTestBase extends WebTestBase {
     $this->drupalLogin($this->admin_user);
 
     // Populate the unit list.
-    $this->unit_list = recipe_get_units();
+    $this->unit_list = ingredient_get_units();
   }
 }

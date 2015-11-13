@@ -139,7 +139,7 @@ function recipe_recipeML_export_single($nid = NULL, $yield = NULL, $add_content_
     '<description>' . $recipe_description . "</description>\n" .
     '<ingredients>';
 
-  $unit_list = recipe_get_units();
+  $unit_list = ingredient_get_units();
 
   $ingredient_items = field_get_items('node', $node, 'recipe_ingredient');
   $ingredient_instance = field_read_instance('node', 'recipe_ingredient', 'recipe');

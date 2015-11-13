@@ -215,7 +215,7 @@ function recipe_plaintext_format_ingredients($node = NULL) {
     $node->recipe_yield = $node->recipe_custom_yield;
   }
 
-  $unit_list = recipe_get_units();
+  $unit_list = ingredient_get_units();
 
   $ingredient_items = field_get_items('node', $node, 'recipe_ingredient');
   $ingredient_instance = field_read_instance('node', 'recipe_ingredient', 'recipe');

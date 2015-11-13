@@ -371,10 +371,10 @@ function recipe_import_parse($form, &$form_state) {
  *   A unit of measure abbreviation or a unit name.
  *
  * @return
- *   A recipe unit key as from recipe_get_units or FALSE if no match.
+ *   An ingredient unit key as from ingredient_get_units or FALSE if no match.
  */
 function recipe_unit_fuzzymatch($unit_name_or_abbrev) {
-  $units = recipe_get_units();
+  $units = ingredient_get_units();
 
   // Empty strings should use the default non-printing 'unit'.
   if (empty($unit_name_or_abbrev)) {
