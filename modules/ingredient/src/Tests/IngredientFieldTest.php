@@ -2,7 +2,7 @@
 
 /*
  * @file
- * Contains \Drupal\ingredient\Tests\IngredientSettingsTest
+ * Contains \Drupal\ingredient\Tests\IngredientFieldTest
  */
 
 namespace Drupal\ingredient\Tests;
@@ -10,11 +10,11 @@ namespace Drupal\ingredient\Tests;
 use Drupal\simpletest\WebTestBase;
 
 /**
- * Tests the functionality of the ingredient field settings.
+ * Tests the functionality of the ingredient field.
  *
  * @group recipe
  */
-class IngredientSettingsTest extends WebTestBase {
+class IngredientFieldTest extends WebTestBase {
 
   /**
    * Modules to enable.
