@@ -30,6 +30,13 @@ class IngredientFieldTest extends WebTestBase {
    */
   protected $admin_user;
 
+  /**
+   * A list of units available for ingredient amounts.
+   *
+   * @var array
+   */
+  protected $unit_list;
+
   public function setUp() {
     parent::setUp();
 
@@ -39,6 +46,107 @@ class IngredientFieldTest extends WebTestBase {
     // Create and log in the admin user.
     $this->admin_user = $this->drupalCreateUser(array('create test_bundle content', 'add ingredient', 'view ingredient', 'administer site configuration'));
     $this->drupalLogin($this->admin_user);
+
+    // Populate the unit list.
+    $this->unit_list = ingredient_get_units();
+  }
+
+  /**
+   * Tests adding data with the ingredient field.
+   */
+  public function testIngredientField() {
+    $field_name = strtolower($this->randomMachineName());
+    $this->createIngredientField($field_name, 'node', 'test_bundle');
+
+    $test_ingredients = [];
+
+    // Ingredient with quantity == 1 and unit tablespoon with note.
+    $test_ingredients[] = [
+      'quantity' => 1,
+      'unit_key' => 'tablespoon',
+      'name' => $this->randomMachineName(16),
+      'note' => $this->randomMachineName(16),
+    ];
+    // Ingredient with quantity > 1 and unit tablespoon with note.
+    $test_ingredients[] = [
+      'quantity' => 2,
+      'unit_key' => 'tablespoon',
+      'name' => $this->randomMachineName(16),
+      'note' => $this->randomMachineName(16),
+    ];
+    // Ingredient with quantity == 0 and unit tablespoon with note.
+    $test_ingredients[] = [
+      'quantity' => 0,
+      'unit_key' => 'tablespoon',
+      'name' => $this->randomMachineName(16),
+      'note' => $this->randomMachineName(16),
+    ];
+    // Ingredient without note.
+    $test_ingredients[] = [
+      'quantity' => 1,
+      'unit_key' => 'tablespoon',
+      'name' => $this->randomMachineName(16),
+      'note' => '',
+    ];
+    // Ingredient with unit that has no abbreviation.
+    $test_ingredients[] = [
+      'quantity' => 10,
+      'unit_key' => 'unit',
+      'name' => $this->randomMachineName(16),
+      'note' => $this->randomMachineName(16),
+    ];
+    // Ingredient with fractional quantity and unit tablespoon.
+    $test_ingredients[] = [
+      'quantity' => '1/4',
+      'unit_key' => 'tablespoon',
+      'name' => $this->randomMachineName(16),
+      'note' => '',
+    ];
+    // Ingredient with mixed fractional quantity and unit tablespoon.
+    $test_ingredients[] = [
+      'quantity' => '2 2/3',
+      'unit_key' => 'tablespoon',
+      'name' => $this->randomMachineName(16),
+      'note' => '',
+    ];
+
+    foreach ($test_ingredients as $_ingredient) {
+      // Create a new test_bundle node with the ingredient field values.
+      $edit = [
+        'title[0][value]' => $this->randomMachineName(16),
+        'ingredient[0][quantity]' => $ingredient['quantity'],
+        'ingredient[0][unit_key]' => $ingredient['unit_key'],
+        'ingredient[0][name]' => $ingredient['name'],
+        'ingredient[0][note]' => $ingredient['note'],
+      ];
+      $this->drupalPostForm('node/add/test_bundle', $edit, t('Save'));
+
+      $formatted_quantity = str_replace('/', '&frasl;', $ingredient['quantity']);
+
+      // Check for the presence or absence of the ingredient quantity and unit
+      // abbreviation.
+      if ($ingredient['quantity'] === 0) {
+        // Ingredients with quantities === 0 should not display the quantity or
+        // units.
+        $this->assertNoText(t('@quantity @unit', array('@quantity' => $formatted_quantity, '@unit' => $this->unit_list[$ingredient['unit_key']]['abbreviation'])), 'Did not find the ingredient quantity === 0.');
+      }
+      elseif ($ingredient['unit_key'] == 'unit') {
+        $this->assertRaw(format_string('<span class="quantity-unit" property="schema:amount"> @quantity </span>', array('@quantity' => $formatted_quantity)), 'Found the ingredient quantity with no unit.');
+      }
+      else {
+        $unit_abbreviation = $this->unit_list[$ingredient['unit_key']]['abbreviation'];
+        $this->assertText(t('@quantity @unit', array('@quantity' => $formatted_quantity, '@unit' => $unit_abbreviation)), 'Found the ingredient quantity and unit abbreviation.');
+      }
+
+      // Check for the ingredient name and the presence or absence of the note.
+      if ($ingredient['note'] === '') {
+        $this->assertText(t('@name'), ['@name' => $ingredient['name']], 'Found the ingredient name.');
+        $this->assertNoText(format_string('@name (@note)', array('@name' => $ingredient['name'], '@note' => $ingredient['note'])), 'Did not find ingredient name with blank note field, "()".');
+      }
+      else {
+        $this->assertText(format_string('@name (@note)', array('@name' => $ingredient['name'], '@note' => $ingredient['note'])), 'Found the ingredient name and note.');
+      }
+    }
   }
 
   /**

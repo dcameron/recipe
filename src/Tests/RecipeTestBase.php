@@ -28,21 +28,11 @@ class RecipeTestBase extends WebTestBase {
    */
   protected $admin_user;
 
-  /**
-   * A list of units available for ingredient amounts.
-   *
-   * @var array
-   */
-  protected $unit_list;
-
   public function setUp() {
     parent::setUp();
 
     // Create and log in the admin user with Recipe content permissions.
     $this->admin_user = $this->drupalCreateUser(array('create recipe content', 'edit any recipe content', 'administer site configuration', 'administer blocks'));
     $this->drupalLogin($this->admin_user);
-
-    // Populate the unit list.
-    $this->unit_list = ingredient_get_units();
   }
 }

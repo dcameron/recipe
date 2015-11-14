@@ -37,42 +37,6 @@ class RecipeNodeTest extends RecipeTestBase {
     $ing_0_name = $this->randomMachineName(16);
     $ing_0_note = $this->randomMachineName(16);
 
-    // Ingredient with quantity > 1 and unit tablespoon with note.
-    $ing_1_quantity = 2;
-    $ing_1_unit = 'tablespoon';
-    $ing_1_name = $this->randomMachineName(16);
-    $ing_1_note = $this->randomMachineName(16);
-
-    // Ingredient with quantity == 0 and unit tablespoon with note.
-    $ing_2_quantity = 0;
-    $ing_2_unit = 'tablespoon';
-    $ing_2_name = $this->randomMachineName(16);
-    $ing_2_note = $this->randomMachineName(16);
-
-    // Ingredient without note.
-    $ing_3_quantity = 1;
-    $ing_3_unit = 'tablespoon';
-    $ing_3_name = $this->randomMachineName(16);
-    $ing_3_note = '';
-
-    // Ingredient with unit that has no abbreviation.
-    $ing_4_quantity = 10;
-    $ing_4_unit = 'unit';
-    $ing_4_name = $this->randomMachineName(16);
-    $ing_4_note = $this->randomMachineName(16);
-
-    // Ingredient with fractional quantity and unit tablespoon.
-    $ing_5_quantity = '1/4';
-    $ing_5_unit = 'tablespoon';
-    $ing_5_name = $this->randomMachineName(16);
-    $ing_5_note = '';
-
-    // Ingredient with mixed fractional quantity and unit tablespoon.
-    $ing_6_quantity = '2 2/3';
-    $ing_6_unit = 'tablespoon';
-    $ing_6_name = $this->randomMachineName(16);
-    $ing_6_note = '';
-
     $edit = array(
       'title[0][value]' => $title,
       'recipe_description[0][value]' => $description,
@@ -86,43 +50,11 @@ class RecipeNodeTest extends RecipeTestBase {
       'recipe_ingredient[0][quantity]' => $ing_0_quantity,
       'recipe_ingredient[0][unit_key]' => $ing_0_unit,
       'recipe_ingredient[0][name]' => $ing_0_name,
-      'recipe_ingredient[0][note]' => $ing_0_note,
-      'recipe_ingredient[1][quantity]' => $ing_1_quantity,
-      'recipe_ingredient[1][unit_key]' => $ing_1_unit,
-      'recipe_ingredient[1][name]' => $ing_1_name,
-      'recipe_ingredient[1][note]' => $ing_1_note,
-      'recipe_ingredient[2][quantity]' => $ing_2_quantity,
-      'recipe_ingredient[2][unit_key]' => $ing_2_unit,
-      'recipe_ingredient[2][name]' => $ing_2_name,
-      'recipe_ingredient[2][note]' => $ing_2_note,
-      'recipe_ingredient[3][quantity]' => $ing_3_quantity,
-      'recipe_ingredient[3][unit_key]' => $ing_3_unit,
-      'recipe_ingredient[3][name]' => $ing_3_name,
-      'recipe_ingredient[3][note]' => $ing_3_note,
-      'recipe_ingredient[4][quantity]' => $ing_4_quantity,
-      'recipe_ingredient[4][unit_key]' => $ing_4_unit,
-      'recipe_ingredient[4][name]' => $ing_4_name,
-      'recipe_ingredient[4][note]' => $ing_4_note,
-      'recipe_ingredient[5][quantity]' => $ing_5_quantity,
-      'recipe_ingredient[5][unit_key]' => $ing_5_unit,
-      'recipe_ingredient[5][name]' => $ing_5_name,
-      'recipe_ingredient[5][note]' => $ing_5_note,
-      'recipe_ingredient[6][quantity]' => $ing_6_quantity,
-      'recipe_ingredient[6][unit_key]' => $ing_6_unit,
-      'recipe_ingredient[6][name]' => $ing_6_name,
-      'recipe_ingredient[6][note]' => $ing_6_note,*/
+      'recipe_ingredient[0][note]' => $ing_0_note,*/
     );
 
-    $this->drupalGet('node/add/recipe');
-    // Add six recipe_ingredient widgets.
-    $this->drupalPostForm(NULL, array(), t('Add another item'));
-    $this->drupalPostForm(NULL, array(), t('Add another item'));
-    $this->drupalPostForm(NULL, array(), t('Add another item'));
-    $this->drupalPostForm(NULL, array(), t('Add another item'));
-    $this->drupalPostForm(NULL, array(), t('Add another item'));
-    $this->drupalPostForm(NULL, array(), t('Add another item'));
     // Post the values to the node form.
-    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
     $this->assertText(t('Recipe @title has been created.', array('@title' => $title)));
 
     // Check the page for the recipe content.
@@ -136,24 +68,8 @@ class RecipeNodeTest extends RecipeTestBase {
     $this->assertText('2 hours, 15 minutes', 'Found the recipe cook time.');
     $this->assertText('3 hours, 15 minutes', 'Found the recipe total time.');
 
-    $this->assertText(t('@quantity @unit', array('@quantity' => $ing_0_quantity, '@unit' => $this->unit_list[$ing_0_unit]['abbreviation'])), 'Found ingredient 0 quantity and abbreviation.');
-    $this->assertText(format_string('@name (@note)', array('@name' => $ing_0_name, '@note' => $ing_0_note)), 'Found ingredient 0 name and note.');
-
-    $this->assertText(t('@quantity @unit', array('@quantity' => $ing_1_quantity, '@unit' => $this->unit_list[$ing_1_unit]['abbreviation'])), 'Found ingredient 1 quantity and abbreviation.');
-    $this->assertText(format_string('@name (@note)', array('@name' => $ing_1_name, '@note' => $ing_1_note)), 'Found ingredient 1 name and note.');
-
-    $this->assertNoText(t('@quantity @unit', array('@quantity' => $ing_2_quantity, '@unit' => $this->unit_list[$ing_2_unit]['abbreviation'])), 'Did not find ingredient 2 quantity == 0.');
-    $this->assertText(format_string('@name (@note)', array('@name' => $ing_2_name, '@note' => $ing_2_note)), 'Found ingredient 2 name and note.');
-
-    $this->assertText(t('@quantity @unit', array('@quantity' => $ing_3_quantity, '@unit' => $this->unit_list[$ing_3_unit]['abbreviation'])), 'Found ingredient 3 quantity and abbreviation.');
-    $this->assertNoText(format_string('@name (@note)', array('@name' => $ing_3_name, '@note' => $ing_3_note)), 'Did not find ingredient 3 name with blank note field, "()".');
-
-    $this->assertRaw(format_string('<span class="quantity-unit" property="schema:amount"> @quantity </span>', array('@quantity' => $ing_4_quantity)), 'Found ingredient 4 quantity with no unit.');
-    $this->assertText(format_string('@name (@note)', array('@name' => $ing_4_name, '@note' => $ing_4_note)), 'Found ingredient 4 name and note.');
-
-    $this->assertRaw(str_replace('/', '&frasl;', $ing_5_quantity), 'Found ingredient 5 quantity.');
-
-    $this->assertRaw(str_replace('/', '&frasl;', $ing_6_quantity), 'Found ingredient 6 quantity.');
+    $this->assertText(t('@quantity @unit', array('@quantity' => $ing_0_quantity, '@unit' => $this->unit_list[$ing_0_unit]['abbreviation'])), 'Found the ingredient quantity and abbreviation.');
+    $this->assertText(format_string('@name (@note)', array('@name' => $ing_0_name, '@note' => $ing_0_note)), 'Found the ingredient name and note.');
 
     // Check the page HTML for the recipe RDF properties.
     $properties = array(
