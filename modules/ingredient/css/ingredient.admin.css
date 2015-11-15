@@ -1,0 +1,19 @@
+/**
+ * @file
+ * Admin stylesheet for the ingredient module.
+ */
+
+/* Ingredient field widget form */
+.field-type-ingredient-reference .form-type-textfield,
+.field-type-ingredient-reference .form-type-select {
+  float: left;
+}
+.field-type-ingredient-reference .form-type-textfield {
+  min-width: 17em;
+}
+.field-type-ingredient-reference .form-type-textfield:first-child {
+  min-width: 8em;
+}
+.field-type-ingredient-reference .form-type-select {
+  min-width: 12em;
+}

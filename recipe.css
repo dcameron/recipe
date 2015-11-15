@@ -1,20 +1,4 @@
 
-
-/* Ingredient field widget form */
-.field-type-ingredient-reference .form-type-textfield,
-.field-type-ingredient-reference .form-type-select {
-  float: left;
-}
-.field-type-ingredient-reference .form-type-textfield {
-  min-width: 17em;
-}
-.field-type-ingredient-reference .form-type-textfield:first-child {
-  min-width: 8em;
-}
-.field-type-ingredient-reference .form-type-select {
-  min-width: 12em;
-}
-
 .recipe-section div.section {
   margin: 0;
   padding: 0 0 0 1.5em;
