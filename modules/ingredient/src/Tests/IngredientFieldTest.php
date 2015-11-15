@@ -7,6 +7,7 @@
 
 namespace Drupal\ingredient\Tests;
 
+use Drupal\field\Entity\FieldConfig;
 use Drupal\simpletest\WebTestBase;
 
 /**
@@ -21,7 +22,7 @@ class IngredientFieldTest extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = array('ingredient', 'node');
+  public static $modules = array('field_ui', 'ingredient', 'node');
 
   /**
    * A test user with administrative privileges.
@@ -44,7 +45,7 @@ class IngredientFieldTest extends WebTestBase {
     $content_type = $this->drupalCreateContentType(array('type' => 'test_bundle'));
 
     // Create and log in the admin user.
-    $this->admin_user = $this->drupalCreateUser(array('create test_bundle content', 'add ingredient', 'view ingredient', 'administer site configuration'));
+    $this->admin_user = $this->drupalCreateUser(array('create test_bundle content', 'access content', 'administer node display', 'add ingredient', 'view ingredient', 'administer site configuration'));
     $this->drupalLogin($this->admin_user);
 
     // Populate the unit list.
@@ -56,7 +57,10 @@ class IngredientFieldTest extends WebTestBase {
    */
   public function testIngredientField() {
     $field_name = strtolower($this->randomMachineName());
-    $this->createIngredientField($field_name, 'node', 'test_bundle');
+    $display_settings = [
+      'fraction_format' => '{%d }%d/%d',
+    ];
+    $this->createIngredientField($field_name, 'node', 'test_bundle', [], [], [], $display_settings);
 
     $test_ingredients = [];
 
@@ -110,37 +114,39 @@ class IngredientFieldTest extends WebTestBase {
       'note' => '',
     ];
 
-    foreach ($test_ingredients as $_ingredient) {
+    foreach ($test_ingredients as $ingredient) {
       // Create a new test_bundle node with the ingredient field values.
+      $title = $this->randomMachineName(16);
       $edit = [
-        'title[0][value]' => $this->randomMachineName(16),
-        'ingredient[0][quantity]' => $ingredient['quantity'],
-        'ingredient[0][unit_key]' => $ingredient['unit_key'],
-        'ingredient[0][name]' => $ingredient['name'],
-        'ingredient[0][note]' => $ingredient['note'],
+        'title[0][value]' => $title,
+        $field_name . '[0][quantity]' => $ingredient['quantity'],
+        $field_name . '[0][unit_key]' => $ingredient['unit_key'],
+        $field_name . '[0][target_id]' => $ingredient['name'],
+        $field_name . '[0][note]' => $ingredient['note'],
       ];
       $this->drupalPostForm('node/add/test_bundle', $edit, t('Save'));
 
-      $formatted_quantity = str_replace('/', '&frasl;', $ingredient['quantity']);
+      // Check for the node title to verify redirection to the node view.
+      $this->assertText($title, 'Found the node title.');
 
       // Check for the presence or absence of the ingredient quantity and unit
       // abbreviation.
       if ($ingredient['quantity'] === 0) {
         // Ingredients with quantities === 0 should not display the quantity or
         // units.
-        $this->assertNoText(t('@quantity @unit', array('@quantity' => $formatted_quantity, '@unit' => $this->unit_list[$ingredient['unit_key']]['abbreviation'])), 'Did not find the ingredient quantity === 0.');
+        $this->assertNoText(t('@quantity @unit', array('@quantity' => $ingredient['quantity'], '@unit' => $this->unit_list[$ingredient['unit_key']]['abbreviation'])), 'Did not find the ingredient quantity === 0.');
       }
       elseif ($ingredient['unit_key'] == 'unit') {
-        $this->assertRaw(format_string('<span class="quantity-unit" property="schema:amount"> @quantity </span>', array('@quantity' => $formatted_quantity)), 'Found the ingredient quantity with no unit.');
+        $this->assertRaw(format_string('<span class="quantity-unit" property="schema:amount">@quantity</span>', array('@quantity' => $ingredient['quantity'])), 'Found the ingredient quantity with no unit.');
       }
       else {
         $unit_abbreviation = $this->unit_list[$ingredient['unit_key']]['abbreviation'];
-        $this->assertText(t('@quantity @unit', array('@quantity' => $formatted_quantity, '@unit' => $unit_abbreviation)), 'Found the ingredient quantity and unit abbreviation.');
+        $this->assertText(t('@quantity @unit', array('@quantity' => $ingredient['quantity'], '@unit' => $unit_abbreviation)), 'Found the ingredient quantity and unit abbreviation.');
       }
 
       // Check for the ingredient name and the presence or absence of the note.
       if ($ingredient['note'] === '') {
-        $this->assertText(t('@name'), ['@name' => $ingredient['name']], 'Found the ingredient name.');
+        $this->assertText(format_string('@name', ['@name' => $ingredient['name']]), 'Found the ingredient name.');
         $this->assertNoText(format_string('@name (@note)', array('@name' => $ingredient['name'], '@note' => $ingredient['note'])), 'Did not find ingredient name with blank note field, "()".');
       }
       else {
@@ -155,59 +161,67 @@ class IngredientFieldTest extends WebTestBase {
   public function testIngredientFieldSettings() {
     // Create an ingredient field on the test_bundle node type.
     $field_name = strtolower($this->randomMachineName());
-    $storage_settings = [
-      'ingredient_name_normalize' => 1,
-    ];
     $field_settings = [
       'default_unit' => 'cup',
     ];
-    $this->createIngredientField($field_name, 'node', 'test_bundle', $storage_settings, $field_settings);
-
-    // 7.x field instance settings retained for display settings.
-    /*$instance = array(
-      'bundle' => 'test_bundle',
-      'display' => array(
-        'default' => array(
-          'label' => 'above',
-          'module' => 'recipe',
-          'settings' => array(
-            'fraction_format' => '{%d }%d&frasl;%d',
-            'unit_abbreviation' => 0,
-          ),
-          'type' => 'recipe_ingredient_default',
-          'weight' => 0,
-        ),
-      ),
-      'entity_type' => 'node',
-      'field_name' => 'ingredient',
-      'label' => 'Ingredients',
-      'widget' => array(
-        'active' => 0,
-        'module' => 'recipe',
-        'settings' => array(
-          'default_unit' => 'cup',
-        ),
-        'type' => 'recipe_ingredient_autocomplete',
-        'weight' => 0,
-      ),
-    );*/
+    $this->createIngredientField($field_name, 'node', 'test_bundle', [], $field_settings);
 
     $edit = array(
       'title[0][value]' => $this->randomMachineName(16),
-      'ingredient[0][quantity]' => 4,
-      'ingredient[0][unit_key]' => 'us gallon',
-      'ingredient[0][name]' => 'TeSt InGrEdIeNt',
-      'ingredient[0][note]' => '',
+      $field_name . '[0][quantity]' => 4,
+      $field_name . '[0][unit_key]' => 'us gallon',
+      $field_name . '[0][target_id]' => 'test ingredient',
+      $field_name . '[0][note]' => '',
     );
 
     $this->drupalGet('node/add/test_bundle');
     // Assert that the default element, 'cup', is selected.
-    $this->assertOptionSelected('edit-ingredient-und-0-unit-key', 'cup', 'The default unit was selected.');
+    $this->assertOptionSelected('edit-' . $field_name . '-0-unit-key', 'cup', 'The default unit was selected.');
+    // Post the values to the node form.
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+  }
+
+  /**
+   * Tests ingredient formatter settings.
+   *
+   * todo: Add assertions for singular/plural unit full names.
+   */
+  public function testIngredientFormatterSettings() {
+    // Create an ingredient field on the test_bundle node type.
+    $field_name = strtolower($this->randomMachineName());
+    $this->createIngredientField($field_name, 'node', 'test_bundle');
+
+    // Verify that the ingredient entity link display is turned off by default.
+    $this->drupalGet('admin/structure/types/manage/test_bundle/display');
+    $this->assertText('Link to ingredient: No', 'Ingredient entity link display is turned off.');
+
+    $edit = array(
+      'title[0][value]' => $this->randomMachineName(16),
+      $field_name . '[0][quantity]' => 4,
+      $field_name . '[0][unit_key]' => 'us gallon',
+      $field_name . '[0][target_id]' => 'test ingredient',
+      $field_name . '[0][note]' => '',
+    );
+
+    $this->drupalGet('node/add/test_bundle');
     // Post the values to the node form.
     $this->drupalPostForm(NULL, $edit, t('Save'));
 
-    // Assert that the normalized ingredient name can be found on the node page.
-    $this->assertText('test ingredient', 'Found the normalized ingredient name.');
+    // Verify that the ingredient name is not linked to its entity.
+    $this->assertText('test ingredient', 'Found the ingredient name.');
+    $this->assertNoLink('test ingredient', 'Ingredient entity link is not displayed.');
+
+    // Turn ingredient entity link display on.
+    $this->updateIngredientField($field_name, 'node', 'test_bundle', [], [], ['link' => TRUE]);
+
+    // Verify that the ingredient entity link display is turned on.
+    $this->drupalGet('admin/structure/types/manage/test_bundle/display');
+    $this->assertText('Link to ingredient: Yes', 'Ingredient entity link display is turned on.');
+
+    // Verify that the ingredient name is linked to its entity.
+    $this->drupalGet('node/1');
+    $this->assertText('test ingredient', 'Found the ingredient name.');
+    $this->assertLink('test ingredient', 0, 'Ingredient entity link is displayed.');
   }
 
   /**
@@ -225,8 +239,10 @@ class IngredientFieldTest extends WebTestBase {
    *   A list of instance settings that will be added to the instance defaults.
    * @param array $widget_settings
    *   A list of widget settings that will be added to the widget defaults.
+   * @param array $display_settings
+   *   A list of display settings that will be added to the display defaults.
    */
-  protected function createIngredientField($name, $entity_type, $bundle, $storage_settings = array(), $field_settings = array(), $widget_settings = array()) {
+  protected function createIngredientField($name, $entity_type, $bundle, $storage_settings = array(), $field_settings = array(), $widget_settings = array(), $display_settings = array()) {
     $field_storage = entity_create('field_storage_config', array(
       'entity_type' => $entity_type,
       'field_name' => $name,
@@ -236,7 +252,7 @@ class IngredientFieldTest extends WebTestBase {
     ));
     $field_storage->save();
 
-    $this->attachIngredientField($name, $entity_type, $bundle, $field_settings, $widget_settings);
+    $this->attachIngredientField($name, $entity_type, $bundle, $field_settings, $widget_settings, $display_settings);
     return $field_storage;
   }
 
@@ -253,8 +269,10 @@ class IngredientFieldTest extends WebTestBase {
    *   A list of field settings that will be added to the defaults.
    * @param array $widget_settings
    *   A list of widget settings that will be added to the widget defaults.
+   * @param array $display_settings
+   *   A list of display settings that will be added to the display defaults.
    */
-  protected function attachIngredientField($name, $entity_type, $bundle, $field_settings = array(), $widget_settings = array()) {
+  protected function attachIngredientField($name, $entity_type, $bundle, $field_settings = array(), $widget_settings = array(), $display_settings = array()) {
     $field = array(
       'field_name' => $name,
       'label' => $name,
@@ -265,18 +283,36 @@ class IngredientFieldTest extends WebTestBase {
     );
     entity_create('field_config', $field)->save();
 
-    entity_get_form_display($entity_type, $bundle, 'default')
-      ->setComponent($name, array(
+    $form_display = \Drupal::entityManager()->getStorage('entity_form_display')->load($entity_type . '.' . $bundle . '.default');
+    $form_display->setComponent($name, array(
         'type' => 'ingredient_autocomplete',
         'settings' => $widget_settings,
       ))
       ->save();
     // Assign display settings.
-    entity_get_display($entity_type, $bundle, 'default')
-      ->setComponent($name, array(
+    $view_display = \Drupal::entityManager()->getStorage('entity_view_display')->load($entity_type . '.' . $bundle . '.default');
+    $view_display->setComponent($name, array(
         'label' => 'hidden',
         'type' => 'ingredient_default',
+        'settings' => $display_settings,
       ))
+      ->save();
+  }
+
+  /**
+   * Updates an existing ingredient field with new settings.
+   */
+  function updateIngredientField($name, $entity_type, $bundle, $field_settings = array(), $widget_settings = array(), $display_settings = array()) {
+    $field = FieldConfig::loadByName($entity_type, $bundle, $name);
+    $field->setSettings(array_merge($field->getSettings(), $field_settings));
+    $field->save();
+
+    $form_display = \Drupal::entityManager()->getStorage('entity_form_display')->load($entity_type . '.' . $bundle . '.default');
+    $form_display->setComponent($name, ['settings' => $widget_settings])
+      ->save();
+
+    $view_display = \Drupal::entityManager()->getStorage('entity_view_display')->load($entity_type . '.' . $bundle . '.default');
+    $view_display->setComponent($name, ['settings' => $display_settings])
       ->save();
   }
 

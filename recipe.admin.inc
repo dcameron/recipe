@@ -9,27 +9,6 @@
  * Page callback: Constructs a form for configuring the Recipe module.
  */
 function recipe_admin_settings() {
-  // System of measurement section
-  $form['system_of_measurement'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('System of measurement'),
-  );
-  $form['system_of_measurement']['recipe_preferred_system_of_measure'] = array(
-    '#type' => 'radios',
-    '#title' => t('Preferred system of measure'),
-    '#default_value' => variable_get('recipe_preferred_system_of_measure', 0),
-    '#options' => array(t('U.S. customary units'), t('SI/Metric')),
-    '#description' => t('Which system of measure should be preferred where it is ambiguous.'),
-    '#required' => TRUE,
-  );
-  $form['system_of_measurement']['recipe_preferred_system_of_measure_limit'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Limit UI to the preferred system of measure'),
-    '#default_value' => variable_get('recipe_preferred_system_of_measure_limit', 0),
-    '#return_value' => 1,
-    '#description' => t('Limit unit selectbox to only preferred system of measure.  Does not affect import routines.'),
-  );
-
   // Summary Section
   $form['recipe_summary'] = array(
     '#type' => 'fieldset',

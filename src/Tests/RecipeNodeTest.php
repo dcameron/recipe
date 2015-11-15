@@ -68,7 +68,7 @@ class RecipeNodeTest extends RecipeTestBase {
     $this->assertText('2 hours, 15 minutes', 'Found the recipe cook time.');
     $this->assertText('3 hours, 15 minutes', 'Found the recipe total time.');
 
-    $this->assertText(t('@quantity @unit', array('@quantity' => $ing_0_quantity, '@unit' => $this->unit_list[$ing_0_unit]['abbreviation'])), 'Found the ingredient quantity and abbreviation.');
+    $this->assertText(t('1 T'), 'Found the ingredient quantity and abbreviation.');
     $this->assertText(format_string('@name (@note)', array('@name' => $ing_0_name, '@note' => $ing_0_note)), 'Found the ingredient name and note.');
 
     // Check the page HTML for the recipe RDF properties.
@@ -98,12 +98,6 @@ class RecipeNodeTest extends RecipeTestBase {
       $this->assertRaw($duration, format_string('Found the ISO 8601 duration "@duration" in the recipe node HTML.', array('@duration' => $duration)));
     }
 
-    // Change the ingredient field settings.
-    $instance = field_read_instance('node', 'recipe_ingredient', 'recipe');
-    // Enable full unit name display.
-    $instance['display']['default']['settings']['unit_abbreviation'] = 1;
-    field_update_instance($instance);
-
     // Change the Recipe module settings.
     $summary_title = $this->randomMachineName(16);
     $edit = array(
@@ -119,10 +113,6 @@ class RecipeNodeTest extends RecipeTestBase {
 
     // Check the recipe node display again.
     $this->drupalGet('node/1');
-
-    $this->assertText(t('@quantity @unit', array('@quantity' => $ing_0_quantity, '@unit' => $this->unit_list[$ing_0_unit]['name'])), 'Found ingredient 0 quantity and singular unit name.');
-
-    $this->assertText(t('@quantity @unit', array('@quantity' => $ing_1_quantity, '@unit' => $this->unit_list[$ing_1_unit]['plural'])), 'Found ingredient 1 quantity and plural unit name.');
 
     //$this->assertNoText(t('Summary'), 'Did not find the recipe summary.');
 
@@ -142,18 +132,8 @@ class RecipeNodeTest extends RecipeTestBase {
     $this->drupalGet('node/1');
     $this->assertText($summary_title, 'Found the altered Summary block title.');
 
-    // Test ingredient autocomplete for the first ingredient.
-    $input = substr($ing_0_name, 0, 3);
-    $this->drupalGet('recipe/ingredient/autocomplete/' . $input);
-    $this->assertRaw('{"' . $ing_0_name . '":"' . $ing_0_name . '"}', format_string('Autocomplete returns ingredient %ingredient_name after typing the first 3 letters.', array('%ingredient_name' => $ing_0_name)));
-
     // Check for the description in the teaser view at /node.
     $this->drupalGet('node');
     $this->assertRaw($description, 'Found the recipe description.');
-
-    // Check for fractional quantities when editing the node.
-    $this->drupalGet('node/1/edit');
-    $this->assertFieldById('edit-recipe-ingredient-5-quantity', $ing_5_quantity, 'Found fractional quantity in the 5th ingredient field on the node edit form.');
-    $this->assertFieldById('edit-recipe-ingredient-6-quantity', $ing_6_quantity, 'Found fractional quantity in the 6th ingredient field on the node edit form.');
   }
 }

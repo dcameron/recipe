@@ -69,36 +69,6 @@ class Ingredient extends ContentEntityBase implements IngredientInterface {
   /**
    * {@inheritdoc}
    */
-  public function getOwner() {
-    return $this->get('user_id')->entity;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getOwnerId() {
-    return $this->get('user_id')->target_id;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setOwnerId($uid) {
-    $this->set('user_id', $uid);
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setOwner(UserInterface $account) {
-    $this->set('user_id', $account->id());
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
 
     // Standard field, used as unique if primary index.
@@ -149,6 +119,29 @@ class Ingredient extends ContentEntityBase implements IngredientInterface {
       ->setDescription(t('The time that the entity was last edited.'));
 
     return $fields;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave(EntityStorageInterface $storage) {
+    $config = \Drupal::config('ingredient.settings');
+
+    // Normalize the names of new ingredients to lowercase before saving.
+    if ($this->isNew() && $config->get('ingredient_name_normalize')) {
+      $name_field = $this->get('name');
+      $values = $name_field->getValue();
+      foreach ($values as $key => $value) {
+        // Don't convert to lowercase if there is a &reg; (registered trademark
+        // symbol).
+        if (!strpos($value['value'], '®')) {
+          $values[$key]['value'] = trim(strtolower($value['value']));
+        }
+      }
+      $name_field->setValue($values, FALSE);
+    }
+
+    parent::preSave($storage);
   }
 
 }

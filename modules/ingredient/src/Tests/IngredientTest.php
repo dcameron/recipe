@@ -217,4 +217,68 @@ class IngredientTest extends WebTestBase {
     );
   }
 
+  /**
+   * Test ingredient entity settings.
+   */
+  public function testIngredientSettings() {
+    $web_user = $this->drupalCreateUser([
+      'add ingredient',
+      'edit ingredient',
+      'view ingredient',
+      'delete ingredient',
+      'administer ingredient',
+    ]);
+
+    $this->drupalLogin($web_user);
+
+    // Verify that ingredient normalization is off by default.
+    $this->drupalGet('admin/structure/ingredient_settings');
+    $this->assertFieldChecked('edit-ingredient-name-normalize-0', 'Ingredient normalization is off by default.');
+
+    // Add a new ingredient with capitalized characters in the name.
+    $edit = [
+      'name[0][value]' => 'TeSt InGrEdIeNt 1',
+    ];
+    $this->drupalPostForm('ingredient/add', $edit, t('Save'));
+    // Verify that the name did not change on save.
+    $this->assertText('TeSt InGrEdIeNt 1', 'Found the ingredient name with capitalized characters.');
+
+    // Turn ingredient normaliation on.
+    $edit = [
+      'ingredient_name_normalize' => 1,
+    ];
+    $this->drupalPostForm('admin/structure/ingredient_settings', $edit, t('Save configuration'));
+
+    // Add a new ingredient with capitalized characters in the name.
+    $edit = [
+      'name[0][value]' => 'TeSt InGrEdIeNt 2',
+    ];
+    $this->drupalPostForm('ingredient/add', $edit, t('Save'));
+    // Verify that the name was normalized on save.
+    $this->assertText('test ingredient 2', 'Found the ingredient name with normalized characters.');
+
+    // Add a new ingredient with capitalized characters and an &reg; symbol in
+    // the name.
+    $edit = [
+      'name[0][value]' => 'TeSt InGrEdIeNt 3 ®',
+    ];
+    $this->drupalPostForm('ingredient/add', $edit, t('Save'));
+    // Verify that the name was not normalized on save.
+    $this->assertText('TeSt InGrEdIeNt 3 ®', 'Found the ingredient name with capitalized characters.');
+
+    // Turn ingredient normaliation back off.
+    $edit = [
+      'ingredient_name_normalize' => 0,
+    ];
+    $this->drupalPostForm('admin/structure/ingredient_settings', $edit, t('Save configuration'));
+
+    // Add a new ingredient with capitalized characters in the name.
+    $edit = [
+      'name[0][value]' => 'TeSt InGrEdIeNt 4',
+    ];
+    $this->drupalPostForm('ingredient/add', $edit, t('Save'));
+    // Verify that the name did not change on save.
+    $this->assertText('TeSt InGrEdIeNt 4', 'Found the ingredient name with capitalized characters.');
+  }
+
 }
