@@ -32,19 +32,12 @@ function recipe_theme($existing, $type, $theme, $path) {
     'recipe_landing_page' => array(
       'file' => 'recipe.landing.page.inc'
     ),
-    // The ingredients sub-form on the recipe edit screen.
-    'ingredients_form' => array(
-      'render element' => 'form',
-    ),
     'recipe_summary' => array(
       'function' => 'theme_recipe_summary',
       'variables' => array('node' => NULL, 'show_title' => TRUE),
     ),
     'recipe_duration' => array(
       'variables' => array('duration' => 0),
-    ),
-    'recipe_ingredient' => array(
-      'variables' => array('name' => NULL, 'quantity' => 0, 'unit' => array(), 'note' => '', 'link' => 0),
     ),
   );
 }
@@ -807,30 +800,6 @@ function theme_recipe_duration($variables) {
     $output['minutes'] = format_plural($minutes, '1 minute', '@count minutes');
   }
   return implode(', ', $output);
-}
-
-/**
- * Returns HTML for displaying an ingredient field item.
- */
-function theme_recipe_ingredient($variables) {
-  $quantity = $variables['quantity'];
-  $name = $variables['name'];
-  $link = $variables['link'];
-  $unit = $variables['unit'];
-  $note = $variables['note'];
-
-  // Display the name as a link if the link (ingredient node nid) is set.
-  if (!empty($link)) {
-    $name = l($name, 'node/' . $link);
-  }
-  // Concatenate the ingredient note to the name, if set.
-  if (!empty($note)) {
-    $name .= ' (' . $note . ')';
-  }
-
-  $output = '<span class="quantity-unit" property="schema:amount"> ' . $quantity . ' ' . $unit . '</span> <span class="ingredient-name" property="schema:name">' . $name . '</span>';
-
-  return $output;
 }
 
 /**

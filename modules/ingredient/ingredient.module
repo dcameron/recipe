@@ -8,6 +8,17 @@
 use Drupal\Component\Utility\Xss;
 
 /**
+ * Implements hook_theme().
+ */
+function ingredient_theme($existing, $type, $theme, $path) {
+  return array(
+    'ingredient_formatter' => array(
+      'variables' => array('name' => NULL, 'quantity' => 0, 'unit_name' => '', 'unit_abbreviation' => '', 'unit_display' => 0, 'note' => ''),
+    ),
+  );
+}
+
+/**
  * Converts an ingredient's quantity from decimal to fraction.
  */
 function ingredient_quantity_from_decimal($ingredient_quantity, $fraction_format = '{%d} %d&frasl;%d', $edit_mode = FALSE) {
