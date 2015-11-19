@@ -669,58 +669,6 @@ function fixEncoding($in_str) {
 }
 
 /**
- * Implements hook_rdf_namespaces().
- */
-function recipe_rdf_namespaces() {
-  return array(
-    'schema' => 'http://schema.org/',
-  );
-}
-
-/**
- * Implements hook_rdf_mapping().
- */
-function recipe_rdf_mapping() {
-  return array(
-    array(
-      'type' => 'node',
-      'bundle' => 'recipe',
-      'mapping' => array(
-        'rdftype' => array('schema:Recipe'),
-        'title' => array(
-          'predicates' => array('schema:name'),
-        ),
-        'recipe_instructions' => array(
-          'predicates' => array('schema:instructions'),
-        ),
-        'recipe_description' => array(
-          'predicates' => array('schema:summary'),
-        ),
-        'recipe_prep_time' => array(
-          'predicates' => array('schema:prepTime'),
-          'datatype' => 'xsd:duration',
-          'callback' => 'recipe_duration_iso8601',
-        ),
-        'recipe_cook_time' => array(
-          'predicates' => array('schema:cookTime'),
-          'datatype' => 'xsd:duration',
-          'callback' => 'recipe_duration_iso8601',
-        ),
-        'recipe_totaltime' => array(
-          'predicates' => array('schema:totalTime'),
-        ),
-        'recipe_yield' => array(
-          'predicates' => array('schema:yield'),
-        ),
-        'recipe_ingredient' => array(
-          'predicates' => array('schema:ingredients'),
-        ),
-      ),
-    ),
-  );
-}
-
-/**
  * Returns a duration string in ISO 8601 format.
  *
  * @param $duration
