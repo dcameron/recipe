@@ -46,11 +46,11 @@ class RecipeNodeTest extends RecipeTestBase {
       'recipe_notes[0][value]' => $notes,
       'recipe_instructions[0][value]' => $instructions,
 /*      'recipe_prep_time[0][value]' => $preptime,
-      'recipe_cook_time[0][value]' => $cooktime,
+      'recipe_cook_time[0][value]' => $cooktime,*/
       'recipe_ingredient[0][quantity]' => $ing_0_quantity,
       'recipe_ingredient[0][unit_key]' => $ing_0_unit,
-      'recipe_ingredient[0][name]' => $ing_0_name,
-      'recipe_ingredient[0][note]' => $ing_0_note,*/
+      'recipe_ingredient[0][target_id]' => $ing_0_name,
+      'recipe_ingredient[0][note]' => $ing_0_note,
     );
 
     // Post the values to the node form.

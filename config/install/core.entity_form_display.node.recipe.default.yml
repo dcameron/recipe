@@ -2,12 +2,14 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.node.recipe.recipe_ingredient
     - field.field.node.recipe.recipe_description
     - field.field.node.recipe.recipe_instructions
     - field.field.node.recipe.recipe_notes
     - field.field.node.recipe.recipe_source
     - node.type.recipe
   module:
+    - ingredient
     - path
     - text
 id: node.recipe.default
@@ -15,6 +17,27 @@ targetEntityType: node
 bundle: recipe
 mode: default
 content:
+  created:
+    type: datetime_timestamp
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+  recipe_ingredient:
+    weight: -2
+    settings: {  }
+    third_party_settings: {  }
+    type: ingredient_autocomplete
+  path:
+    type: path
+    weight: 30
+    settings: {  }
+    third_party_settings: {  }
+  promote:
+    type: boolean_checkbox
+    settings:
+      display_label: true
+    weight: 15
+    third_party_settings: {  }
   recipe_description:
     type: text_textarea_with_summary
     weight: -5
@@ -43,22 +66,6 @@ content:
     settings:
       rows: 3
       placeholder: ''
-    third_party_settings: {  }
-  created:
-    type: datetime_timestamp
-    weight: 10
-    settings: {  }
-    third_party_settings: {  }
-  path:
-    type: path
-    weight: 30
-    settings: {  }
-    third_party_settings: {  }
-  promote:
-    type: boolean_checkbox
-    settings:
-      display_label: true
-    weight: 15
     third_party_settings: {  }
   sticky:
     type: boolean_checkbox
