@@ -17,6 +17,9 @@ use Drupal\user\UserInterface;
 /**
  * Defines the Ingredient entity.
  *
+ * @todo Convert to a multilingual schema per the instructions at
+ *   https://www.drupal.org/node/1722906.
+ *
  * @ContentEntityType(
  *   id = "ingredient_ingredient",
  *   label = @Translation("Ingredient"),
