@@ -128,9 +128,5 @@ class RecipeNodeTest extends RecipeTestBase {
     // Check for the Summary block on the recipe node page.
     $this->drupalGet('node/1');
     $this->assertText($summary_title, 'Found the altered Summary block title.');
-
-    // Check for the description in the teaser view at /node.
-    $this->drupalGet('node');
-    $this->assertRaw($description, 'Found the recipe description.');
   }
 }
