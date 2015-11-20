@@ -4,10 +4,6 @@
  * Contains functions for Recipe node CRUD and display.
  */
 
-// $block_delta constants.
-define('RECIPE_BLOCK_RECENT', 0);
-define('RECIPE_BLOCK_SUMMARY', 1);
-
 /**
  * Implements hook_help().
  */
@@ -224,9 +220,6 @@ function recipe_menu() {
  */
 function recipe_block_info() {
   $blocks = array();
-  $blocks['recent'] = array(
-    'info' => t('Newest recipes'),
-  );
   $blocks['summary'] = array(
     'info' => t('Recipe summary'),
   );
@@ -239,15 +232,6 @@ function recipe_block_info() {
 function recipe_block_view($delta = '') {
   $block = array();
   switch ($delta) {
-    case 'recent':
-      $node_list = recipe_get_latest(5);
-      if ($node_title_list = node_title_list($node_list)) {
-        $block['subject'] = t('Newest Recipes');
-        $block['content']['recipe_list'] = $node_title_list;
-        return $block;
-      }
-      break;
-
     case 'summary':
       if (user_access('access content')) {
         if (arg(0) == 'node' && is_numeric(arg(1)) && (arg(2) == '' || arg(2) == 'view')) {
