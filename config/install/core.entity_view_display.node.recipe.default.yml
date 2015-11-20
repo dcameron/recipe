@@ -22,11 +22,9 @@ content:
   recipe_cook_time:
     weight: -2
     label: above
-    settings:
-      thousand_separator: ''
-      prefix_suffix: true
+    settings: {  }
     third_party_settings: {  }
-    type: number_integer
+    type: recipe_duration
   links:
     weight: 101
     settings: {  }
@@ -61,11 +59,9 @@ content:
   recipe_prep_time:
     weight: -3
     label: above
-    settings:
-      thousand_separator: ''
-      prefix_suffix: true
+    settings: {  }
     third_party_settings: {  }
-    type: number_integer
+    type: recipe_duration
   recipe_source:
     label: above
     type: text_default

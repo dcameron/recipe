@@ -349,53 +349,6 @@ function recipe_node_view($node, $view_mode) {
 }
 
 /**
- * Implements hook_field_formatter_info().
- */
-function recipe_field_formatter_info() {
-  return array(
-    'recipe_duration' => array(
-      'label' => t('Recipe duration'),
-      'field types' => array('number_integer'),
-    ),
-  );
-}
-
-/**
- * Implements hook_field_formatter_view().
- */
-function recipe_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
-  $elements = array();
-  switch ($display['type']) {
-    case 'recipe_duration':
-      foreach ($items as $delta => $item) {
-        $elements[$delta] = array(
-          '#theme' => $display['type'],
-          '#duration' => $item['value'],
-        );
-      }
-      break;
-  }
-  return $elements;
-}
-
-/**
- * Returns a string for displaying an integer field as a recipe duration.
- */
-function theme_recipe_duration($variables) {
-  $duration = $variables['duration'];
-  $hours = floor($duration / 60);
-  $minutes = $duration % 60;
-  $output = array();
-  if ($hours > 0) {
-    $output['hours'] = format_plural($hours, '1 hour', '@count hours');
-  }
-  if ($minutes > 0 || $duration == 0) {
-    $output['minutes'] = format_plural($minutes, '1 minute', '@count minutes');
-  }
-  return implode(', ', $output);
-}
-
-/**
  * Returns HTML for displaying the recipe summary box.
  */
 function theme_recipe_summary($variables) {
@@ -649,6 +602,19 @@ function fixEncoding($in_str) {
   }
   else {
     return utf8_encode($in_str);
+  }
+}
+
+function template_preprocess_recipe_duration(&$variables) {
+  $hours = floor($variables['duration'] / 60);
+  $minutes = $variables['duration'] % 60;
+  $variables['hours'] = '';
+  $variables['minutes'] = '';
+  if ($hours > 0) {
+    $variables['hours'] = \Drupal::translation()->formatPlural($hours, '1 hour', '@count hours');
+  }
+  if ($minutes > 0 || $variables['duration'] == 0) {
+    $variables['minutes'] = \Drupal::translation()->formatPlural($minutes, '1 minute', '@count minutes');
   }
 }
 
