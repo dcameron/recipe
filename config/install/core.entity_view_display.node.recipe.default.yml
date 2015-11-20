@@ -2,10 +2,12 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.node.recipe.recipe_ingredient
+    - field.field.node.recipe.recipe_cook_time
     - field.field.node.recipe.recipe_description
+    - field.field.node.recipe.recipe_ingredient
     - field.field.node.recipe.recipe_instructions
     - field.field.node.recipe.recipe_notes
+    - field.field.node.recipe.recipe_prep_time
     - field.field.node.recipe.recipe_source
     - node.type.recipe
   module:
@@ -17,15 +19,14 @@ targetEntityType: node
 bundle: recipe
 mode: default
 content:
-  recipe_ingredient:
+  recipe_cook_time:
     weight: -2
     label: above
     settings:
-      fraction_format: '{%d }%d&frasl;%d'
-      unit_display: 0
-      link: false
+      thousand_separator: ''
+      prefix_suffix: true
     third_party_settings: {  }
-    type: ingredient_default
+    type: number_integer
   links:
     weight: 101
     settings: {  }
@@ -36,6 +37,15 @@ content:
     weight: -4
     settings: {  }
     third_party_settings: {  }
+  recipe_ingredient:
+    weight: -2
+    label: above
+    settings:
+      fraction_format: '{%d }%d&frasl;%d'
+      unit_display: 0
+      link: false
+    third_party_settings: {  }
+    type: ingredient_default
   recipe_instructions:
     label: above
     type: text_default
@@ -48,6 +58,14 @@ content:
     weight: -1
     settings: {  }
     third_party_settings: {  }
+  recipe_prep_time:
+    weight: -3
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_integer
   recipe_source:
     label: above
     type: text_default

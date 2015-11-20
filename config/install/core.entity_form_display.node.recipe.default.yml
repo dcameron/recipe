@@ -2,10 +2,12 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.node.recipe.recipe_ingredient
+    - field.field.node.recipe.recipe_cook_time
     - field.field.node.recipe.recipe_description
+    - field.field.node.recipe.recipe_ingredient
     - field.field.node.recipe.recipe_instructions
     - field.field.node.recipe.recipe_notes
+    - field.field.node.recipe.recipe_prep_time
     - field.field.node.recipe.recipe_source
     - node.type.recipe
   module:
@@ -22,11 +24,12 @@ content:
     weight: 10
     settings: {  }
     third_party_settings: {  }
-  recipe_ingredient:
-    weight: -2
-    settings: {  }
+  recipe_cook_time:
+    weight: 0
+    settings:
+      placeholder: ''
     third_party_settings: {  }
-    type: ingredient_autocomplete
+    type: number
   path:
     type: path
     weight: 30
@@ -46,6 +49,11 @@ content:
       summary_rows: 5
       placeholder: ''
     third_party_settings: {  }
+  recipe_ingredient:
+    weight: -2
+    settings: {  }
+    third_party_settings: {  }
+    type: ingredient_autocomplete
   recipe_instructions:
     type: text_textarea
     weight: -1
@@ -60,6 +68,12 @@ content:
       rows: 5
       placeholder: ''
     third_party_settings: {  }
+  recipe_prep_time:
+    weight: 0
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+    type: number
   recipe_source:
     type: text_textarea
     weight: -1
