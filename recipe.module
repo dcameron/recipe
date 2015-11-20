@@ -516,16 +516,6 @@ function strip_html_and_encode_entities($string) {
 }
 
 /**
- * Implements hook_views_api().
- */
-function recipe_views_api() {
- return array(
-   'api' => 2,
-   'path' => drupal_get_path('module', 'recipe') . '/includes',
- );
-}
-
-/**
  * Implements hook_field_extra_fields().
  *
  * This adds these fields to the manage fields UI for changing weights.
