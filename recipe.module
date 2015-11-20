@@ -25,9 +25,6 @@ function recipe_help($path, $arg) {
  */
 function recipe_theme($existing, $type, $theme, $path) {
   return array(
-    'recipe_landing_page' => array(
-      'file' => 'recipe.landing.page.inc'
-    ),
     'recipe_summary' => array(
       'function' => 'theme_recipe_summary',
       'variables' => array('node' => NULL, 'show_title' => TRUE),
@@ -164,12 +161,6 @@ function recipe_menu() {
     'file' => 'recipe.admin.inc',
     'weight' => 1,
     'type' => MENU_LOCAL_TASK
-  );
-  $items['recipe'] = array(
-    'title' => 'Recipes',
-    'page callback' => 'recipe_landing_page',
-    'access arguments' => array('access content'),
-    'file' => 'recipe.landing.page.inc'
   );
   $items['recipe/export'] = array(
     'page callback' => 'recipe_export',
@@ -513,27 +504,6 @@ function recipe_import_multi_myaccess($string, $account = NULL, $reset = FALSE) 
   }
   // we have a format so continue to user_access
   return user_access($string, $account, $reset);
-}
-
-/**
- * Selects the latest recipes by created date.
- *
- * @return
- *   A database query result suitable for use the node_title_list.
- */
-function recipe_get_latest($count = 5) {
-  $select = db_select('node', 'n');
-  $select->addField('n', 'nid');
-  $select->addField('n', 'title');
-  $select->addField('n', 'sticky');
-  $select->addField('n', 'created');
-  $select->condition('n.type', 'recipe');
-  $select->condition('n.status', 1);
-  $select->orderBy('n.sticky', 'DESC');
-  $select->orderBy('n.created', 'DESC');
-  $select->range(0, $count);
-  $select->addTag('node_access');
-  return $select->execute();
 }
 
 /**
