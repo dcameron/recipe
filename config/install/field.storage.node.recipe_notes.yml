@@ -10,7 +10,7 @@ field_name: recipe_notes
 entity_type: node
 type: text_long
 settings: { }
-module: recipe
+module: text
 locked: false
 cardinality: 1
 translatable: true
