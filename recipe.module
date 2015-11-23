@@ -4,6 +4,9 @@
  * Contains functions for Recipe node CRUD and display.
  */
 
+use \Drupal\Core\Entity\EntityInterface;
+use \Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+
 /**
  * Implements hook_help().
  */
@@ -32,6 +35,9 @@ function recipe_theme($existing, $type, $theme, $path) {
     'recipe_duration' => array(
       'variables' => array('duration' => 0),
     ),
+    'recipe_total_time' => [
+      'variables' => ['total_time' => 0, 'label' => t('Total time'), 'label_display' => 'above'],
+    ],
   );
 }
 
@@ -305,12 +311,29 @@ function recipe_view($node, $view_mode) {
   return $node;
 }
 
-
 /**
- * Implements hook_node_view().
+ * Implements hook_ENTITY_TYPE_view().
+ *
+ * @todo Make integer fields configurable as time sub-fields.
+ * @todo Make the label configurable.
+ * @todo Make the label_display configurable.
  */
-function recipe_node_view($node, $view_mode) {
-  if ( isset($node->in_preview) && $node->in_preview == 1 ) {
+function recipe_node_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+  // Calculate the total time required to make the recipe.
+  $prep_time = $entity->recipe_prep_time->value;
+  $cook_time = $entity->recipe_cook_time->value;
+  $total_time = [
+    '#theme' => 'recipe_duration',
+    '#duration' => $prep_time + $cook_time,
+  ];
+  $build['recipe_total_time'] = [
+    '#theme' => 'recipe_total_time',
+    '#label' => t('Total time'),
+    '#label_display' => 'above',
+    '#total_time' => $total_time,
+  ];
+
+  /*if ( isset($node->in_preview) && $node->in_preview == 1 ) {
     return;
   }
 
@@ -336,7 +359,30 @@ function recipe_node_view($node, $view_mode) {
         '#attributes' => array('class' => array('links', 'inline')),
       );
     }
-  }
+  }*/
+}
+
+/**
+ * Prepares variables for the recipe_total_time template.
+ *
+ * Default template: recipe_total_time.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - total_time: The content of the pseudo-field.
+ *   - label: A string containing the pseudo-field's title.
+ *   - label_display: The display settings for the label.
+ */
+function template_preprocess_recipe_total_time(&$variables, $hook) {
+  // Add the RDF metadata to the content_attributes.
+  $mapping = [
+    'properties' => ['schema:totalTime'],
+    'datatype' => 'xsd:duration',
+    'datatype_callback' => ['callable' => 'recipe_duration_iso8601'],
+  ];
+  $variables['content_attributes'] = rdf_rdfa_attributes($mapping, $variables['total_time']['#duration']);
+
+  $variables['label_hidden'] = ($variables['label_display'] == 'hidden');
 }
 
 /**
@@ -516,33 +562,17 @@ function strip_html_and_encode_entities($string) {
 }
 
 /**
- * Implements hook_field_extra_fields().
- *
- * This adds these fields to the manage fields UI for changing weights.
+ * Implements hook_entity_extra_field_info().
  */
-function recipe_field_extra_fields() {
-  $extra = array();
-  $extra['node']['recipe'] = array(
-    'form' => array(
-      'recipe_yield' => array(
-        'label' => t('Yield'),
-        'description' => t('Recipe module element'),
-        'weight' => -3,
-      ),
-      'recipe_yield_unit' => array(
-        'label' => t('Yield units'),
-        'description' => t('Recipe module element'),
-        'weight' => -3,
-      ),
-    ),
-    'display' => array(
-      'recipe_summary_box' => array(
-        'label' => t('Recipe summary box'),
-        'description' => t('Recipe module element'),
-        'weight' => -7,
-      ),
-    ),
-  );
+function recipe_entity_extra_field_info() {
+  $extra = [];
+
+  $extra['node']['recipe']['display']['recipe_total_time'] = [
+    'label' => t('Total time'),
+    'description' => t('The total time required to make the recipe.'),
+    'weight' => -1,
+    'visible' => TRUE,
+  ];
 
   return $extra;
 }

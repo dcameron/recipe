@@ -30,9 +30,6 @@ fieldMappings:
       - 'schema:cookTime'
     datatype_callback:
       callable: 'recipe_duration_iso8601'
-  recipe_totaltime:
-    properties:
-      - 'schema:totalTime'
   recipe_yield:
     properties:
       - 'schema:yield'
