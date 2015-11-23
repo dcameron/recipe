@@ -9,6 +9,8 @@ dependencies:
     - field.field.node.recipe.recipe_notes
     - field.field.node.recipe.recipe_prep_time
     - field.field.node.recipe.recipe_source
+    - field.field.node.recipe.recipe_yield_amount
+    - field.field.node.recipe.recipe_yield_unit
     - node.type.recipe
   module:
     - ingredient
@@ -102,4 +104,17 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  recipe_yield_amount:
+    weight: -5
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+    type: number
+  recipe_yield_unit:
+    weight: -5
+    settings:
+      size: 16
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
 hidden: {  }
