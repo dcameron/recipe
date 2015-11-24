@@ -6,66 +6,6 @@
  */
 
 /**
- * Page callback: Constructs a form for configuring the Recipe module.
- */
-function recipe_admin_settings() {
-  // Summary Section
-  $form['recipe_summary'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Recipe summary'),
-    '#description' => t('The recipe summary contains the yield, source, and prep time values.')
-  );
-  $form['recipe_summary']['recipe_summary_location'] = array(
-    '#type' => 'radios',
-    '#title' => t('Recipe summary location'),
-    '#return_value' => 1,
-    '#default_value' => variable_get('recipe_summary_location', 0),
-    '#options' => array(t('Node content'), t('Block'), t('Hidden')),
-    '#description' => t('Where to show the recipe summary information.'),
-    '#required' => TRUE
-  );
-  $form['recipe_summary']['recipe_summary_title'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Recipe summary title'),
-    '#default_value' => variable_get('recipe_summary_title', t('Summary')),
-    '#size' => 35,
-    '#maxlength' => 255,
-    '#description' => t('The title shown above the recipe summary.'),
-  );
-
-
-  $form['recipe_recent_box'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Recent recipe box'),
-  );
-  $form['recipe_recent_box']['recipe_recent_box_enable'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Show recent recipes box'),
-    '#return_value' => 1,
-    '#default_value' => variable_get('recipe_recent_box_enable', 1),
-    '#description' => t('Show the recent recipes box on the recipes menu page.'),
-    '#required' => FALSE,
-  );
-  $form['recipe_recent_box']['recipe_recent_box_title'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Box title'),
-    '#default_value' => variable_get('recipe_recent_box_title', t('Latest recipes')),
-    '#size' => 35,
-    '#maxlength' => 255,
-    '#description' => t('Title of the recent recipes box.'),
-  );
-  $form['recipe_recent_box']['recipe_recent_display'] = array(
-    '#type' => 'select',
-    '#title' => t('Recipes to display'),
-    '#default_value' => variable_get('recipe_recent_display', 5),
-    '#options' => drupal_map_assoc(array(0, 5, 10, 15)),
-    '#description' => t('Sets the number of recent recipes that will be displayed in the Recent Recipes box. (0 = not displayed).'),
-  );
-
-  return system_settings_form($form);
-}
-
-/**
  * Page callback: Displays recipe nodes in various formats.
  *
  * @see recipe_menu()
@@ -419,17 +359,4 @@ function recipe_ingredient_match($recipe_ingredient_name) {
     );
   }
   return FALSE;
-}
-
-/**
- * Page callback: Outputs JSON for ingredient autocomplete suggestions.
- */
-function recipe_autocomplete_page($string = "", $limit = 10) {
-  $matches = array();
-  $result = db_query_range("SELECT name FROM {recipe_ingredient} WHERE LOWER(name) LIKE :name ORDER BY name", 0, 10, array(':name' => strtolower($string) . '%'));
-  foreach ($result as $record) {
-    $matches[$record->name] = check_plain($record->name);
-  }
-  drupal_json_output($matches);
-  exit();
 }

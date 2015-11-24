@@ -28,15 +28,14 @@ function recipe_help($path, $arg) {
  */
 function recipe_theme($existing, $type, $theme, $path) {
   return array(
-    'recipe_summary' => array(
-      'function' => 'theme_recipe_summary',
-      'variables' => array('node' => NULL, 'show_title' => TRUE),
-    ),
     'recipe_duration' => array(
       'variables' => array('duration' => 0),
     ),
     'recipe_total_time' => [
       'variables' => ['total_time' => 0, 'label' => t('Total time'), 'label_display' => 'above'],
+    ],
+    'recipe_yield' => [
+      'variables' => ['yield' => '', 'label' => t('Yield'), 'label_display' => 'above'],
     ],
   );
 }
@@ -55,93 +54,6 @@ function recipe_permission() {
       'description' => t('Import recipes in various formats.'),
     ),
   );
-}
-
-/**
- * Implements hook_load().
- */
-function recipe_load($nodes) {
-  $result = db_query('SELECT * FROM {recipe} WHERE nid IN (:nids)', array(':nids' => array_keys($nodes)));
-  foreach ($result as $record) {
-    $nodes[$record->nid]->recipe_yield = $record->yield;
-    $nodes[$record->nid]->recipe_yield_unit = $record->yield_unit;
-  }
-}
-
-/**
- * Implements hook_insert().
- *
- * Insert a new recipe into the database.
- */
-function recipe_insert($node) {
-  db_insert('recipe')
-    ->fields(array(
-      'nid' => $node->nid,
-      'yield' => $node->recipe_yield,
-      'yield_unit' => $node->recipe_yield_unit,
-    ))
-    ->execute();
-}
-
-/**
- * Implements hook_update().
- *
- * As an existing node is being updated in the database, we need to do our own
- * database updates.
- */
-function recipe_update($node) {
-  db_update('recipe')
-    ->fields(array(
-      'yield' => $node->recipe_yield,
-      'yield_unit' => $node->recipe_yield_unit,
-    ))
-    ->condition('nid', $node->nid)
-    ->execute();
-}
-
-/**
- * Implements hook_delete().
- *
- * When a node is deleted, delete the recipe and recipe node ingredient links.
- * Leave the ingredients.
- */
-function recipe_delete($node) {
-  db_query("DELETE FROM {recipe} WHERE nid = :nid", array(':nid' => $node->nid));
-}
-
-/**
- * Implements hook_form().
- */
-function recipe_form($node, &$form_state) {
-  // Title.
-  $form['title'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Title'),
-    '#required' => TRUE,
-    '#default_value' => !empty($node->title) ? $node->title : '',
-    '#maxlength' => 255,
-  );
-
-  $form['recipe_yield'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Yield'),
-    '#default_value' => !empty($node->recipe_yield) ? $node->recipe_yield : '',
-    '#size' => 4,
-    '#maxlength' => 4,
-    '#description' => t('The number of servings the recipe will make (whole number integer, ie 5 or 6).'),
-    '#required' => TRUE,
-  );
-  $form['recipe_yield_unit'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Yield Units'),
-    '#default_value' => empty($node->recipe_yield_unit) ? t('Servings') : $node->recipe_yield_unit,
-    '#size' => 16,
-    '#maxlength' => 64,
-    '#description' => t('The units for the yield field(ie servings, people, cans, cookies, etc).'),
-    '#required' => FALSE,
-  );
-
-  return $form;
 }
 
 /**
@@ -174,17 +86,6 @@ function recipe_menu() {
     'access arguments' => array('access content'),  // lower level permissions are handled in recipe_export
     'file' => 'recipe.pages.inc',
   );
-  // Recipe configuration and bulk import/export menus.
-  $items['admin/config/content/recipe'] = array(
-    'title' => 'Recipe',
-    'description' => 'Settings that control how the recipe module functions.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('recipe_admin_settings'),
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_NORMAL_ITEM,
-    'file' => 'recipe.admin.inc',
-    'weight' => 0,
-  );
   $items['admin/structure/recipe'] = array(
     'title' => 'Recipe bulk import/export',
     'description' => 'Export/Import all recipes from this site to/from a supported format.',
@@ -213,102 +114,15 @@ function recipe_menu() {
 }
 
 /**
- * Implements hook_block_info().
- */
-function recipe_block_info() {
-  $blocks = array();
-  $blocks['summary'] = array(
-    'info' => t('Recipe summary'),
-  );
-  return $blocks;
-}
-
-/**
- * Implements hook_block_view().
- */
-function recipe_block_view($delta = '') {
-  $block = array();
-  switch ($delta) {
-    case 'summary':
-      if (user_access('access content')) {
-        if (arg(0) == 'node' && is_numeric(arg(1)) && (arg(2) == '' || arg(2) == 'view')) {
-          $node = node_load(arg(1));
-          if ( $node->type == 'recipe' ) {
-            $block['subject'] = variable_get('recipe_summary_title', t('Summary'));
-            $block['content'] = theme('recipe_summary', array('node' => $node, 'show_title' => FALSE, 'show_yield_form' => TRUE));
-            return $block;
-          }
-        }
-      }
-      break;
-  }
-}
-
-/**
  * Implements hook_view().
  */
 function recipe_view($node, $view_mode) {
-  drupal_add_css(drupal_get_path('module', 'recipe') . '/recipe.css');
-
   if ($view_mode == 'full' && node_is_page($node)) {
     $breadcrumb = array();
     $breadcrumb[] = l(t('Home'), NULL);
     $breadcrumb[] = l(t('Recipes'), 'recipe');
     drupal_set_breadcrumb($breadcrumb);
   }
-
-  // Prepare and sanitize node fields.
-  recipe_node_sanitize($node);
-
-  // Calculate yield and ingredient factor.
-
-  // Get custom yield or default to a factor of 1.
-  $node->recipe_yield = intval($node->recipe_yield);
-  // Factor is calculated and added into the $node variable.
-  $node->recipe_factor = 1;
-
-  // check post variable to see if the yield form was posted.
-  if ( $node->recipe_yield != 0 && isset($_POST['op'])) {
-    if ($_POST['op'] == t('Change')) {
-      $node->recipe_factor = $_POST['custom_yield'] / $node->recipe_yield;
-      $node->recipe_yield = $_POST['custom_yield'];
-      $_POST = array();
-    }
-    elseif ($_POST['op'] == t('Halve')) {
-      $node->recipe_factor = $_POST['custom_yield']/2 / $node->recipe_yield;
-      $node->recipe_yield = $_POST['custom_yield']/2;
-      $_POST = array();
-    }
-    elseif ($_POST['op'] == t('Double')) {
-      $node->recipe_factor = $_POST['custom_yield']*2 / $node->recipe_yield;
-      $node->recipe_yield = $_POST['custom_yield']*2;
-      $_POST = array();
-    }
-    // Reset yield back to recipe default
-    elseif ($_POST['op'] == t('Reset')) {
-      $_POST = array();
-    }
-  }
-  // Custom_yield comes from export single urls currently.
-  elseif (isset($node->recipe_custom_yield)) {
-    $node->recipe_factor = $node->recipe_custom_yield / $node->recipe_yield;
-    $node->recipe_yield = $node->recipe_custom_yield;
-  }
-
-  // If it is a teaser, you're done.
-  // The teaser should have a full $node object, but not the $node->content render array.
-  if ($view_mode == 'teaser') {
-    return $node;
-  }
-
-  if ( isset($node->in_preview) && $node->in_preview == 1 ) {
-    $node->recipe_show_yield_form = FALSE;
-  }
-  $node->content['recipe_summary_box'] = array(
-      '#markup' => theme('recipe_summary', array('node' => $node, 'show_yield_form' => isset($node->recipe_show_yield_form) ? $node->recipe_show_yield_form : TRUE)),
-  );
-
-  return $node;
 }
 
 /**
@@ -333,6 +147,18 @@ function recipe_node_view(array &$build, EntityInterface $entity, EntityViewDisp
     '#total_time' => $total_time,
   ];
 
+  // Display the recipe yield by combining the recipe_yield_amount and
+  // recipe_yield_unit fields.
+  $arguments = [
+    '@yield_amount' => $entity->recipe_yield_amount->value,
+    '@yield_unit' => $entity->recipe_yield_unit->value,
+  ];
+  $build['recipe_yield'] = [
+    '#theme' => 'recipe_yield',
+    '#label' => t('Yield'),
+    '#label_display' => 'above',
+    '#yield' => t('@yield_amount @yield_unit', $arguments),
+  ];
   /*if ( isset($node->in_preview) && $node->in_preview == 1 ) {
     return;
   }
@@ -386,131 +212,24 @@ function template_preprocess_recipe_total_time(&$variables, $hook) {
 }
 
 /**
- * Returns HTML for displaying the recipe summary box.
- */
-function theme_recipe_summary($variables) {
-  $node = $variables['node'];
-  $show_title = isset($variables['show_title']) ? $variables['show_title'] : FALSE;
-  $show_yield_form = isset($variables['show_yield_form']) ? $variables['show_yield_form'] : TRUE;
-  // Construct the summary
-  $output = '<div class="recipe-summary">';
-
-  if ( $show_title ) {
-    $output .= '<h2 class="title">' . t('Summary') . '</h2>';
-  }
-
-  $output .= '<table>';
-
-  // Render the yield form.
-  $yield_form = drupal_get_form('recipe_yield_form', $node, $show_yield_form);
-  $output .= '<tr><th class="summary-title">' . t('Yield') . '</th><td class="summary-data">' . drupal_render($yield_form) . '</td></tr>';
-
-  // Print the total time if the prep and cook times are set.
-  if (isset($node->recipe_cook_time[LANGUAGE_NONE][0]['value']) && isset($node->recipe_prep_time[LANGUAGE_NONE][0]['value'])) {
-    $duration = $node->recipe_cook_time[LANGUAGE_NONE][0]['value'] + $node->recipe_prep_time[LANGUAGE_NONE][0]['value'];
-    $_text = theme('recipe_duration', array('duration' => $duration));
-    // Wrap the total time in RDFa markup.
-    if (!empty($node->rdf_mapping['recipe_totaltime'])) {
-      $attributes = rdf_rdfa_attributes($node->rdf_mapping['recipe_totaltime']);
-      $attributes['content'] = array(recipe_duration_iso8601($duration));
-      $_text = theme('rdf_template_variable_wrapper', array('content' => $_text, 'attributes' => $attributes, 'inline' => FALSE));
-    }
-
-    $output .= '<tr><th>' . t('Total time') . '</th><td>' . $_text . '</td></tr>';
-  }
-
-  $output .= '</table>';
-  $output .= '</div>';
-
-  return $output;
-}
-
-/**
- * Implements hook_validate().
+ * Prepares variables for the recipe_yield template.
  *
- * Errors should be signaled with form_set_error().
- */
-function recipe_validate($node, $form, &$form_state) {
-  $return = TRUE;
-  if (!is_numeric($form_state['values']['recipe_yield']) || $form_state['values']['recipe_yield'] <=0) {
-    form_set_error('recipe_yield', t('Yield must be a valid positive integer.'));
-    $return = FALSE;
-  }
-
-  return $return;
-}
-
-/**
- * Sanitizes recipe data for display.
+ * Default template: recipe_yield.html.twig.
  *
- * All recipe fields should be run through one of the Drupal data checks.
+ * @param array $variables
+ *   An associative array containing:
+ *   - yield: The content of the pseudo-field.
+ *   - label: A string containing the pseudo-field's title.
+ *   - label_display: The display settings for the label.
  */
-function recipe_node_sanitize(&$node) {
-  if (!empty($node->recipe_yield_unit)) {
-    $node->recipe_yield_unit = filter_xss($node->recipe_yield_unit, array());
-  }
-}
+function template_preprocess_recipe_yield(&$variables, $hook) {
+  // Add the RDF metadata to the content_attributes.
+  $mapping = [
+    'properties' => ['schema:recipeYield'],
+  ];
+  $variables['content_attributes'] = rdf_rdfa_attributes($mapping);
 
-/**
- * Form constructor for the custom yield form.
- *
- * @param stdClass $node
- *   The node object being displayed.
- * @param Bool $show_yield_form
- *   TRUE if the custom yield form should be displayed.
- */
-function recipe_yield_form($form, &$form_state, $node, $show_yield_form) {
-  // Don't render the custom yield textbox and submit buttons if disabled or shown in a block.
-
-  if ($show_yield_form == FALSE || variable_get('recipe_summary_location', 0) == 1 ) {
-    $form['yield'] = array(
-      '#markup' => $node->recipe_yield,
-    );
-    // An html space is useful here since we don't have a separate theme function for this form.
-    $form['_space'] = array(
-      '#markup' => '&nbsp;',
-    );
-    $form['yield_unit'] = array(
-      '#markup' => ($node->recipe_yield_unit == '')?t('Servings'):$node->recipe_yield_unit,
-    );
-  }
-
-  // Render the custom yield textbox and submit buttons.
-  else {
-    $form['custom_yield'] = array(
-      '#type' => 'textfield',
-      '#default_value' => $node->recipe_yield,
-      '#size' => 2,
-      '#maxlength' => 4,
-      '#attributes' => array('class' => array('recipe-yield-value')),
-    );
-    $form['yield_unit'] = array(
-      '#markup' => ($node->recipe_yield_unit == '')?t('Servings'):$node->recipe_yield_unit,
-      '#suffix' => '<br/>',
-    );
-    $form['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Change'),
-      '#attributes' => array('class' => array('recipe-yield-change')),
-    );
-    $form['reset'] = array(
-      '#type' => 'submit',
-      '#value' => t('Reset'),
-      '#attributes' => array('class' => array('recipe-yield-reset')),
-    );
-    $form['halve'] = array(
-      '#type' => 'submit',
-      '#value' => t('Halve'),
-      '#attributes' => array('class' => array('recipe-yield-halve')),
-    );
-    $form['double'] = array(
-      '#type' => 'submit',
-      '#value' => t('Double'),
-      '#attributes' => array('class' => array('recipe-yield-double')),
-    );
-  }
-
-  return $form;
+  $variables['label_hidden'] = ($variables['label_display'] == 'hidden');
 }
 
 /**
@@ -571,6 +290,12 @@ function recipe_entity_extra_field_info() {
     'label' => t('Total time'),
     'description' => t('The total time required to make the recipe.'),
     'weight' => -1,
+    'visible' => TRUE,
+  ];
+  $extra['node']['recipe']['display']['recipe_yield'] = [
+    'label' => t('Yield'),
+    'description' => t('The amount of food produced by the recipe.'),
+    'weight' => -4,
     'visible' => TRUE,
   ];
 

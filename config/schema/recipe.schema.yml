@@ -1,10 +1,5 @@
 recipe.settings:
   type: config_object
   label: 'Recipe settings'
-  mapping:
-    recipe_summary_location:
-      type: integer
-      label: 'Recipe summary location'
-    recipe_summary_title:
-      type: string
-      label: 'Recipe summary title'
+  mapping: {  }
+  
