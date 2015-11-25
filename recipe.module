@@ -6,19 +6,14 @@
 
 use \Drupal\Core\Entity\EntityInterface;
 use \Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use \Drupal\Core\Routing\RouteMatchInterface;
 
 /**
  * Implements hook_help().
  */
-function recipe_help($path, $arg) {
-  switch ($path) {
-    case 'admin/structure/recipe':
-      $output = '<p>' . t('You can enable/disable bulk export formats on the <a href="@modules-page">modules page</a> in the recipes section.', array('@modules-page' => url('admin/modules', array('fragment' => 'edit-modules-recipe')))) . '</p>';
-      return $output;
-    case 'admin/structure/recipe/import_multi':
-      $output = '<p>' . t('You can enable/disable bulk import formats on the <a href="@modules-page">modules page</a> in the recipes section.', array('@modules-page' => url('admin/modules', array('fragment' => 'edit-modules-recipe')))) . '</p>';
-      return $output;
-    case 'admin/config/content/recipe':
+function recipe_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'recipe.settings':
       return t('Configure the management and display of recipes.');
   }
 }
