@@ -114,18 +114,6 @@ function recipe_menu() {
 }
 
 /**
- * Implements hook_view().
- */
-function recipe_view($node, $view_mode) {
-  if ($view_mode == 'full' && node_is_page($node)) {
-    $breadcrumb = array();
-    $breadcrumb[] = l(t('Home'), NULL);
-    $breadcrumb[] = l(t('Recipes'), 'recipe');
-    drupal_set_breadcrumb($breadcrumb);
-  }
-}
-
-/**
  * Implements hook_ENTITY_TYPE_view().
  *
  * @todo Make integer fields configurable as time sub-fields.

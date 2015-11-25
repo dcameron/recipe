@@ -7,6 +7,7 @@
 
 namespace Drupal\recipe\Tests;
 
+use Drupal\Core\URL;
 use Drupal\recipe\Tests\RecipeTestBase;
 
 /**
@@ -94,5 +95,20 @@ class RecipeNodeTest extends RecipeTestBase {
     foreach ($durations as $duration) {
       $this->assertRaw($duration, format_string('Found the ISO 8601 duration "@duration" in the recipe node HTML.', array('@duration' => $duration)));
     }
+
+    // Check for the breadcrumb.
+    $expected_breadcrumb = [];
+    $expected_breadcrumb[] = URL::fromRoute('<front>')->toString();
+    $expected_breadcrumb[] = URL::fromRoute('view.recipe_name_index.page_1')->toString();
+
+    // Fetch links in the current breadcrumb.
+    $links = $this->xpath('//nav[@class="breadcrumb"]/ol/li/a');
+    $got_breadcrumb = array();
+    foreach ($links as $link) {
+      $got_breadcrumb[] = (string) $link['href'];
+    }
+
+    // Compare expected and got breadcrumbs.
+    $this->assertIdentical($expected_breadcrumb, $got_breadcrumb, 'The breadcrumb is correctly displayed on the page.');
   }
 }
