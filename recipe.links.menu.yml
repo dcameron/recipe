@@ -1,0 +1,5 @@
+recipe.admin.config.content.settings:
+  title: Recipe
+  description: 'Configure the Recipe module.'
+  route_name:  recipe.settings
+  parent: system.admin_config_content
