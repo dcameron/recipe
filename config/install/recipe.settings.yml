@@ -1,0 +1,6 @@
+total_time:
+  label: 'Total time'
+  label_display: above
+yield:
+  label: 'Yield'
+  label_display: above

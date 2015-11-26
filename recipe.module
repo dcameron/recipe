@@ -112,10 +112,10 @@ function recipe_menu() {
  * Implements hook_ENTITY_TYPE_view().
  *
  * @todo Make integer fields configurable as time sub-fields.
- * @todo Make the label configurable.
- * @todo Make the label_display configurable.
  */
 function recipe_node_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+  $config = \Drupal::config('recipe.settings');
+
   // Calculate the total time required to make the recipe.
   $prep_time = $entity->recipe_prep_time->value;
   $cook_time = $entity->recipe_cook_time->value;
@@ -125,8 +125,8 @@ function recipe_node_view(array &$build, EntityInterface $entity, EntityViewDisp
   ];
   $build['recipe_total_time'] = [
     '#theme' => 'recipe_total_time',
-    '#label' => t('Total time'),
-    '#label_display' => 'above',
+    '#label' => $config->get('total_time.label'),
+    '#label_display' => $config->get('total_time.label_display'),
     '#total_time' => $total_time,
   ];
 
@@ -138,8 +138,8 @@ function recipe_node_view(array &$build, EntityInterface $entity, EntityViewDisp
   ];
   $build['recipe_yield'] = [
     '#theme' => 'recipe_yield',
-    '#label' => t('Yield'),
-    '#label_display' => 'above',
+    '#label' => $config->get('yield.label'),
+    '#label_display' => $config->get('yield.label_display'),
     '#yield' => t('@yield_amount @yield_unit', $arguments),
   ];
   /*if ( isset($node->in_preview) && $node->in_preview == 1 ) {

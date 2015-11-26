@@ -18,7 +18,7 @@ use Drupal\recipe\Tests\RecipeTestBase;
 class RecipeNodeTest extends RecipeTestBase {
 
   /**
-   * Creates a recipe node using the node form and test the module settings.
+   * Creates a recipe node using the node form and tests the display.
    */
   public function testRecipeContent() {
     // Generate values for our test node.

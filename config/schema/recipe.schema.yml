@@ -1,5 +1,24 @@
 recipe.settings:
   type: config_object
   label: 'Recipe settings'
-  mapping: {  }
-  
+  mapping:
+    total_time:
+      type: mapping
+      label: 'Total time'
+      mapping:
+        label:
+          type: label
+          label: "The label for Recipe's Total time pseudo-field."
+        label_display:
+          type: string
+          label: "The display setting for Recipe's Total time pseudo-field label."
+    yield:
+      type: mapping
+      label: 'Yield'
+      mapping:
+        label:
+          type: label
+          label: "The label for Recipe's Yield pseudo-field."
+        label_display:
+          type: string
+          label: "The display setting for Recipe's Yield pseudo-field label."
