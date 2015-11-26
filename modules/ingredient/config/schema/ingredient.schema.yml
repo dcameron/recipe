@@ -1,6 +1,8 @@
+# Schema for the configuration files of the Ingredient module.
+
 ingredient.settings:
   type: config_object
-  label: 'Ingredient settings'
+  label: 'Ingredient module settings'
   mapping:
     ingredient_name_normalize:
       type: integer
@@ -14,7 +16,7 @@ ingredient.settings:
 
 field.storage_settings.ingredient:
   type: mapping
-  label: 'Ingredient settings'
+  label: 'Ingredient field storage settings'
   mapping:
     target_type:
       type: string
@@ -22,7 +24,7 @@ field.storage_settings.ingredient:
 
 field.field_settings.ingredient:
   type: mapping
-  label: 'Ingredient settings'
+  label: 'Ingredient field settings'
   mapping:
     handler:
       type: string
@@ -36,14 +38,14 @@ field.field_settings.ingredient:
 
 field.formatter.settings.ingredient_default:
   type: mapping
-  label: 'Ingredient display settings'
+  label: 'Ingredient field formatter settings'
   mapping:
     fraction_format:
       type: string
       label: 'Fractions display string'
     unit_display:
       type: integer
-      label: Ingredient unit display
+      label: 'Ingredient unit display'
     link:
       type: boolean
       label: 'Link name to the referenced ingredient'

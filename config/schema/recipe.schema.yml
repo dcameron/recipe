@@ -1,3 +1,5 @@
+# Schema for the configuration files of the Recipe module.
+
 recipe.settings:
   type: config_object
   label: 'Recipe settings'
@@ -8,17 +10,17 @@ recipe.settings:
       mapping:
         label:
           type: label
-          label: "The label for Recipe's Total time pseudo-field."
+          label: 'The label for the Total time pseudo-field.'
         label_display:
           type: string
-          label: "The display setting for Recipe's Total time pseudo-field label."
+          label: 'The display setting for the Total time pseudo-field label.'
     yield:
       type: mapping
       label: 'Yield'
       mapping:
         label:
           type: label
-          label: "The label for Recipe's Yield pseudo-field."
+          label: 'The label for the Yield pseudo-field.'
         label_display:
           type: string
-          label: "The display setting for Recipe's Yield pseudo-field label."
+          label: 'The display setting for the Yield pseudo-field label.'
