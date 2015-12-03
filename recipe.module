@@ -290,13 +290,13 @@ function recipe_entity_extra_field_info() {
   $extra['node']['recipe']['display']['recipe_total_time'] = [
     'label' => t('Total time'),
     'description' => t('The total time required to make the recipe.'),
-    'weight' => -1,
+    'weight' => 4,
     'visible' => TRUE,
   ];
   $extra['node']['recipe']['display']['recipe_yield'] = [
     'label' => t('Yield'),
     'description' => t('The amount of food produced by the recipe.'),
-    'weight' => -4,
+    'weight' => 1,
     'visible' => TRUE,
   ];
 
