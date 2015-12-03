@@ -6,7 +6,9 @@
 
 use \Drupal\Core\Entity\EntityInterface;
 use \Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use \Drupal\Core\Form\FormStateInterface;
 use \Drupal\Core\Routing\RouteMatchInterface;
+use \Drupal\field\FieldConfigInterface;
 
 /**
  * Implements hook_help().
@@ -109,25 +111,41 @@ function recipe_menu() {
 }
 
 /**
+ * Implements hook_form_BASE_FORM_ID_alter() for 'field_config_edit_form'.
+ */
+function recipe_form_field_config_edit_form_alter(&$form, FormStateInterface $form_state) {
+  $field = $form_state->getFormObject()->getEntity();
+
+  if ($field->getTargetBundle() == 'recipe' && $field->getType() == 'integer') {
+    $form['third_party_settings']['recipe']['total_time'] = [
+      '#type' => 'checkbox',
+      '#title' => t("Add this field's value to the Recipe's total time."),
+      '#default_value' => $field->getThirdPartySetting('recipe', 'total_time', 0),
+    ];
+  }
+}
+
+/**
  * Implements hook_ENTITY_TYPE_view().
- *
- * @todo Make integer fields configurable as time sub-fields.
  */
 function recipe_node_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
   $config = \Drupal::config('recipe.settings');
 
   // Calculate the total time required to make the recipe.
-  $prep_time = $entity->recipe_prep_time->value;
-  $cook_time = $entity->recipe_cook_time->value;
-  $total_time = [
-    '#theme' => 'recipe_duration',
-    '#duration' => $prep_time + $cook_time,
-  ];
+  $total_time = 0;
+  foreach ($entity->getFieldDefinitions() as $field_name => $field_definition) {
+    if (!($field_definition instanceof FieldConfigInterface)) {
+      continue;
+    }
+    if ($field_definition->getType() == 'integer' && $field_definition->getThirdPartySetting('recipe', 'total_time') == 1) {
+      $total_time += $entity->{$field_name}->value;
+    }
+  }
   $build['recipe_total_time'] = [
     '#theme' => 'recipe_total_time',
     '#label' => $config->get('total_time.label'),
     '#label_display' => $config->get('total_time.label_display'),
-    '#total_time' => $total_time,
+    '#total_time' => ['#theme' => 'recipe_duration', '#duration' => $total_time],
   ];
 
   // Display the recipe yield by combining the recipe_yield_amount and

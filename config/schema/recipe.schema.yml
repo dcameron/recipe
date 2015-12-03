@@ -24,3 +24,11 @@ recipe.settings:
         label_display:
           type: string
           label: 'The display setting for the Yield pseudo-field label.'
+
+field.field.*.*.*.third_party.recipe:
+  type: mapping
+  label: 'Recipe field settings'
+  mapping:
+    total_time:
+      type: boolean
+      label: 'Whether to add this integer field to the Recipe total time.'
