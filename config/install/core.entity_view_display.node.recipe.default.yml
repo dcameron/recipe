@@ -14,6 +14,7 @@ dependencies:
     - node.type.recipe
   module:
     - ingredient
+    - recipe
     - text
     - user
 id: node.recipe.default
@@ -21,24 +22,24 @@ targetEntityType: node
 bundle: recipe
 mode: default
 content:
+  links:
+    weight: 9
+    settings: {  }
+    third_party_settings: {  }
   recipe_cook_time:
-    weight: -2
+    weight: 3
     label: above
     settings: {  }
     third_party_settings: {  }
     type: recipe_duration
-  links:
-    weight: 101
-    settings: {  }
-    third_party_settings: {  }
   recipe_description:
     label: above
     type: text_default
-    weight: -4
+    weight: 0
     settings: {  }
     third_party_settings: {  }
   recipe_ingredient:
-    weight: -2
+    weight: 5
     label: above
     settings:
       fraction_format: '{%d }%d&frasl;%d'
@@ -49,17 +50,17 @@ content:
   recipe_instructions:
     label: above
     type: text_default
-    weight: -1
+    weight: 6
     settings: {  }
     third_party_settings: {  }
   recipe_notes:
     label: above
     type: text_default
-    weight: -1
+    weight: 7
     settings: {  }
     third_party_settings: {  }
   recipe_prep_time:
-    weight: -3
+    weight: 2
     label: above
     settings: {  }
     third_party_settings: {  }
@@ -67,7 +68,15 @@ content:
   recipe_source:
     label: above
     type: text_default
-    weight: 0
+    weight: 8
+    settings: {  }
+    third_party_settings: {  }
+  recipe_total_time:
+    weight: 4
+    settings: {  }
+    third_party_settings: {  }
+  recipe_yield:
+    weight: 1
     settings: {  }
     third_party_settings: {  }
 hidden:
