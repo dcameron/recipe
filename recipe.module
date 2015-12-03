@@ -129,6 +129,10 @@ function recipe_form_field_config_edit_form_alter(&$form, FormStateInterface $fo
  * Implements hook_ENTITY_TYPE_view().
  */
 function recipe_node_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+  if ($entity->getEntityTypeId() !== 'node' || $entity->bundle() !== 'recipe') {
+    return;
+  }
+
   $config = \Drupal::config('recipe.settings');
 
   // Calculate the total time required to make the recipe.
