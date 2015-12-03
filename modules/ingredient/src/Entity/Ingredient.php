@@ -98,7 +98,7 @@ class Ingredient extends ContentEntityBase implements IngredientInterface {
         'text_processing' => 0,
       ])
       ->setDisplayOptions('view', [
-        'label' => 'above',
+        'label' => 'hidden',
         'type' => 'string',
         'weight' => -6,
       ])
