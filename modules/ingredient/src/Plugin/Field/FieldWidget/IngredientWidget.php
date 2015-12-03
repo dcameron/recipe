@@ -73,6 +73,7 @@ class IngredientWidget extends WidgetBase {
       '#attributes' => array('class' => array('recipe-ingredient-note')),
     );
     $element['#element_validate'] = array(array($this, 'validate'));
+    $element['#attached']['library'][] = 'ingredient/drupal.ingredient';
 
     return $element;
   }

@@ -4,16 +4,12 @@
  */
 
 /* Ingredient field widget form */
-.field-type-ingredient-reference .form-type-textfield,
-.field-type-ingredient-reference .form-type-select {
-  float: left;
+.field--widget-ingredient-autocomplete .form-type-entity-autocomplete,
+.field--widget-ingredient-autocomplete .form-type-select,
+.field--widget-ingredient-autocomplete .form-type-textfield {
+  display: inline-block;
+  margin-right: 1em;
 }
-.field-type-ingredient-reference .form-type-textfield {
-  min-width: 17em;
-}
-.field-type-ingredient-reference .form-type-textfield:first-child {
-  min-width: 8em;
-}
-.field-type-ingredient-reference .form-type-select {
-  min-width: 12em;
+.field--widget-ingredient-autocomplete .form-type-textfield:last-child {
+  margin-right: 0;
 }
