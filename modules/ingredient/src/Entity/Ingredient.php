@@ -106,8 +106,7 @@ class Ingredient extends ContentEntityBase implements IngredientInterface {
         'type' => 'string',
         'weight' => -6,
       ])
-      ->setDisplayConfigurable('form', TRUE)
-      ->setDisplayConfigurable('view', TRUE);
+      ->setDisplayConfigurable('form', TRUE);
 
     $fields['langcode'] = BaseFieldDefinition::create('language')
       ->setLabel(t('Language code'))
