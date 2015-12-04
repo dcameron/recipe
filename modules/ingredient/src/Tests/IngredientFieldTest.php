@@ -8,6 +8,7 @@
 namespace Drupal\ingredient\Tests;
 
 use Drupal\field\Entity\FieldConfig;
+use Drupal\ingredient\IngredientUnitTrait;
 use Drupal\simpletest\WebTestBase;
 
 /**
@@ -16,6 +17,8 @@ use Drupal\simpletest\WebTestBase;
  * @group recipe
  */
 class IngredientFieldTest extends WebTestBase {
+
+  use IngredientUnitTrait;
 
   /**
    * Modules to enable.
@@ -49,7 +52,7 @@ class IngredientFieldTest extends WebTestBase {
     $this->drupalLogin($this->admin_user);
 
     // Populate the unit list.
-    $this->unit_list = ingredient_get_units();
+    $this->unit_list = $this->getConfiguredUnits();
   }
 
   /**

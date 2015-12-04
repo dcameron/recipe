@@ -13,6 +13,7 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TypedData\DataDefinition;
+use Drupal\ingredient\IngredientUnitTrait;
 
 /**
  * Plugin implementation of the 'ingredient' field type.
@@ -28,6 +29,8 @@ use Drupal\Core\TypedData\DataDefinition;
  * )
  */
 class IngredientItem extends EntityReferenceItem {
+
+  use IngredientUnitTrait;
 
   /**
    * {@inheritdoc}
@@ -110,17 +113,20 @@ class IngredientItem extends EntityReferenceItem {
   /**
    * {@inheritdoc}
    *
-   * @todo: Migrate this setting to the defaultValuesForm().
+   * @todo: Migrate the default_unit setting to the defaultValuesForm().
    */
   public function fieldSettingsForm(array $form, FormStateInterface $form_state) {
     $element = [];
+
+    // Create the unit options.
+    $units = $this->getConfiguredUnits();
+    $units = $this->sortUnitsByName($units);
 
     $element['default_unit'] = [
       '#type' => 'select',
       '#title' => t('Default unit type for ingredients'),
       '#default_value' => $this->getSetting('default_unit'),
-      '#options' => ingredient_unit_options(),
-      '#description' => t('The default unit for new ingredients on the recipe edit screen.'),
+      '#options' => $this->createUnitSelectOptions($units),
     ];
 
     return $element;
@@ -134,7 +140,7 @@ class IngredientItem extends EntityReferenceItem {
     $settings = $field_definition->getSettings();
 
     // Get the ingredient unit keys.
-    $unit_keys = array_keys(ingredient_get_units());
+    $unit_keys = array_keys($this->getConfiguredUnits());
     $random_unit_key = mt_rand(0, count($unit_keys) - 1);
 
     // Generate an ingredient entity.

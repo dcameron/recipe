@@ -11,6 +11,7 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\ingredient\Entity\Ingredient;
+use Drupal\ingredient\IngredientUnitTrait;
 
 /**
  * Plugin implementation of the 'ingredient_autocomplete' widget.
@@ -26,11 +27,17 @@ use Drupal\ingredient\Entity\Ingredient;
  */
 class IngredientWidget extends WidgetBase {
 
+  use IngredientUnitTrait;
+
   /**
    * {@inheritdoc}
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $referenced_entities = $items->referencedEntities();
+
+    // Get the enabled units and sort them for the select options.
+    $units = $this->getConfiguredUnits();
+    $units = $this->sortUnitsByName($units);
 
     // Strange, but html_entity_decode() doesn't handle &frasl;
     $quantity = isset($items[$delta]->quantity) ? preg_replace('/\&frasl;/', '/', ingredient_quantity_from_decimal($items[$delta]->quantity, '{%d} %d&frasl;%d', TRUE)) : '';
@@ -46,7 +53,7 @@ class IngredientWidget extends WidgetBase {
       '#type' => 'select',
       '#title' => t('Unit'),
       '#default_value' => isset($items[$delta]->unit_key) ? $items[$delta]->unit_key : $this->getFieldSetting('default_unit'),
-      '#options' => ingredient_unit_options(),
+      '#options' => $this->createUnitSelectOptions($units),
       '#attributes' => array('class' => array('recipe-ingredient-unit-key')),
     );
     $element['target_id'] = array(

@@ -12,6 +12,7 @@ use Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceFormatterBase;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Template\Attribute;
+use Drupal\ingredient\IngredientUnitTrait;
 
 /**
  * Plugin implementation of the 'ingredient_default' formatter.
@@ -26,6 +27,8 @@ use Drupal\Core\Template\Attribute;
  * )
  */
 class IngredientFormatter extends EntityReferenceFormatterBase {
+
+  use IngredientUnitTrait;
 
   /**
    * {@inheritdoc}
@@ -142,24 +145,6 @@ class IngredientFormatter extends EntityReferenceFormatterBase {
       );
     }
     return $elements;
-  }
-
-  /**
-   * Returns all configured units, regardless of which set they are in.
-   */
-  protected function getConfiguredUnits() {
-    $unit_sets = \Drupal::config('ingredient.units')->get('unit_sets');
-
-    $units = [];
-    foreach ($unit_sets as $set) {
-      // Verify that the set contains an array of units.
-      if (empty($set['units']) || !is_array($set['units'])) {
-        continue;
-      }
-
-      $units = array_merge($units, $set['units']);
-    }
-    return $units;
   }
 
 }
