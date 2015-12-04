@@ -14,6 +14,52 @@ ingredient.settings:
       type: integer
       label: 'Limit the UI to the preferred system of measure'
 
+ingredient.units:
+  type: mapping
+  label: 'Ingredient module units'
+  mapping:
+    langcode:
+      type: string
+      label: 'Language code'
+    unit_sets:
+      type: sequence
+      label: 'A list of sets of units of measurement'
+      sequence:
+        type: ingredient.unit_set
+
+ingredient.unit_set:
+  type: mapping
+  label: 'An Ingredient set of units'
+  mapping:
+    name:
+      type: label
+      label: 'The name of a set of units of measurement'
+    units:
+      type: sequence
+      label: 'The units in a set'
+      sequence:
+        type: ingredient.unit
+
+ingredient.unit:
+  type: mapping
+  label: 'An Ingredient unit'
+  mapping:
+    name:
+      type: label
+      label: 'A singluar ingredient unit name'
+    plural:
+      type: label
+      label: 'A plural ingredient unit name'
+    abbreviation:
+      type: label
+      label: 'The abbreviation for an ingredient unit name'
+    aliases:
+      type: sequence
+      label: 'A list of alternate names or abbreviations for units'
+      sequence:
+        type: string
+        label: 'An alternate name or abbreviation for a unit'
+
 field.storage_settings.ingredient:
   type: mapping
   label: 'Ingredient field storage settings'
