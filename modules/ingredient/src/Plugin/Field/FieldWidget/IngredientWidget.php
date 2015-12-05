@@ -36,7 +36,7 @@ class IngredientWidget extends WidgetBase {
     $referenced_entities = $items->referencedEntities();
 
     // Get the enabled units and sort them for the select options.
-    $units = $this->getConfiguredUnits();
+    $units = $this->getConfiguredUnits($this->getFieldSetting('unit_sets'));
     $units = $this->sortUnitsByName($units);
 
     // Strange, but html_entity_decode() doesn't handle &frasl;

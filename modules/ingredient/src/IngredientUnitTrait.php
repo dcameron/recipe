@@ -22,6 +22,11 @@ trait IngredientUnitTrait {
    *   An array of units.
    */
   protected function getConfiguredUnits($sets_to_get = []) {
+    // The field settings will set disabled set values to 0 in configuration.
+    // Filter out any disabled values.  This prevents custom unit sets with an
+    // ID of '0' and another solution may have to be found eventually.
+    $sets_to_get = array_filter($sets_to_get);
+
     $unit_sets = \Drupal::config('ingredient.units')->get('unit_sets');
 
     $units = [];
@@ -77,6 +82,33 @@ trait IngredientUnitTrait {
       $options[$unit_key] = $text;
     }
     return $options;
+  }
+
+  /**
+   * Returns options for a unit set select form element.
+   *
+   * @return array
+   *   An array of all unit set names with unit names, keyed by set id.
+   */
+  protected function getUnitSetOptions() {
+    $unit_sets = \Drupal::config('ingredient.units')->get('unit_sets');
+
+    $set_names = [];
+    foreach ($unit_sets as $key => $set) {
+      $set_name = $set['name'];
+
+      // Append a list of the unit names in the set, in parenthesis.
+      $unit_names = [];
+      foreach ($set['units'] as $unit) {
+        $unit_names[] = $unit['name'];
+      }
+      if (!empty($unit_names)) {
+        $set_name .= ' <em>(' . implode(', ', $unit_names) . ')</em>';
+      }
+
+      $set_names[$key] = $set_name;
+    }
+    return $set_names;
   }
 
 }

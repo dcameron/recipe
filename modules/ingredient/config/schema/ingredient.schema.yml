@@ -81,6 +81,12 @@ field.field_settings.ingredient:
     default_unit:
       type: string
       label: 'The default unit to display in the ingredient widget'
+    unit_sets:
+      type: sequence
+      label: 'A list of enabled unit sets to be displayed by the field widget'
+      sequence:
+        type: string
+        label: 'An enabled unit set to be displayed by the field widget'
 
 field.formatter.settings.ingredient_default:
   type: mapping

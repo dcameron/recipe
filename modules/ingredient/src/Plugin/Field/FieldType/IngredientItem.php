@@ -47,6 +47,7 @@ class IngredientItem extends EntityReferenceItem {
   public static function defaultFieldSettings() {
     return [
       'default_unit' => '',
+      'unit_sets' => [],
     ] + parent::defaultFieldSettings();
   }
 
@@ -113,7 +114,9 @@ class IngredientItem extends EntityReferenceItem {
   /**
    * {@inheritdoc}
    *
-   * @todo: Migrate the default_unit setting to the defaultValuesForm().
+   * @todo Cause the default_unit element to be reloaded via AJAX when unit_sets
+   *   are enabled or disabled so that it only displays enabled units.
+   * @todo Migrate the default_unit setting to the defaultValuesForm().
    */
   public function fieldSettingsForm(array $form, FormStateInterface $form_state) {
     $element = [];
@@ -122,6 +125,13 @@ class IngredientItem extends EntityReferenceItem {
     $units = $this->getConfiguredUnits();
     $units = $this->sortUnitsByName($units);
 
+    $element['unit_sets'] = [
+      '#type' => 'checkboxes',
+      '#title' => t('Enable sets of units'),
+      '#default_value' => $this->getSetting('unit_sets'),
+      '#options' => $this->getUnitSetOptions(),
+      '#description' => t('Units in enabled sets will appear in the field widget.  If no sets are selected then all units will appear by default.'),
+    ];
     $element['default_unit'] = [
       '#type' => 'select',
       '#title' => t('Default unit type for ingredients'),
