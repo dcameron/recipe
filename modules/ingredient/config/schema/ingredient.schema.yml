@@ -7,12 +7,6 @@ ingredient.settings:
     ingredient_name_normalize:
       type: integer
       label: 'Normalize ingredient names to lowercase'
-    ingredient_preferred_system_of_measure:
-      type: integer
-      label: 'Preferred system of measure'
-    ingredient_preferred_system_of_measure_limit:
-      type: integer
-      label: 'Limit the UI to the preferred system of measure'
 
 ingredient.units:
   type: mapping
