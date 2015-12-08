@@ -114,16 +114,10 @@ class IngredientItem extends EntityReferenceItem {
   /**
    * {@inheritdoc}
    *
-   * @todo Cause the default_unit element to be reloaded via AJAX when unit_sets
-   *   are enabled or disabled so that it only displays enabled units.
    * @todo Migrate the default_unit setting to the defaultValuesForm().
    */
   public function fieldSettingsForm(array $form, FormStateInterface $form_state) {
     $element = [];
-
-    // Create the unit options.
-    $units = $this->getConfiguredUnits();
-    $units = $this->sortUnitsByName($units);
 
     $element['unit_sets'] = [
       '#type' => 'checkboxes',
@@ -131,15 +125,48 @@ class IngredientItem extends EntityReferenceItem {
       '#default_value' => $this->getSetting('unit_sets'),
       '#options' => $this->getUnitSetOptions(),
       '#description' => t('Units in enabled sets will appear in the field widget.  If no sets are selected then all units will appear by default.'),
+      '#ajax' => [
+        'callback' => [$this, 'setChangeAjaxCallback'],
+        'wrapper' => 'default-unit-wrapper',
+      ],
     ];
     $element['default_unit'] = [
       '#type' => 'select',
       '#title' => t('Default unit type for ingredients'),
       '#default_value' => $this->getSetting('default_unit'),
-      '#options' => $this->createUnitSelectOptions($units),
+      '#options' => [],
+      '#process' => [[$this, 'processDefaultUnit']],
+      '#prefix' => '<div id="default-unit-wrapper">',
+      '#suffix' => '</div>',
     ];
 
     return $element;
+  }
+
+  /**
+   * Sets the options of the default_unit form element.
+   */
+  public function processDefaultUnit($element, FormStateInterface $form_state, $form) {
+    $unit_sets = $form_state->getValue(['settings', 'unit_sets']);
+
+    $units = $this->getConfiguredUnits($unit_sets);
+    $units = $this->sortUnitsByName($units);
+    $element['#options'] = $this->createUnitSelectOptions($units);
+
+    // If the #default_value is not in the current list of units due to an AJAX
+    // reload, unset it to prevent a validation error when reloading.
+    if (!isset($element['#options'][$element['#default_value']])) {
+      unset($element['#default_value']);
+      unset($element['#value']);
+    }
+    return $element;
+  }
+
+  /**
+   * #ajax callback for the unit_sets form element.
+   */
+  public function setChangeAjaxCallback(array $form, FormStateInterface $form_state) {
+    return $form['settings']['default_unit'];
   }
 
   /**
