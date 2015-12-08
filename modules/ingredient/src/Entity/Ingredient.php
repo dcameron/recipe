@@ -40,6 +40,7 @@ use Drupal\user\UserInterface;
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "name",
+ *     "langcode" = "langcode",
  *     "uuid" = "uuid"
  *   },
  *   links = {
@@ -74,51 +75,42 @@ class Ingredient extends ContentEntityBase implements IngredientInterface {
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
 
-    // Standard field, used as unique if primary index.
     $fields['id'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('ID'))
       ->setDescription(t('The ID of the Contact entity.'))
       ->setReadOnly(TRUE);
 
-    // Standard field, unique outside of the scope of the current project.
     $fields['uuid'] = BaseFieldDefinition::create('uuid')
       ->setLabel(t('UUID'))
       ->setDescription(t('The UUID of the Contact entity.'))
       ->setReadOnly(TRUE);
 
-    // Name field for the ingredient.
-    // We set display options for the view as well as the form.
-    // Users with correct privileges can change the view and edit configuration.
     $fields['name'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Name'))
-      ->setDescription(t('The name of the Ingredient.'))
-      ->setSettings([
-        'default_value' => '',
-        'max_length' => 255,
-        'text_processing' => 0,
-      ])
+      ->setRequired(TRUE)
+      ->setSetting('max_length', 255)
       ->setDisplayOptions('view', [
         'label' => 'hidden',
         'type' => 'string',
         'weight' => -6,
       ])
       ->setDisplayOptions('form', [
-        'type' => 'string',
+        'type' => 'string_textfield',
         'weight' => -6,
       ])
       ->setDisplayConfigurable('form', TRUE);
 
     $fields['langcode'] = BaseFieldDefinition::create('language')
       ->setLabel(t('Language code'))
-      ->setDescription(t('The language code of ContentEntityExample entity.'));
+      ->setDescription(t('The ingredient language code.'));
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))
-      ->setDescription(t('The time that the entity was created.'));
+      ->setDescription(t('The time that the ingredient was created.'));
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
-      ->setDescription(t('The time that the entity was last edited.'));
+      ->setDescription(t('The time that the ingredient was last edited.'));
 
     return $fields;
   }
