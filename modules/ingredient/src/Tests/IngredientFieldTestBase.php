@@ -46,7 +46,7 @@ class IngredientFieldTestBase extends WebTestBase {
     $content_type = $this->drupalCreateContentType(array('type' => 'test_bundle'));
 
     // Create and log in the admin user.
-    $this->admin_user = $this->drupalCreateUser(array('create test_bundle content', 'access content', 'administer node display', 'add ingredient', 'view ingredient', 'administer site configuration'));
+    $this->admin_user = $this->drupalCreateUser(array('create test_bundle content', 'access content', 'administer node fields', 'administer node display', 'add ingredient', 'view ingredient', 'administer site configuration'));
     $this->drupalLogin($this->admin_user);
 
     // Populate the unit list.
