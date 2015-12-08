@@ -101,7 +101,7 @@ class IngredientFieldTest extends IngredientFieldTestBase {
         $this->assertNoText(t('@quantity @unit', array('@quantity' => $ingredient['quantity'], '@unit' => $this->unit_list[$ingredient['unit_key']]['abbreviation'])), 'Did not find the ingredient quantity === 0.');
       }
       elseif ($ingredient['unit_key'] == 'unit') {
-        $this->assertRaw(format_string('<span class="quantity-unit" property="schema:amount">@quantity</span>', array('@quantity' => $ingredient['quantity'])), 'Found the ingredient quantity with no unit.');
+        $this->assertRaw(format_string('<span class="quantity-unit">@quantity</span>', array('@quantity' => $ingredient['quantity'])), 'Found the ingredient quantity with no unit.');
       }
       else {
         $unit_abbreviation = $this->unit_list[$ingredient['unit_key']]['abbreviation'];

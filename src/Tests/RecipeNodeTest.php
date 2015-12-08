@@ -75,8 +75,9 @@ class RecipeNodeTest extends RecipeTestBase {
     $properties = array(
       'schema:Recipe',
       'schema:name',
-      'schema:instructions',
-      'schema:summary',
+      'schema:recipeInstructions',
+      'schema:recipeIngredient',
+      'schema:description',
       'schema:prepTime',
       'schema:cookTime',
       'schema:totalTime',

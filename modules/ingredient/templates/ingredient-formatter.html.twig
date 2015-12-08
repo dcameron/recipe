@@ -12,11 +12,11 @@
  * - name: The ingredient name.
  * - note: The ingredient note.
  *
- * @todo Use attributes to set the element classes and metadata.
+ * @todo Use attributes to set the element classes.
  *
  * @see template_preprocess_ingredient_formatter()
  *
  * @ingroup themeable
  */
 #}
-<span class="quantity-unit" property="schema:amount">{{ quantity|raw }}{% if unit_name %}{% if unit_display %} {{ unit_name }}{% else %} <abbr title="{{ unit_name }}">{{ unit_abbreviation }}</abbr>{% endif %}{% endif %}</span> <span class="ingredient-name" property="schema:name">{{ name }}{% if note|length > 0 %} ({{ note }}){% endif %}</span>
+<span class="quantity-unit">{{ quantity|raw }}{% if unit_name %}{% if unit_display %} {{ unit_name }}{% else %} <abbr title="{{ unit_name }}">{{ unit_abbreviation }}</abbr>{% endif %}{% endif %}</span> <span class="ingredient-name">{{ name }}{% if note|length > 0 %} ({{ note }}){% endif %}</span>

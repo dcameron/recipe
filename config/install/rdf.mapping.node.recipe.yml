@@ -16,10 +16,10 @@ fieldMappings:
       - 'schema:name'
   recipe_instructions:
     properties:
-      - 'schema:instructions'
+      - 'schema:recipeInstructions'
   recipe_description:
     properties:
-      - 'schema:summary'
+      - 'schema:description'
   recipe_prep_time:
     properties:
       - 'schema:prepTime'
@@ -32,4 +32,4 @@ fieldMappings:
       callable: 'recipe_duration_iso8601'
   recipe_ingredient:
     properties:
-      - 'schema:ingredients'
+      - 'schema:recipeIngredient'
