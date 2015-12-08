@@ -59,9 +59,9 @@ class IngredientWidget extends WidgetBase {
     $element['target_id'] = array(
       '#type' => 'entity_autocomplete',
       '#title' => t('Name'),
-      '#target_type' => 'ingredient_ingredient',
+      '#target_type' => 'ingredient',
       '#autocreate' => [
-        'bundle' => 'ingredient_ingredient',
+        'bundle' => 'ingredient',
       ],
       // Entity reference field items are handling validation themselves via
       // the 'ValidReference' constraint.

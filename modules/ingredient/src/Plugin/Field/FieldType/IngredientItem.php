@@ -37,7 +37,7 @@ class IngredientItem extends EntityReferenceItem {
    */
   public static function defaultStorageSettings() {
     return [
-      'target_type' => 'ingredient_ingredient',
+      'target_type' => 'ingredient',
     ] + parent::defaultStorageSettings();
   }
 
@@ -181,7 +181,7 @@ class IngredientItem extends EntityReferenceItem {
     $random_unit_key = mt_rand(0, count($unit_keys) - 1);
 
     // Generate an ingredient entity.
-    $ingredient = entity_create('ingredient_ingredient', ['name' => $random->name(10, TRUE)]);
+    $ingredient = entity_create('ingredient', ['name' => $random->name(10, TRUE)]);
     $values = [
       'target_id' => $ingredient->id(),
       'quantity' => mt_rand(1, 5),

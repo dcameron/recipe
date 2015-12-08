@@ -21,7 +21,7 @@ use Drupal\user\UserInterface;
  *   https://www.drupal.org/node/1722906.
  *
  * @ContentEntityType(
- *   id = "ingredient_ingredient",
+ *   id = "ingredient",
  *   label = @Translation("Ingredient"),
  *   handlers = {
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
@@ -43,9 +43,9 @@ use Drupal\user\UserInterface;
  *     "uuid" = "uuid"
  *   },
  *   links = {
- *     "canonical" = "/ingredient/{ingredient_ingredient}",
- *     "edit-form" = "/ingredient/{ingredient_ingredient}/edit",
- *     "delete-form" = "/ingredient/{ingredient_ingredient}/delete",
+ *     "canonical" = "/ingredient/{ingredient}",
+ *     "edit-form" = "/ingredient/{ingredient}/edit",
+ *     "delete-form" = "/ingredient/{ingredient}/delete",
  *     "collection" = "/ingredient/list"
  *   },
  *   field_ui_base_route = "ingredient.ingredient_settings",

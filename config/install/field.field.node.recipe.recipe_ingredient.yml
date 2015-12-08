@@ -18,7 +18,7 @@ default_value: {  }
 default_value_callback: ''
 settings:
   default_unit: ''
-  handler: 'default:ingredient_ingredient'
+  handler: 'default:ingredient'
   handler_settings: {  }
   unit_sets:
     - common

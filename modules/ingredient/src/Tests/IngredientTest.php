@@ -53,9 +53,9 @@ class IngredientTest extends WebTestBase {
       'view ingredient',
       'delete ingredient',
       'administer ingredient',
-      'administer ingredient_ingredient display',
-      'administer ingredient_ingredient fields',
-      'administer ingredient_ingredient form display'));
+      'administer ingredient display',
+      'administer ingredient fields',
+      'administer ingredient form display'));
 
     $this->drupalLogin($web_user);
 

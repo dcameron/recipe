@@ -1,15 +1,15 @@
-entity.ingredient_ingredient.canonical:
-  path: '/ingredient/{ingredient_ingredient}'
+entity.ingredient.canonical:
+  path: '/ingredient/{ingredient}'
   defaults:
-    _entity_view: 'ingredient_ingredient'
+    _entity_view: 'ingredient'
     _title: 'Ingredient Content'
   requirements:
-    _entity_access: 'ingredient_ingredient.view'
+    _entity_access: 'ingredient.view'
 
-entity.ingredient_ingredient.collection:
+entity.ingredient.collection:
   path: '/ingredient/list'
   defaults:
-    _entity_list: 'ingredient_ingredient'
+    _entity_list: 'ingredient'
     _title: 'Ingredient List'
   requirements:
     _permission: 'view ingredient'
@@ -17,26 +17,26 @@ entity.ingredient_ingredient.collection:
 ingredient.ingredient_add:
   path: '/ingredient/add'
   defaults:
-    _entity_form: ingredient_ingredient.add
+    _entity_form: ingredient.add
     _title: 'Add Ingredient'
   requirements:
-    _entity_create_access: 'ingredient_ingredient'
+    _entity_create_access: 'ingredient'
 
-entity.ingredient_ingredient.edit_form:
-  path: '/ingredient/{ingredient_ingredient}/edit'
+entity.ingredient.edit_form:
+  path: '/ingredient/{ingredient}/edit'
   defaults:
-    _entity_form: ingredient_ingredient.edit
+    _entity_form: ingredient.edit
     _title: 'Edit Ingredient'
   requirements:
-    _entity_access: 'ingredient_ingredient.edit'
+    _entity_access: 'ingredient.edit'
 
-entity.ingredient_ingredient.delete_form:
-  path: '/ingredient/{ingredient_ingredient}/delete'
+entity.ingredient.delete_form:
+  path: '/ingredient/{ingredient}/delete'
   defaults:
-    _entity_form: ingredient_ingredient.delete
+    _entity_form: ingredient.delete
     _title: 'Delete Ingredient'
   requirements:
-    _entity_access: 'ingredient_ingredient.delete'
+    _entity_access: 'ingredient.delete'
 
 ingredient.ingredient_settings:
   path: 'admin/structure/ingredient_settings'

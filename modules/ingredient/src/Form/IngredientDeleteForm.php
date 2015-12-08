@@ -29,7 +29,7 @@ class IngredientDeleteForm extends ContentEntityConfirmFormBase {
    * If the delete command is canceled, return to the ingredient list.
    */
   public function getCancelURL() {
-    return new Url('entity.ingredient_ingredient.collection');
+    return new Url('entity.ingredient.collection');
   }
 
   /**
@@ -53,7 +53,7 @@ class IngredientDeleteForm extends ContentEntityConfirmFormBase {
         '@type' => $this->entity->bundle(),
         '%title' => $this->entity->label(),
       ));
-    $form_state->setRedirect('entity.ingredient_ingredient.collection');
+    $form_state->setRedirect('entity.ingredient.collection');
   }
 
 }

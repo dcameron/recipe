@@ -10,7 +10,7 @@ field_name: recipe_ingredient
 entity_type: node
 type: ingredient
 settings:
-  target_type: ingredient_ingredient
+  target_type: ingredient
 module: ingredient
 locked: false
 cardinality: -1
