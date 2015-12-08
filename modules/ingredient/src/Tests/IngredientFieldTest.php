@@ -7,53 +7,14 @@
 
 namespace Drupal\ingredient\Tests;
 
-use Drupal\field\Entity\FieldConfig;
-use Drupal\ingredient\IngredientUnitTrait;
-use Drupal\simpletest\WebTestBase;
+use Drupal\ingredient\Tests\IngredientFieldTestBase;
 
 /**
  * Tests the functionality of the ingredient field.
  *
  * @group recipe
  */
-class IngredientFieldTest extends WebTestBase {
-
-  use IngredientUnitTrait;
-
-  /**
-   * Modules to enable.
-   *
-   * @var array
-   */
-  public static $modules = array('field_ui', 'ingredient', 'node');
-
-  /**
-   * A test user with administrative privileges.
-   *
-   * @var \Drupal\user\UserInterface
-   */
-  protected $admin_user;
-
-  /**
-   * A list of units available for ingredient amounts.
-   *
-   * @var array
-   */
-  protected $unit_list;
-
-  public function setUp() {
-    parent::setUp();
-
-    // Create a new content type for testing.
-    $content_type = $this->drupalCreateContentType(array('type' => 'test_bundle'));
-
-    // Create and log in the admin user.
-    $this->admin_user = $this->drupalCreateUser(array('create test_bundle content', 'access content', 'administer node display', 'add ingredient', 'view ingredient', 'administer site configuration'));
-    $this->drupalLogin($this->admin_user);
-
-    // Populate the unit list.
-    $this->unit_list = $this->getConfiguredUnits();
-  }
+class IngredientFieldTest extends IngredientFieldTestBase {
 
   /**
    * Tests adding data with the ingredient field.
@@ -159,32 +120,6 @@ class IngredientFieldTest extends WebTestBase {
   }
 
   /**
-   * Tests ingredient field settings.
-   */
-  public function testIngredientFieldSettings() {
-    // Create an ingredient field on the test_bundle node type.
-    $field_name = strtolower($this->randomMachineName());
-    $field_settings = [
-      'default_unit' => 'cup',
-    ];
-    $this->createIngredientField($field_name, 'node', 'test_bundle', [], $field_settings);
-
-    $edit = array(
-      'title[0][value]' => $this->randomMachineName(16),
-      $field_name . '[0][quantity]' => 4,
-      $field_name . '[0][unit_key]' => 'us gallon',
-      $field_name . '[0][target_id]' => 'test ingredient',
-      $field_name . '[0][note]' => '',
-    );
-
-    $this->drupalGet('node/add/test_bundle');
-    // Assert that the default element, 'cup', is selected.
-    $this->assertOptionSelected('edit-' . $field_name . '-0-unit-key', 'cup', 'The default unit was selected.');
-    // Post the values to the node form.
-    $this->drupalPostForm(NULL, $edit, t('Save'));
-  }
-
-  /**
    * Tests ingredient formatter settings.
    *
    * todo: Add assertions for singular/plural unit full names.
@@ -225,98 +160,6 @@ class IngredientFieldTest extends WebTestBase {
     $this->drupalGet('node/1');
     $this->assertText('test ingredient', 'Found the ingredient name.');
     $this->assertLink('test ingredient', 0, 'Ingredient entity link is displayed.');
-  }
-
-  /**
-   * Creates a new ingredient field.
-   *
-   * @param string $name
-   *   The name of the new field (all lowercase), exclude the "field_" prefix.
-   * @param string $entity_type
-   *   The entity type.
-   * @param string $bundle
-   *   The bundle that this field will be added to.
-   * @param array $storage_settings
-   *   A list of field storage settings that will be added to the defaults.
-   * @param array $field_settings
-   *   A list of instance settings that will be added to the instance defaults.
-   * @param array $widget_settings
-   *   A list of widget settings that will be added to the widget defaults.
-   * @param array $display_settings
-   *   A list of display settings that will be added to the display defaults.
-   */
-  protected function createIngredientField($name, $entity_type, $bundle, $storage_settings = array(), $field_settings = array(), $widget_settings = array(), $display_settings = array()) {
-    $field_storage = entity_create('field_storage_config', array(
-      'entity_type' => $entity_type,
-      'field_name' => $name,
-      'type' => 'ingredient',
-      'settings' => $storage_settings,
-      'cardinality' => !empty($storage_settings['cardinality']) ? $storage_settings['cardinality'] : 1,
-    ));
-    $field_storage->save();
-
-    $this->attachIngredientField($name, $entity_type, $bundle, $field_settings, $widget_settings, $display_settings);
-    return $field_storage;
-  }
-
-  /**
-   * Attaches an ingredient field to an entity.
-   *
-   * @param string $name
-   *   The name of the new field (all lowercase), exclude the "field_" prefix.
-   * @param string $entity_type
-   *   The entity type this field will be added to.
-   * @param string $bundle
-   *   The bundle this field will be added to.
-   * @param array $field_settings
-   *   A list of field settings that will be added to the defaults.
-   * @param array $widget_settings
-   *   A list of widget settings that will be added to the widget defaults.
-   * @param array $display_settings
-   *   A list of display settings that will be added to the display defaults.
-   */
-  protected function attachIngredientField($name, $entity_type, $bundle, $field_settings = array(), $widget_settings = array(), $display_settings = array()) {
-    $field = array(
-      'field_name' => $name,
-      'label' => $name,
-      'entity_type' => $entity_type,
-      'bundle' => $bundle,
-      'required' => !empty($field_settings['required']),
-      'settings' => $field_settings,
-    );
-    entity_create('field_config', $field)->save();
-
-    $form_display = \Drupal::entityManager()->getStorage('entity_form_display')->load($entity_type . '.' . $bundle . '.default');
-    $form_display->setComponent($name, array(
-        'type' => 'ingredient_autocomplete',
-        'settings' => $widget_settings,
-      ))
-      ->save();
-    // Assign display settings.
-    $view_display = \Drupal::entityManager()->getStorage('entity_view_display')->load($entity_type . '.' . $bundle . '.default');
-    $view_display->setComponent($name, array(
-        'label' => 'hidden',
-        'type' => 'ingredient_default',
-        'settings' => $display_settings,
-      ))
-      ->save();
-  }
-
-  /**
-   * Updates an existing ingredient field with new settings.
-   */
-  function updateIngredientField($name, $entity_type, $bundle, $field_settings = array(), $widget_settings = array(), $display_settings = array()) {
-    $field = FieldConfig::loadByName($entity_type, $bundle, $name);
-    $field->setSettings(array_merge($field->getSettings(), $field_settings));
-    $field->save();
-
-    $form_display = \Drupal::entityManager()->getStorage('entity_form_display')->load($entity_type . '.' . $bundle . '.default');
-    $form_display->setComponent($name, ['settings' => $widget_settings])
-      ->save();
-
-    $view_display = \Drupal::entityManager()->getStorage('entity_view_display')->load($entity_type . '.' . $bundle . '.default');
-    $view_display->setComponent($name, ['settings' => $display_settings])
-      ->save();
   }
 
 }

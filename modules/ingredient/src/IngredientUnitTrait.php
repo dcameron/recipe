@@ -64,6 +64,14 @@ trait IngredientUnitTrait {
   /**
    * Returns options for a unit select form element.
    *
+   * @todo The blank option should be created as the #empty_option in the
+   *   individual select elements.  Unfortunately, the default_unit element in
+   *   the field settings form uses a #process function to set its options which
+   *   seems to overwrite the #empty_option.  Even setting the #empty_option
+   *   during the #process step doesn't seem to work.  This seems like a
+   *   possible core bug and will probably have to be fixed there before we can
+   *   complete this task.
+   *
    * @param array $units
    *   An array of units.
    *
