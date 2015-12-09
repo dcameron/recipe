@@ -9,6 +9,7 @@ namespace Drupal\ingredient\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\language\Entity\ContentLanguageSettings;
 
 /**
  * Configure ingredient settings for this site.
@@ -43,6 +44,21 @@ class IngredientSettingsForm extends ConfigFormBase {
       '#description' => t('If enabled, the names of <em>new</em> ingredients will be converted to lowercase when they are entered. The names of registered trademarks, any ingredient name containing the &reg; symbol, will be excluded from normalization.'),
       '#required' => TRUE,
     ];
+    if (\Drupal::moduleHandler()->moduleExists('language')) {
+      $form['default_ingredient_language'] = array(
+        '#type' => 'details',
+        '#title' => $this->t('Ingredients language'),
+        '#open' => TRUE,
+      );
+      $form['default_ingredient_language']['default_language'] = array(
+        '#type' => 'language_configuration',
+        '#entity_information' => array(
+          'entity_type' => 'ingredient',
+          'bundle' => 'ingredient',
+        ),
+        '#default_value' => ContentLanguageSettings::loadByEntityTypeBundle('ingredient', 'ingredient'),
+      );
+    }
 
     return parent::buildForm($form, $form_state);
   }

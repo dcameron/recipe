@@ -16,9 +16,6 @@ use Drupal\ingredient\IngredientInterface;
 /**
  * Defines the Ingredient entity.
  *
- * @todo Convert to a multilingual schema per the instructions at
- *   https://www.drupal.org/node/1722906.
- *
  * @ContentEntityType(
  *   id = "ingredient",
  *   label = @Translation("Ingredient"),
@@ -27,15 +24,18 @@ use Drupal\ingredient\IngredientInterface;
  *     "list_builder" = "Drupal\ingredient\Entity\Controller\IngredientListBuilder",
  *     "form" = {
  *       "add" = "Drupal\ingredient\Form\IngredientForm",
- *       "edit" = "Drupal\ingredient\Form\IngredientForm",
+ *       "default" = "Drupal\ingredient\Form\IngredientForm",
  *       "delete" = "Drupal\ingredient\Form\IngredientDeleteForm",
+ *       "edit" = "Drupal\ingredient\Form\IngredientForm",
  *     },
  *     "access" = "Drupal\ingredient\IngredientAccessControlHandler",
  *   },
  *   list_cache_contexts = { "user" },
  *   base_table = "ingredient",
+ *   data_table = "ingredient_field_data",
  *   admin_permission = "administer ingredient",
  *   fieldable = TRUE,
+ *   translatable = TRUE,
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "name",
@@ -87,6 +87,7 @@ class Ingredient extends ContentEntityBase implements IngredientInterface {
     $fields['name'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Name'))
       ->setRequired(TRUE)
+      ->setTranslatable(TRUE)
       ->setSetting('max_length', 255)
       ->setDisplayOptions('view', [
         'label' => 'hidden',
@@ -100,16 +101,26 @@ class Ingredient extends ContentEntityBase implements IngredientInterface {
       ->setDisplayConfigurable('form', TRUE);
 
     $fields['langcode'] = BaseFieldDefinition::create('language')
-      ->setLabel(t('Language code'))
-      ->setDescription(t('The ingredient language code.'));
+      ->setLabel(t('Language'))
+      ->setDescription(t('The ingredient language code.'))
+      ->setTranslatable(TRUE)
+      ->setDisplayOptions('view', [
+        'type' => 'hidden',
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'language_select',
+        'weight' => 2,
+      ]);
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))
-      ->setDescription(t('The time that the ingredient was created.'));
+      ->setDescription(t('The time that the ingredient was created.'))
+      ->setTranslatable(TRUE);
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
-      ->setDescription(t('The time that the ingredient was last edited.'));
+      ->setDescription(t('The time that the ingredient was last edited.'))
+      ->setTranslatable(TRUE);
 
     return $fields;
   }
