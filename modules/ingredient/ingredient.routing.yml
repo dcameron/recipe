@@ -13,6 +13,8 @@ entity.ingredient.collection:
     _title: 'Ingredient List'
   requirements:
     _permission: 'view ingredient'
+  options:
+    _admin_route: TRUE
 
 ingredient.ingredient_add:
   path: '/ingredient/add'
@@ -21,6 +23,8 @@ ingredient.ingredient_add:
     _title: 'Add Ingredient'
   requirements:
     _entity_create_access: 'ingredient'
+  options:
+    _admin_route: TRUE
 
 entity.ingredient.edit_form:
   path: '/ingredient/{ingredient}/edit'
@@ -29,6 +33,8 @@ entity.ingredient.edit_form:
     _title: 'Edit Ingredient'
   requirements:
     _entity_access: 'ingredient.edit'
+  options:
+    _admin_route: TRUE
 
 entity.ingredient.delete_form:
   path: '/ingredient/{ingredient}/delete'
@@ -37,6 +43,8 @@ entity.ingredient.delete_form:
     _title: 'Delete Ingredient'
   requirements:
     _entity_access: 'ingredient.delete'
+  options:
+    _admin_route: TRUE
 
 ingredient.ingredient_settings:
   path: 'admin/structure/ingredient_settings'
