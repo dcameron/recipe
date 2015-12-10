@@ -7,24 +7,60 @@
 
 namespace Drupal\ingredient\Tests;
 
-use Drupal\ingredient\Tests\IngredientFieldTestBase;
+use Drupal\ingredient\Tests\IngredientTestTrait;
+use Drupal\simpletest\WebTestBase;
 
 /**
  * Tests the functionality of the ingredient field.
  *
  * @group recipe
  */
-class IngredientFieldTest extends IngredientFieldTestBase {
+class IngredientFieldTest extends WebTestBase {
+
+  use IngredientTestTrait;
+
+  /**
+   * Modules to enable.
+   *
+   * @var array
+   */
+  public static $modules = ['field_ui', 'ingredient', 'node'];
+
+  /**
+   * A test user with administrative privileges.
+   *
+   * @var \Drupal\user\UserInterface
+   */
+  protected $admin_user;
+
+  public function setUp() {
+    parent::setUp();
+
+    // Create a new content type for testing.
+    $this->ingredientCreateContentType();
+
+    // Create and log in the admin user.
+    $permissions = [
+      'create test_bundle content',
+      'access content',
+      'administer node fields',
+      'administer node display',
+      'add ingredient',
+      'view ingredient',
+      'administer site configuration',
+    ];
+    $this->admin_user = $this->drupalCreateUser($permissions);
+    $this->drupalLogin($this->admin_user);
+  }
 
   /**
    * Tests adding data with the ingredient field.
    */
   public function testIngredientField() {
-    $field_name = strtolower($this->randomMachineName());
     $display_settings = [
       'fraction_format' => '{%d }%d/%d',
     ];
-    $this->createIngredientField($field_name, 'node', 'test_bundle', [], [], [], $display_settings);
+    $this->createIngredientField([], [], [], $display_settings);
 
     $test_ingredients = [];
 
@@ -83,10 +119,10 @@ class IngredientFieldTest extends IngredientFieldTestBase {
       $title = $this->randomMachineName(16);
       $edit = [
         'title[0][value]' => $title,
-        $field_name . '[0][quantity]' => $ingredient['quantity'],
-        $field_name . '[0][unit_key]' => $ingredient['unit_key'],
-        $field_name . '[0][target_id]' => $ingredient['name'],
-        $field_name . '[0][note]' => $ingredient['note'],
+        'field_ingredient[0][quantity]' => $ingredient['quantity'],
+        'field_ingredient[0][unit_key]' => $ingredient['unit_key'],
+        'field_ingredient[0][target_id]' => $ingredient['name'],
+        'field_ingredient[0][note]' => $ingredient['note'],
       ];
       $this->drupalPostForm('node/add/test_bundle', $edit, t('Save'));
 
@@ -98,14 +134,13 @@ class IngredientFieldTest extends IngredientFieldTestBase {
       if ($ingredient['quantity'] === 0) {
         // Ingredients with quantities === 0 should not display the quantity or
         // units.
-        $this->assertNoText(t('@quantity @unit', array('@quantity' => $ingredient['quantity'], '@unit' => $this->unit_list[$ingredient['unit_key']]['abbreviation'])), 'Did not find the ingredient quantity === 0.');
+        $this->assertNoText(t('0 T'), 'Did not find the ingredient quantity === 0.');
       }
       elseif ($ingredient['unit_key'] == 'unit') {
         $this->assertRaw(format_string('<span class="quantity-unit">@quantity</span>', array('@quantity' => $ingredient['quantity'])), 'Found the ingredient quantity with no unit.');
       }
       else {
-        $unit_abbreviation = $this->unit_list[$ingredient['unit_key']]['abbreviation'];
-        $this->assertText(t('@quantity @unit', array('@quantity' => $ingredient['quantity'], '@unit' => $unit_abbreviation)), 'Found the ingredient quantity and unit abbreviation.');
+        $this->assertText(t('@quantity T', ['@quantity' => $ingredient['quantity']]), 'Found the ingredient quantity and unit abbreviation.');
       }
 
       // Check for the ingredient name and the presence or absence of the note.
@@ -125,9 +160,7 @@ class IngredientFieldTest extends IngredientFieldTestBase {
    * todo: Add assertions for singular/plural unit full names.
    */
   public function testIngredientFormatterSettings() {
-    // Create an ingredient field on the test_bundle node type.
-    $field_name = strtolower($this->randomMachineName());
-    $this->createIngredientField($field_name, 'node', 'test_bundle');
+    $this->createIngredientField();
 
     // Verify that the ingredient entity link display is turned off by default.
     $this->drupalGet('admin/structure/types/manage/test_bundle/display');
@@ -135,10 +168,10 @@ class IngredientFieldTest extends IngredientFieldTestBase {
 
     $edit = array(
       'title[0][value]' => $this->randomMachineName(16),
-      $field_name . '[0][quantity]' => 4,
-      $field_name . '[0][unit_key]' => 'us gallon',
-      $field_name . '[0][target_id]' => 'test ingredient',
-      $field_name . '[0][note]' => '',
+      'field_ingredient[0][quantity]' => 4,
+      'field_ingredient[0][unit_key]' => 'us gallon',
+      'field_ingredient[0][target_id]' => 'test ingredient',
+      'field_ingredient[0][note]' => '',
     );
 
     $this->drupalGet('node/add/test_bundle');
@@ -150,7 +183,7 @@ class IngredientFieldTest extends IngredientFieldTestBase {
     $this->assertNoLink('test ingredient', 'Ingredient entity link is not displayed.');
 
     // Turn ingredient entity link display on.
-    $this->updateIngredientField($field_name, 'node', 'test_bundle', [], [], ['link' => TRUE]);
+    $this->updateIngredientField([], [], ['link' => TRUE]);
 
     // Verify that the ingredient entity link display is turned on.
     $this->drupalGet('admin/structure/types/manage/test_bundle/display');
