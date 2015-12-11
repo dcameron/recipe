@@ -76,12 +76,12 @@ class Ingredient extends ContentEntityBase implements IngredientInterface {
 
     $fields['id'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('ID'))
-      ->setDescription(t('The ID of the Contact entity.'))
+      ->setDescription(t('The ID of the Ingredient entity.'))
       ->setReadOnly(TRUE);
 
     $fields['uuid'] = BaseFieldDefinition::create('uuid')
       ->setLabel(t('UUID'))
-      ->setDescription(t('The UUID of the Contact entity.'))
+      ->setDescription(t('The UUID of the Ingredient entity.'))
       ->setReadOnly(TRUE);
 
     $fields['name'] = BaseFieldDefinition::create('string')
