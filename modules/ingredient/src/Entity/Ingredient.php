@@ -29,6 +29,7 @@ use Drupal\ingredient\IngredientInterface;
  *       "edit" = "Drupal\ingredient\Form\IngredientForm",
  *     },
  *     "access" = "Drupal\ingredient\IngredientAccessControlHandler",
+ *     "views_data" = "Drupal\ingredient\IngredientViewsData",
  *   },
  *   list_cache_contexts = { "user" },
  *   base_table = "ingredient",
