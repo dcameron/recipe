@@ -1,7 +1,7 @@
 entity.ingredient.canonical:
   path: '/ingredient/{ingredient}'
   defaults:
-    _entity_view: 'ingredient'
+    _entity_view: 'ingredient.full'
     _title: 'Ingredient Content'
   requirements:
     _entity_access: 'ingredient.view'

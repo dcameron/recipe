@@ -164,7 +164,7 @@ class IngredientTranslationTest extends WebTestBase {
   }
 
   /**
-   * Creates a test subject term, with translation.
+   * Creates a test subject ingredient, with translation.
    */
   protected function setUpIngredient() {
     $this->ingredient = Ingredient::create(['name' => $this->baseIngredientName]);
