@@ -9,12 +9,9 @@ ingredient.settings:
       label: 'Normalize ingredient names to lowercase'
 
 ingredient.units:
-  type: mapping
+  type: config_object
   label: 'Ingredient module units'
   mapping:
-    langcode:
-      type: string
-      label: 'Language code'
     unit_sets:
       type: sequence
       label: 'A list of sets of units of measurement'
