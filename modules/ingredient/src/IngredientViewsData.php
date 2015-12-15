@@ -21,6 +21,7 @@ class IngredientViewsData extends EntityViewsData {
     $data = parent::getViewsData();
 
     $data['ingredient_field_data']['table']['base']['access query tag'] = 'ingredient_access';
+    $data['ingredient_field_data']['table']['wizard_id'] = 'ingredient';
 
     $data['ingredient_field_data']['id']['argument'] = [
       'id' => 'ingredient_id',
