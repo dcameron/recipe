@@ -1,3 +1,8 @@
+ingredient.admin:
+  base_route: system.admin_content
+  route_name: ingredient.admin
+  title: Ingredients
+
 ingredient.settings_tab:
   route_name: ingredient.ingredient_settings
   title: Settings

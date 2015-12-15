@@ -19,7 +19,7 @@ class IngredientForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
-    $form_state->setRedirect('entity.ingredient.collection');
+    $form_state->setRedirect('ingredient.admin');
     $entity = $this->getEntity();
     $entity->save();
   }

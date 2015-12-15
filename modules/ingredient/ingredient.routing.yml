@@ -6,15 +6,13 @@ entity.ingredient.canonical:
   requirements:
     _entity_access: 'ingredient.view'
 
-entity.ingredient.collection:
-  path: '/ingredient/list'
+ingredient.admin:
+  path: '/admin/content/ingredient'
   defaults:
     _entity_list: 'ingredient'
-    _title: 'Ingredient List'
+    _title: 'Ingredients'
   requirements:
-    _permission: 'view ingredient'
-  options:
-    _admin_route: TRUE
+    _permission: 'administer ingredient'
 
 ingredient.ingredient_add:
   path: '/ingredient/add'

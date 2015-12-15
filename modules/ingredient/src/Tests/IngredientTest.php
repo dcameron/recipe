@@ -60,7 +60,7 @@ class IngredientTest extends WebTestBase {
     $this->drupalLogin($web_user);
 
     // Web_user user has the right to view listing.
-    $this->drupalGet('ingredient/list');
+    $this->drupalGet('admin/content/ingredient');
 
     // WebUser can add entity content.
     $this->assertLink(t('Add Ingredient'));
@@ -166,12 +166,12 @@ class IngredientTest extends WebTestBase {
       ),
       array(
         200,
-        '/ingredient/list',
-        'view ingredient',
+        '/admin/content/ingredient',
+        'administer ingredient',
       ),
       array(
         403,
-        '/ingredient/list',
+        '/admin/content/ingredient',
         '',
       ),
       array(

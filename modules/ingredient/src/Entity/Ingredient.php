@@ -21,7 +21,7 @@ use Drupal\ingredient\IngredientInterface;
  *   label = @Translation("Ingredient"),
  *   handlers = {
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
- *     "list_builder" = "Drupal\ingredient\Entity\Controller\IngredientListBuilder",
+ *     "list_builder" = "Drupal\ingredient\IngredientListBuilder",
  *     "form" = {
  *       "add" = "Drupal\ingredient\Form\IngredientForm",
  *       "default" = "Drupal\ingredient\Form\IngredientForm",
@@ -47,7 +47,6 @@ use Drupal\ingredient\IngredientInterface;
  *     "canonical" = "/ingredient/{ingredient}",
  *     "edit-form" = "/ingredient/{ingredient}/edit",
  *     "delete-form" = "/ingredient/{ingredient}/delete",
- *     "collection" = "/ingredient/list"
  *   },
  *   field_ui_base_route = "ingredient.ingredient_settings",
  * )
