@@ -22,6 +22,13 @@ class IngredientViewsData extends EntityViewsData {
 
     $data['ingredient_field_data']['table']['base']['access query tag'] = 'ingredient_access';
 
+    $data['ingredient_field_data']['id']['argument'] = [
+      'id' => 'ingredient_id',
+      'name field' => 'name',
+      'numeric' => TRUE,
+      'validate type' => 'id',
+    ];
+
     return $data;
   }
 
