@@ -7,6 +7,7 @@
 
 namespace Drupal\ingredient\Tests;
 
+use Drupal\Core\URL;
 use Drupal\ingredient\Entity\Ingredient;
 use Drupal\simpletest\WebTestBase;
 
@@ -32,6 +33,8 @@ class IngredientTest extends WebTestBase {
     parent::setUp();
     // Add the system menu blocks to appropriate regions.
     $this->setupIngredientMenus();
+    // Add the system breadcrumb block.
+    $this->drupalPlaceBlock('system_breadcrumb_block');
   }
 
   /**
@@ -86,6 +89,21 @@ class IngredientTest extends WebTestBase {
     $this->assertLink(t('Add Ingredient'));
     $this->assertLink(t('Edit'));
     $this->assertLink(t('Delete'));
+
+    // Check for the breadcrumb.
+    $expected_breadcrumb = [];
+    $expected_breadcrumb[] = URL::fromRoute('<front>')->toString();
+    $expected_breadcrumb[] = URL::fromRoute('ingredient.landing_page')->toString();
+
+    // Fetch links in the current breadcrumb.
+    $links = $this->xpath('//nav[@class="breadcrumb"]/ol/li/a');
+    $got_breadcrumb = array();
+    foreach ($links as $link) {
+      $got_breadcrumb[] = (string) $link['href'];
+    }
+
+    // Compare expected and got breadcrumbs.
+    $this->assertIdentical($expected_breadcrumb, $got_breadcrumb, 'The breadcrumb is correctly displayed on the page.');
 
     // Delete the entity.
     $this->clickLink('Delete');

@@ -44,6 +44,13 @@ entity.ingredient.delete_form:
   options:
     _admin_route: TRUE
 
+ingredient.landing_page:
+  path: 'ingredient'
+  defaults:
+    _title: 'Ingredients'
+  requirements:
+    _permission: 'view ingredients'
+
 ingredient.ingredient_settings:
   path: 'admin/structure/ingredient_settings'
   defaults:
