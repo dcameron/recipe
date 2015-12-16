@@ -86,6 +86,7 @@ class Ingredient extends ContentEntityBase implements IngredientInterface {
 
     $fields['name'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Name'))
+      ->setDescription(t('The name of the Ingredient entity.'))
       ->setRequired(TRUE)
       ->setTranslatable(TRUE)
       ->setSetting('max_length', 255)
