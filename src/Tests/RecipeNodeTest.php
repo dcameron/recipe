@@ -112,4 +112,47 @@ class RecipeNodeTest extends RecipeTestBase {
     // Compare expected and got breadcrumbs.
     $this->assertIdentical($expected_breadcrumb, $got_breadcrumb, 'The breadcrumb is correctly displayed on the page.');
   }
+
+  /**
+   * Tests the visibility of the Recipe pseudo-fields.
+   */
+  public function testPseudoFields() {
+    // Create a node with values in all of the pseudo-field sub-fields.
+    $edit = array(
+      'title[0][value]' => $this->randomMachineName(16),
+      'recipe_yield_amount[0][value]' => 1,
+      'recipe_yield_unit[0][value]' => $this->randomMachineName(16),
+      'recipe_prep_time[0][value]' => 1,
+      'recipe_cook_time[0][value]' => 1,
+    );
+    $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
+
+    // Verify that the pseudo-fields are shown on the node view.
+    $this->assertText('Yield', 'Found the Yield psuedo-field.');
+    $this->assertText('Total time', 'Found the Total time pseudo-field.');
+
+    // Create a node with no value in the yield_amount and a value in only one
+    // time field.
+    $edit = array(
+      'title[0][value]' => $this->randomMachineName(16),
+      'recipe_yield_unit[0][value]' => $this->randomMachineName(16),
+      'recipe_cook_time[0][value]' => 1,
+    );
+    $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
+
+    // Verify that the pseudo-fields are not shown on the node view.
+    $this->assertNoText('Yield', 'Did not find the Yield psuedo-field.');
+    $this->assertNoText('Total time', 'Did not find the Total time pseudo-field.');
+
+    // Create a node with no values in time fields.
+    $edit = array(
+      'title[0][value]' => $this->randomMachineName(16),
+    );
+    $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
+
+    // Verify that the pseudo-fields are not shown on the node view.
+    $this->assertNoText('Yield', 'Did not find the Yield psuedo-field.');
+    $this->assertNoText('Total time', 'Did not find the Total time pseudo-field.');
+  }
+
 }

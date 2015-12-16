@@ -137,33 +137,41 @@ function recipe_node_view(array &$build, EntityInterface $entity, EntityViewDisp
 
   // Calculate the total time required to make the recipe.
   $total_time = 0;
+  $total_time_count = 0;
   foreach ($entity->getFieldDefinitions() as $field_name => $field_definition) {
     if (!($field_definition instanceof FieldConfigInterface)) {
       continue;
     }
-    if ($field_definition->getType() == 'integer' && $field_definition->getThirdPartySetting('recipe', 'total_time') == 1) {
+    if ($field_definition->getType() == 'integer' && $field_definition->getThirdPartySetting('recipe', 'total_time') == 1 && $entity->{$field_name}->value != NULL) {
       $total_time += $entity->{$field_name}->value;
+      $total_time_count++;
     }
   }
-  $build['recipe_total_time'] = [
-    '#theme' => 'recipe_total_time',
-    '#label' => $config->get('total_time.label'),
-    '#label_display' => $config->get('total_time.label_display'),
-    '#total_time' => ['#theme' => 'recipe_duration', '#duration' => $total_time],
-  ];
+  // Do not display the total time if only one time field or none have been
+  // filled out for the recipe.
+  if ($total_time_count > 1) {
+    $build['recipe_total_time'] = [
+      '#theme' => 'recipe_total_time',
+      '#label' => $config->get('total_time.label'),
+      '#label_display' => $config->get('total_time.label_display'),
+      '#total_time' => ['#theme' => 'recipe_duration', '#duration' => $total_time],
+    ];
+  }
 
   // Display the recipe yield by combining the recipe_yield_amount and
-  // recipe_yield_unit fields.
-  $arguments = [
-    '@yield_amount' => $entity->recipe_yield_amount->value,
-    '@yield_unit' => $entity->recipe_yield_unit->value,
-  ];
-  $build['recipe_yield'] = [
-    '#theme' => 'recipe_yield',
-    '#label' => $config->get('yield.label'),
-    '#label_display' => $config->get('yield.label_display'),
-    '#yield' => t('@yield_amount @yield_unit', $arguments),
-  ];
+  // recipe_yield_unit fields. Do not display if the yield_amount is NULL.
+  if ($entity->recipe_yield_amount->value != NULL) {
+    $arguments = [
+      '@yield_amount' => $entity->recipe_yield_amount->value,
+      '@yield_unit' => $entity->recipe_yield_unit->value,
+    ];
+    $build['recipe_yield'] = [
+      '#theme' => 'recipe_yield',
+      '#label' => $config->get('yield.label'),
+      '#label_display' => $config->get('yield.label_display'),
+      '#yield' => t('@yield_amount @yield_unit', $arguments),
+    ];
+  }
   /*if ( isset($node->in_preview) && $node->in_preview == 1 ) {
     return;
   }
