@@ -3,4 +3,3 @@ ingredient.ingredient_add:
   title: 'Add Ingredient'
   appears_on:
     - ingredient.admin
-    - entity.ingredient.canonical

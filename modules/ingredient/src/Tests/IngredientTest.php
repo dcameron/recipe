@@ -86,7 +86,6 @@ class IngredientTest extends WebTestBase {
 
     // Entity shown.
     $this->assertText(t('test name'));
-    $this->assertLink(t('Add Ingredient'));
     $this->assertLink(t('Edit'));
     $this->assertLink(t('Delete'));
 
