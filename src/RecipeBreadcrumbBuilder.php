@@ -33,7 +33,7 @@ class RecipeBreadcrumbBuilder implements BreadcrumbBuilderInterface {
     $breadcrumb = new Breadcrumb();
 
     $links[] = Link::createFromRoute($this->t('Home'), '<front>');
-    $links[] = Link::createFromRoute($this->t('Recipes'), 'view.recipe_name_index.page_1');
+    $links[] = Link::createFromRoute($this->t('Recipes'), 'recipe.landing_page');
     $breadcrumb->setLinks($links);
     $breadcrumb->addCacheContexts(['route']);
     return $breadcrumb;

@@ -100,7 +100,7 @@ class RecipeNodeTest extends RecipeTestBase {
     // Check for the breadcrumb.
     $expected_breadcrumb = [];
     $expected_breadcrumb[] = URL::fromRoute('<front>')->toString();
-    $expected_breadcrumb[] = URL::fromRoute('view.recipe_name_index.page_1')->toString();
+    $expected_breadcrumb[] = URL::fromRoute('recipe.landing_page')->toString();
 
     // Fetch links in the current breadcrumb.
     $links = $this->xpath('//nav[@class="breadcrumb"]/ol/li/a');

@@ -1,3 +1,9 @@
+recipe.landing_page:
+  path: 'recipe'
+  defaults:
+    _title: 'Recipes'
+  requirements:
+    _permission: 'access content'
 recipe.settings:
   path: 'admin/config/content/recipe'
   defaults:
