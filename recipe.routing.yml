@@ -4,10 +4,3 @@ recipe.landing_page:
     _title: 'Recipes'
   requirements:
     _permission: 'access content'
-recipe.settings:
-  path: 'admin/config/content/recipe'
-  defaults:
-    _form: \Drupal\recipe\Form\RecipeSettingsForm
-    _title: 'Recipe settings'
-  requirements:
-    _permission: 'administer site configuration'

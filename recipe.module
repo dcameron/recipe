@@ -4,21 +4,14 @@
  * Contains functions for Recipe node CRUD and display.
  */
 
+use Drupal\Core\Cache\Cache;
 use \Drupal\Core\Entity\EntityInterface;
 use \Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use \Drupal\Core\Form\FormStateInterface;
 use \Drupal\Core\Routing\RouteMatchInterface;
 use \Drupal\field\FieldConfigInterface;
-
-/**
- * Implements hook_help().
- */
-function recipe_help($route_name, RouteMatchInterface $route_match) {
-  switch ($route_name) {
-    case 'recipe.settings':
-      return t('Configure the management and display of recipes.');
-  }
-}
+use \Drupal\node\Entity\NodeType;
+use \Drupal\node\NodeTypeInterface;
 
 /**
  * Implements hook_theme().
@@ -126,6 +119,94 @@ function recipe_form_field_config_edit_form_alter(&$form, FormStateInterface $fo
 }
 
 /**
+ * Implements hook_form_BASE_FORM_ID_alter() for 'node_type_edit_form'.
+ *
+ * Adds recipe options to the node type form.
+ *
+ * @see NodeTypeForm::form().
+ * @see recipe_form_node_type_form_builder().
+ */
+function recipe_form_node_type_edit_form_alter(&$form, FormStateInterface $form_state) {
+  $node_type = $form_state->getFormObject()->getEntity();
+
+  // Return if this isn't a Recipe node.
+  // @todo Add the ability to define other content types as recipes, allowing
+  //   those types to display the pseudo-fields by enabling them with a
+  //   checkbox.
+  if ($node_type->id() != 'recipe') {
+    return;
+  }
+
+  $form['recipe'] = [
+    '#type' => 'details',
+    '#title' => t('Recipe settings'),
+    '#group' => 'additional_settings',
+  ];
+
+  // Create form elements for configuring the Total time pseudo-field.
+  $form['recipe']['total_time'] = [
+    '#type' => 'fieldset',
+    '#title' => t('Total time pseudo-field'),
+  ];
+  $form['recipe']['total_time']['recipe_total_time_label'] = [
+    '#type' => 'textfield',
+    '#title' => t('Label'),
+    '#default_value' => $node_type->getThirdPartySetting('recipe', 'total_time_label', 'Total time'),
+    '#size' => 20,
+  ];
+  $form['recipe']['total_time']['recipe_total_time_label_display'] = [
+    '#type' => 'select',
+    '#title' => t('Label display'),
+    '#options' => [
+      'above' => t('Above'),
+      'inline' => t('Inline'),
+      'hidden' => '- ' . t('Hidden') . ' -',
+      'visually_hidden' => '- ' . t('Visually Hidden') . ' -',
+    ],
+    '#default_value' => $node_type->getThirdPartySetting('recipe', 'total_time_label_display', 'above'),
+  ];
+
+  // Create form elements for configuring the Yield pseudo-field.
+  $form['recipe']['yield'] = [
+    '#type' => 'fieldset',
+    '#title' => t('Yield pseudo-field'),
+  ];
+  $form['recipe']['yield']['recipe_yield_label'] = [
+    '#type' => 'textfield',
+    '#title' => t('Label'),
+    '#default_value' => $node_type->getThirdPartySetting('recipe', 'yield_label', 'Yield'),
+    '#size' => 20,
+  ];
+  $form['recipe']['yield']['recipe_yield_label_display'] = [
+    '#type' => 'select',
+    '#title' => t('Label display'),
+    '#options' => [
+      'above' => t('Above'),
+      'inline' => t('Inline'),
+      'hidden' => '- ' . t('Hidden') . ' -',
+      'visually_hidden' => '- ' . t('Visually Hidden') . ' -',
+    ],
+    '#default_value' => $node_type->getThirdPartySetting('recipe', 'yield_label_display', 'above'),
+  ];
+  $form['#entity_builders'][] = 'recipe_form_node_type_form_builder';
+}
+
+/**
+ * Entity builder for the node type form with menu options.
+ *
+ * @see recipe_form_node_type_form_alter().
+ */
+function recipe_form_node_type_form_builder($entity_type, NodeTypeInterface $type, &$form, FormStateInterface $form_state) {
+  $type->setThirdPartySetting('recipe', 'total_time_label', $form_state->getValue('recipe_total_time_label'));
+  $type->setThirdPartySetting('recipe', 'total_time_label_display', $form_state->getValue('recipe_total_time_label_display'));
+  $type->setThirdPartySetting('recipe', 'yield_label', $form_state->getValue('recipe_yield_label'));
+  $type->setThirdPartySetting('recipe', 'yield_label_display', $form_state->getValue('recipe_yield_label_display'));
+
+  // Invalidate the node cache so the changes will appear in node displays.
+  Cache::invalidateTags(['node_view']);
+}
+
+/**
  * Implements hook_ENTITY_TYPE_view().
  */
 function recipe_node_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
@@ -133,7 +214,7 @@ function recipe_node_view(array &$build, EntityInterface $entity, EntityViewDisp
     return;
   }
 
-  $config = \Drupal::config('recipe.settings');
+  $node_type = NodeType::load('recipe');
 
   // Calculate the total time required to make the recipe.
   $total_time = 0;
@@ -152,8 +233,8 @@ function recipe_node_view(array &$build, EntityInterface $entity, EntityViewDisp
   if ($total_time_count > 1) {
     $build['recipe_total_time'] = [
       '#theme' => 'recipe_total_time',
-      '#label' => $config->get('total_time.label'),
-      '#label_display' => $config->get('total_time.label_display'),
+      '#label' => $node_type->getThirdPartySetting('recipe', 'total_time_label'),
+      '#label_display' => $node_type->getThirdPartySetting('recipe', 'total_time_label_display'),
       '#total_time' => ['#theme' => 'recipe_duration', '#duration' => $total_time],
     ];
   }
@@ -167,8 +248,8 @@ function recipe_node_view(array &$build, EntityInterface $entity, EntityViewDisp
     ];
     $build['recipe_yield'] = [
       '#theme' => 'recipe_yield',
-      '#label' => $config->get('yield.label'),
-      '#label_display' => $config->get('yield.label_display'),
+      '#label' => $node_type->getThirdPartySetting('recipe', 'yield_label'),
+      '#label_display' => $node_type->getThirdPartySetting('recipe', 'total_time_label_display'),
       '#yield' => t('@yield_amount @yield_unit', $arguments),
     ];
   }

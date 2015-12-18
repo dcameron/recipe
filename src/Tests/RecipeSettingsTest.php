@@ -34,7 +34,7 @@ class RecipeSettingsTest extends WebTestBase {
     parent::setUp();
 
     // Create and log in the admin user with Recipe content permissions.
-    $this->admin_user = $this->drupalCreateUser(array('create recipe content', 'edit any recipe content', 'administer site configuration'));
+    $this->admin_user = $this->drupalCreateUser(array('create recipe content', 'edit any recipe content', 'administer content types'));
     $this->drupalLogin($this->admin_user);
   }
 
@@ -68,13 +68,13 @@ class RecipeSettingsTest extends WebTestBase {
     $total_time_label = $this->randomMachineName(20);
     $yield_label = $this->randomMachineName(20);
     $edit = [
-      'total_time[label]' => $total_time_label,
-      'yield[label]' => $yield_label,
+      'recipe_total_time_label' => $total_time_label,
+      'recipe_yield_label' => $yield_label,
     ];
 
     // Post the values to the settings form.
-    $this->drupalPostForm('admin/config/content/recipe', $edit, t('Save configuration'));
-    $this->assertText(t('The configuration options have been saved.'));
+    $this->drupalPostForm('admin/structure/types/manage/recipe', $edit, t('Save content type'));
+    $this->assertText(t('The content type Recipe has been updated.'));
 
     // Check the node display for the new labels.
     $this->drupalGet('node/1');
@@ -83,13 +83,13 @@ class RecipeSettingsTest extends WebTestBase {
 
     // Alter the pseudo-field label displays.
     $edit = [
-      'total_time[label_display]' => 'hidden',
-      'yield[label_display]' => 'hidden',
+      'recipe_total_time_label_display' => 'hidden',
+      'recipe_yield_label_display' => 'hidden',
     ];
 
     // Post the values to the settings form.
-    $this->drupalPostForm('admin/config/content/recipe', $edit, t('Save configuration'));
-    $this->assertText(t('The configuration options have been saved.'));
+    $this->drupalPostForm('admin/structure/types/manage/recipe', $edit, t('Save content type'));
+    $this->assertText(t('The content type Recipe has been updated.'));
 
     // Check the node display for the new labels.
     $this->drupalGet('node/1');

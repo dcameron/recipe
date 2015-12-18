@@ -3,7 +3,6 @@ type: module
 description: 'Collect and display recipes.'
 package: Recipe
 core: 8.x
-configure: recipe.settings
 dependencies:
   - ingredient
   - node
