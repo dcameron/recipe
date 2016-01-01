@@ -29,6 +29,8 @@ dependent on that field.  The field can also be used to define your own custom
 recipe content types.  The other sub-modules provide the ability to import
 recipes and display or export them in other formats.
 
+This product is RecipeML compatible.
+
 REQUIREMENTS
 ------------
 

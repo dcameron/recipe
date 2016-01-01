@@ -9,6 +9,7 @@ use \Drupal\Core\Entity\EntityInterface;
 use \Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use \Drupal\Core\Form\FormStateInterface;
 use \Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Template\Attribute;
 use \Drupal\field\FieldConfigInterface;
 use \Drupal\node\Entity\NodeType;
 use \Drupal\node\NodeTypeInterface;
@@ -18,6 +19,9 @@ use \Drupal\node\NodeTypeInterface;
  */
 function recipe_theme($existing, $type, $theme, $path) {
   return array(
+    'ingredient_recipeml_formatter' => array(
+      'variables' => array('name' => NULL, 'quantity' => 0, 'unit_name' => '', 'unit_abbreviation' => '', 'unit_display' => 0, 'note' => ''),
+    ),
     'recipe_duration' => array(
       'variables' => array('duration' => 0),
     ),
@@ -449,4 +453,29 @@ function recipe_duration_iso8601($duration = 0) {
     $output .= $minutes . 'M';
   }
   return empty($output) ? 'PT0M' : 'PT' . $output;
+}
+
+/**
+ * Prepares variables for the RecipeML style template.
+ *
+ * Default template: recipe-view-recipeml.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - view: A ViewExecutable object.
+ *   - rows: The raw row data.
+ */
+function template_preprocess_recipe_view_recipeml(&$variables) {
+  $variables['recipes'] = $variables['rows'];
+
+  // During live preview we don't want to output the header since the contents
+  // of the RecipeML are being displayed inside a normal HTML page.
+  if (empty($variables['view']->live_preview)) {
+    $variables['view']->getResponse()->headers->set('Content-Type', 'text/xml; charset=utf-8');
+  }
+
+  // Add the language xml:lang attribute to each recipe.
+  foreach ($variables['recipes'] as $key => $recipe) {
+    $variables['recipes'][$key]['attributes'] = new Attribute(['xml:lang' => $recipe['langcode']]);
+  }
 }

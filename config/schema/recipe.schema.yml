@@ -24,3 +24,14 @@ field.field.*.*.*.third_party.recipe:
     total_time:
       type: boolean
       label: 'Whether to add this integer field to the Recipe total time.'
+
+field.formatter.settings.ingredient_recipeml:
+  type: mapping
+  label: 'Ingredient field RecipeML formatter settings'
+  mapping:
+    fraction_format:
+      type: string
+      label: 'Fractions display string'
+    unit_display:
+      type: integer
+      label: 'Ingredient unit display'
