@@ -185,13 +185,13 @@ function recipe_plaintext_export($nid = NULL, $yield = NULL) {
   $output .= recipe_plaintext_format_ingredients($node) . "\n";
   $output .= t('Instructions:') . "\n";
   $instructions_items = field_get_items('node', $node, 'recipe_instructions');
-  $output .= wordwrap(strip_html_and_encode_entities($instructions_items[0]['value']), 75, "\n") . "\n\n";
+  $output .= wordwrap(_recipe_prepare_plain_text($instructions_items[0]['value']), 75, "\n") . "\n\n";
   $output .= t('Description:') . "\n";
   $description_items = field_get_items('node', $node, 'recipe_description');
-  $output .= strip_html_and_encode_entities($description_items[0]['value']) . "\n\n";
+  $output .= _recipe_prepare_plain_text($description_items[0]['value']) . "\n\n";
   $output .= t('Notes:') . "\n";
   $notes_items = field_get_items('node', $node, 'recipe_notes');
-  $output .= strip_html_and_encode_entities($notes_items[0]['value']) . "\n";
+  $output .= _recipe_prepare_plain_text($notes_items[0]['value']) . "\n";
 
   drupal_add_http_header('Content-type', 'text/plain; charset=utf-8');
   return $output;

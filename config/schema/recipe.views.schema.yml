@@ -11,6 +11,20 @@ views.display.recipe:
         type: string
         label: 'Display'
 
+views.style.recipe_plain_text:
+  type: views_style
+  label: RecipeML
+  mapping:
+    hide_empty:
+      type: boolean
+      label: 'Hide empty'
+    wordwrap_width:
+      type: integer
+      label: 'Wordwrap width'
+    row_separator:
+      type: string
+      label: 'Row separator'
+
 views.style.recipeml:
   type: views_style
   label: RecipeML

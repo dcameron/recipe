@@ -370,12 +370,14 @@ function recipe_import_multi_myaccess($string, $account = NULL, $reset = FALSE) 
 }
 
 /**
- * Sanitizes a string and encodes the &deg; symbol.
+ * Prepares content for display in plain text recipe formats.
+ *
+ * Removes HTML tags and encodes the &deg; symbol.
  */
-function strip_html_and_encode_entities($string) {
-  $string = filter_xss($string, array());
+function _recipe_prepare_plain_text($string) {
+  $string = strip_tags($string);
   $string = str_replace("&deg;", "\xB0", $string);
-  return $string;
+  return trim($string);
 }
 
 /**
@@ -453,6 +455,74 @@ function recipe_duration_iso8601($duration = 0) {
     $output .= $minutes . 'M';
   }
   return empty($output) ? 'PT0M' : 'PT' . $output;
+}
+
+/**
+ * Prepares variables for the plain text style template.
+ *
+ * Default template: recipe-view-plain-text.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - view: A ViewExecutable object.
+ *   - options: An array of options. Each option contains:
+ *     - hide_empty: Whether the field is to be hidden if empty.
+ *   - rows: The raw row data.
+ */
+function template_preprocess_recipe_view_plain_text(&$variables) {
+  $view = $variables['view'];
+  $variables['recipes'] = [];
+
+  // During live preview we don't want to output the header since the contents
+  // of the text are being displayed inside a normal HTML page.
+  if (empty($variables['view']->live_preview)) {
+    $variables['view']->getResponse()->headers->set('Content-Type', 'text/plain; charset=utf-8');
+  }
+
+  // Strip HTML from the fields.
+  foreach ($variables['rows'] as $row) {
+    $recipe = [];
+
+    // Process the row fields.
+    foreach ($view->field as $id => $field) {
+      // render this even if set to exclude so it can be used elsewhere.
+      $field_output = $view->style_plugin->getField($row->index, $id);
+      $empty = $field->isValueEmpty($field_output, $field->options['empty_zero']);
+      if (empty($field->options['exclude']) && (!$empty || (empty($field->options['hide_empty']) && empty($variables['options']['hide_empty'])))) {
+        $object = new stdClass();
+        $object->handler = $view->field[$id];
+        // Set up default value of the flag that indicates whether to display a
+        // colon after the label.
+        $object->has_label_colon = FALSE;
+
+        $object->content = wordwrap(_recipe_prepare_plain_text($field_output), $variables['options']['wordwrap_width']);
+        if (isset($view->field[$id]->field_alias) && isset($row->{$view->field[$id]->field_alias})) {
+          $object->raw = $row->{$view->field[$id]->field_alias};
+        }
+        else {
+          $object->raw = NULL; // make sure it exists to reduce NOTICE
+        }
+
+        // Set up field label
+        $object->label = $view->field[$id]->label();
+
+        // Set up field label wrapper and its attributes.
+        if ($object->label) {
+          // Add a colon in a label suffix.
+          if ($object->handler->options['element_label_colon']) {
+            $object->label_suffix = ': ';
+            $object->has_label_colon = TRUE;
+          }
+        }
+
+        $recipe['fields'][$id] = $object;
+      }
+    }
+
+    $variables['recipes'][] = $recipe;
+  }
+
+  $variables['row_separator'] = strip_tags($variables['options']['row_separator']);
 }
 
 /**

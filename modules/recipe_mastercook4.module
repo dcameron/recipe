@@ -90,7 +90,7 @@ function merge_template($node) {
   $source_items = field_get_items('node', $node, 'recipe_source');
   $recipe_source = '';
   if (!empty($source_items[0]['value'])) {
-    $recipe_source = strip_html_and_encode_entities($source_items[0]['value']);
+    $recipe_source = _recipe_prepare_plain_text($source_items[0]['value']);
   }
   $template = str_replace("<<recipeby>>", $recipe_source, $template);
   // merge serving size
@@ -153,20 +153,20 @@ function merge_template($node) {
   $instructions_items = field_get_items('node', $node, 'recipe_instructions');
   $recipe_instructions = '';
   if (!empty($instructions_items[0]['value'])) {
-    $recipe_instructions = strip_html_and_encode_entities($instructions_items[0]['value']);
+    $recipe_instructions = _recipe_prepare_plain_text($instructions_items[0]['value']);
   }
   $template = str_replace("<<instructions>>", $recipe_instructions, $template);
   // merge notes
   $notes_items = field_get_items('node', $node, 'recipe_notes');
   $recipe_notes = '';
   if (!empty($notes_items[0]['value'])) {
-    $recipe_notes = 'NOTES : ' . strip_html_and_encode_entities($notes_items[0]['value']);
+    $recipe_notes = 'NOTES : ' . _recipe_prepare_plain_text($notes_items[0]['value']);
   }
   $template = str_replace("<<notes>>", $recipe_notes, $template);
 
   $description_items = field_get_items('node', $node, 'recipe_description');
   if (!empty($description_items[0]['value'])) {
-    $recipe_description = "DESCRIPTION : " . strip_html_and_encode_entities($description_items[0]['value']) ."\n\n";
+    $recipe_description = "DESCRIPTION : " . _recipe_prepare_plain_text($description_items[0]['value']) ."\n\n";
     $template = str_replace("<<description>>", $recipe_description, $template);
   }
   else {
