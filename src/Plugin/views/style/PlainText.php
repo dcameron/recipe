@@ -12,7 +12,7 @@ use Drupal\Core\Url;
 use Drupal\views\Plugin\views\style\StylePluginBase;
 
 /**
- * Default style plugin to render RecipeML.
+ * Default style plugin to render recipes in plain text.
  *
  * @ingroup views_style_plugins
  *
