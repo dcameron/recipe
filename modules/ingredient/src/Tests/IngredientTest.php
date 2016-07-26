@@ -23,7 +23,7 @@ class IngredientTest extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = array('block', 'ingredient', 'field_ui');
+  public static $modules = array('block', 'ingredient', 'field_ui', 'views');
 
   /**
    * {@inheritdoc}
