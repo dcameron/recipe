@@ -282,66 +282,6 @@ function recipe_import_parse($form, &$form_state) {
 }
 
 /**
- * Returns a best-guess matched unit key for a unit of measure.
- *
- * Used by the various import plugins.
- *
- * @param string $recipe_name_or_abbrev
- *   A unit of measure abbreviation or a unit name.
- *
- * @return
- *   An ingredient unit key as from ingredient_get_units or FALSE if no match.
- */
-function recipe_unit_fuzzymatch($unit_name_or_abbrev) {
-  $units = ingredient_get_units();
-
-  // Empty strings should use the default non-printing 'unit'.
-  if (empty($unit_name_or_abbrev)) {
-    $unit_name_or_abbrev = 'unit';
-  }
-
-  // First pass unit case must match exactly( T=Tbsp, t=tsp ).
-  foreach ($units as $unit_key => $u) {
-    $pats = array();
-    // Add name pattern.
-    $pats[] = '^' . $u['name'] . 's{0,1}$';
-    // Add plural name pattern.
-    $pats[] = '^' . $u['plural'] . 's{0,1}$';
-    // Add abbreviation pattern.
-    $pats[] = '^' . $u['abbreviation'] . 's{0,1}\.{0,1}$';
-
-    foreach ($u['aliases'] as $alias) {
-      $pats[] = '^' . trim($alias) . 's{0,1}\.{0,1}$';
-    }
-    $search_pat = implode('|', $pats);
-    if (preg_match("/$search_pat/", $unit_name_or_abbrev)) {
-      return $unit_key;
-    }
-  }
-
-  // Second pass unit case doesn't matter.
-  foreach ($units as $unit_key => $u) {
-    $pats = array();
-    // Add name pattern.
-    $pats[] = '^' . $u['name'] . 's{0,1}$';
-    // Add plural name pattern.
-    $pats[] = '^' . $u['plural'] . 's{0,1}$';
-    // Add abbreviation pattern.
-    $pats[] = '^' . $u['abbreviation'] . 's{0,1}\.{0,1}$';
-
-    foreach ($u['aliases'] as $alias) {
-      $pats[] = '^' . trim($alias) . 's{0,1}\.{0,1}$';
-    }
-    $search_pat = implode('|', $pats);
-    if (preg_match("/$search_pat/i", $unit_name_or_abbrev)) {
-      return $unit_key;
-    }
-  }
-
-  return FALSE;
-}
-
-/**
  * Returns the ID and name of an existing ingredient.
  *
  * @param string $recipe_ingredient_name

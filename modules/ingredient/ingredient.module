@@ -179,3 +179,64 @@ function ingredient_quantity_from_fraction($ingredient_quantity) {
 
   return $ingredient_quantity;
 }
+
+/**
+ * Returns a best-guess matched unit key for a unit of measure.
+ *
+ * @param string $subject
+ *   The unit of measure for which the function will search.
+ *
+ * @return
+ *   The unit's key from configuration or FALSE if there was no match.
+ */
+function ingredient_unit_fuzzymatch($subject) {
+  $unit_sets = \Drupal::config('ingredient.units')->get('unit_sets');
+  // Merge the unit sets into a single array for simplicity.
+  $units = [];
+  foreach ($unit_sets as $set) {
+    $units = array_merge($units, $set['units']);
+  }
+
+  // Empty strings should use the default non-printing 'unit'.
+  if (empty($subject)) {
+    $subject = 'unit';
+  }
+
+  // First pass unit case must match exactly( T=Tbsp, t=tsp ).
+  foreach ($units as $unit_key => $unit) {
+    $patterns = array();
+    // Add name pattern.
+    $patterns[] = '^' . $unit['name'] . 's{0,1}$';
+    // Add plural name pattern.
+    $patterns[] = '^' . $unit['plural'] . 's{0,1}$';
+    // Add abbreviation pattern.
+    $patterns[] = '^' . $unit['abbreviation'] . 's{0,1}\.{0,1}$';
+    // Add alias patterns.
+    foreach ($unit['aliases'] as $alias) {
+      $patterns[] = '^' . trim($alias) . 's{0,1}\.{0,1}$';
+    }
+    if (preg_match("/" . implode('|', $patterns) . "/", $subject)) {
+      return $unit_key;
+    }
+  }
+
+  // Second pass unit case doesn't matter.
+  foreach ($units as $unit_key => $unit) {
+    $patterns = array();
+    // Add name pattern.
+    $patterns[] = '^' . $unit['name'] . 's{0,1}$';
+    // Add plural name pattern.
+    $patterns[] = '^' . $unit['plural'] . 's{0,1}$';
+    // Add abbreviation pattern.
+    $patterns[] = '^' . $unit['abbreviation'] . 's{0,1}\.{0,1}$';
+    // Add alias patterns.
+    foreach ($unit['aliases'] as $alias) {
+      $patterns[] = '^' . trim($alias) . 's{0,1}\.{0,1}$';
+    }
+    if (preg_match("/" . implode('|', $patterns) . "/i", $subject)) {
+      return $unit_key;
+    }
+  }
+
+  return FALSE;
+}
