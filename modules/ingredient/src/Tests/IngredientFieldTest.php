@@ -169,7 +169,7 @@ class IngredientFieldTest extends WebTestBase {
     $edit = array(
       'title[0][value]' => $this->randomMachineName(16),
       'field_ingredient[0][quantity]' => 4,
-      'field_ingredient[0][unit_key]' => 'us gallon',
+      'field_ingredient[0][unit_key]' => 'tablespoon',
       'field_ingredient[0][target_id]' => 'test ingredient',
       'field_ingredient[0][note]' => '',
     );
@@ -179,11 +179,12 @@ class IngredientFieldTest extends WebTestBase {
     $this->drupalPostForm(NULL, $edit, t('Save'));
 
     // Verify that the ingredient name is not linked to its entity.
+    $this->assertText('4 T', 'Found the unit abbreviation.');
     $this->assertText('test ingredient', 'Found the ingredient name.');
     $this->assertNoLink('test ingredient', 'Ingredient entity link is not displayed.');
 
     // Turn ingredient entity link display on.
-    $this->updateIngredientField([], [], ['link' => TRUE]);
+    $this->updateIngredientField([], [], ['link' => TRUE, 'unit_display' => 1]);
 
     // Verify that the ingredient entity link display is turned on.
     $this->drupalGet('admin/structure/types/manage/test_bundle/display');
@@ -191,6 +192,7 @@ class IngredientFieldTest extends WebTestBase {
 
     // Verify that the ingredient name is linked to its entity.
     $this->drupalGet('node/1');
+    $this->assertText('4 tablespoons', 'Found the unit full name.');
     $this->assertText('test ingredient', 'Found the ingredient name.');
     $this->assertLink('test ingredient', 0, 'Ingredient entity link is displayed.');
   }

@@ -140,7 +140,7 @@ class IngredientFormatter extends EntityReferenceFormatterBase {
         '#quantity' => $formatted_quantity,
         '#unit_name' => $unit_name,
         '#unit_abbreviation' => $unit_abbreviation,
-        '#unit_display' => $this->getSetting('unit_abbreviation'),
+        '#unit_display' => $this->getSetting('unit_display'),
         '#note' => $note,
       );
     }
