@@ -2,8 +2,6 @@
 
 /**
  * @file
- * Contains \Drupal\recipe\Plugin\views\style\RecipeML.
- *
  * Copyright (c) FormatData. All rights reserved.
  *
  * Distribution of RecipeML Processing Software in source and/or binary forms is

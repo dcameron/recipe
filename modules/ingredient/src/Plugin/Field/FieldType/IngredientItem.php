@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\ingredient\Plugin\Field\FieldType\IngredientItem.
- */
-
 namespace Drupal\ingredient\Plugin\Field\FieldType;
 
 use Drupal\Component\Utility\Random;

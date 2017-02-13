@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\ingredient\Tests\IngredientTranslationTest
- */
-
 namespace Drupal\ingredient\Tests;
 
 use Drupal\ingredient\Entity\Ingredient;

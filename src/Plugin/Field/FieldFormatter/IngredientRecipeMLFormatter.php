@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\recipe\Plugin\Field\FieldFormatter\IngredientRecipeMLFormatter.
- */
-
 namespace Drupal\recipe\Plugin\Field\FieldFormatter;
 
 use Drupal\Component\Utility\Xss;

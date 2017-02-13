@@ -1,10 +1,5 @@
 <?php
 
-/*
- * @file
- * Contains \Drupal\ingredient\IngredientBreadcrumbBuilder
- */
-
 namespace Drupal\ingredient;
 
 use Drupal\Core\Breadcrumb\Breadcrumb;

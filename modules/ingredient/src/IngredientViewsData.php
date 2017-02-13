@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\ingredient\IngredientViewsData.
- */
-
 namespace Drupal\ingredient;
 
 use Drupal\views\EntityViewsData;

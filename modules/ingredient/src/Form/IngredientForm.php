@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains Drupal\ingredient\Form\IngredientForm.
- */
 
 namespace Drupal\ingredient\Form;
 

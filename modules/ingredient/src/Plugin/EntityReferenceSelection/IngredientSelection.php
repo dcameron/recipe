@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\ingredient\Plugin\EntityReferenceSelection\NodeSelection.
- */
-
 namespace Drupal\ingredient\Plugin\EntityReferenceSelection;
 
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\ingredient\Form\IngredientDeleteForm.
- */
-
 namespace Drupal\ingredient\Form;
 
 use Drupal\Core\Entity\ContentEntityConfirmFormBase;

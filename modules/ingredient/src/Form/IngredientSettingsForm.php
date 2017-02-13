@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\ingredient\Form\IngredientSettingsForm.
- */
-
 namespace Drupal\ingredient\Form;
 
 use Drupal\Core\Form\ConfigFormBase;

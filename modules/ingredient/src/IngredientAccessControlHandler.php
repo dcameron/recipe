@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\ingredient\IngredientAccessControlHandler
- */
-
 namespace Drupal\ingredient;
 
 use Drupal\Core\Access\AccessResult;

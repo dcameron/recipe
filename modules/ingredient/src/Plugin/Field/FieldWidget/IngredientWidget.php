@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\ingredient\Plugin\field\widget\IngredientWidget.
- */
-
 namespace Drupal\ingredient\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\FieldItemListInterface;

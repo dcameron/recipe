@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\ingredient\Plugin\Field\FieldFormatter\IngredientFormatter.
- */
-
 namespace Drupal\ingredient\Plugin\Field\FieldFormatter;
 
 use Drupal\Component\Utility\Xss;

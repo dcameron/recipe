@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\ingredient\Plugin\views\argument\Id.
- */
-
 namespace Drupal\ingredient\Plugin\views\argument;
 
 use Drupal\ingredient\Entity\Ingredient;

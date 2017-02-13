@@ -1,10 +1,5 @@
 <?php
 
-/*
- * @file
- * Contains \Drupal\recipe\Tests\RecipeTotalTimeConfigTest
- */
-
 namespace Drupal\recipe\Tests;
 
 use Drupal\field\Entity\FieldConfig;

@@ -1,10 +1,5 @@
 <?php
 
-/*
- * @file
- * Contains \Drupal\recipe\Tests\PlainTextStyleTest
- */
-
 namespace Drupal\recipe\Tests;
 
 use Drupal\Component\Render\FormattableMarkup;

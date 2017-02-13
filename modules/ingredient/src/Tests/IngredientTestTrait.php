@@ -1,10 +1,5 @@
 <?php
 
-/*
- * @file
- * Contains \Drupal\ingredient\Tests\IngredientTestTrait
- */
-
 namespace Drupal\ingredient\Tests;
 
 use Drupal\field\Entity\FieldConfig;

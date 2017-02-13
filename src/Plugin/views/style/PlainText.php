@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\recipe\Plugin\views\style\PlainText.
- */
-
 namespace Drupal\recipe\Plugin\views\style;
 
 use Drupal\Core\Form\FormStateInterface;

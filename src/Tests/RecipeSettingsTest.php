@@ -1,10 +1,5 @@
 <?php
 
-/*
- * @file
- * Contains \Drupal\recipe\Tests\RecipeSettingsTest
- */
-
 namespace Drupal\recipe\Tests;
 
 use Drupal\simpletest\WebTestBase;

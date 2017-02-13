@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\ingredient\IngredientUnitTrait.
- */
-
 namespace Drupal\ingredient;
 
 /**

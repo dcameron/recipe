@@ -1,10 +1,5 @@
 <?php
 
-/*
- * @file
- * Contains \Drupal\ingredient\Tests\IngredientFieldTest
- */
-
 namespace Drupal\ingredient\Tests;
 
 use Drupal\simpletest\WebTestBase;

@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\ingredient\Entity\Ingredient.
- */
 
 namespace Drupal\ingredient\Entity;
 

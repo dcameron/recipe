@@ -1,10 +1,5 @@
 <?php
 
-/*
- * @file
- * Contains \Drupal\recipe\Tests\RecipeNodeTest
- */
-
 namespace Drupal\recipe\Tests;
 
 use Drupal\Core\URL;

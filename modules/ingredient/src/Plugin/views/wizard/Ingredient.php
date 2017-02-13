@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\ingredient\Plugin\views\wizard\Ingredient.
- */
-
 namespace Drupal\ingredient\Plugin\views\wizard;
 
 use Drupal\Core\Form\FormStateInterface;

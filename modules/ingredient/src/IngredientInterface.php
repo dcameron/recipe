@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\ingredient\IngredientInterface.
- */
 
 namespace Drupal\ingredient;
 

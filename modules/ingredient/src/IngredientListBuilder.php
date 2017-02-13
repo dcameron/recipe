@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\ingredient\IngredientListBuilder.
- */
-
 namespace Drupal\ingredient;
 
 use Drupal\Core\Datetime\DateFormatterInterface;

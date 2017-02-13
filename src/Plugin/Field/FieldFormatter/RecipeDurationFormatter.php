@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\recipe\Plugin\Field\FieldFormatter\RecipeDurationFormatter.
- */
-
 namespace Drupal\recipe\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FieldItemListInterface;

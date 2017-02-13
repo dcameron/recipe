@@ -1,10 +1,5 @@
 <?php
 
-/*
- * @file
- * Contains \Drupal\recipe\Tests\RecipeMLTest
- */
-
 namespace Drupal\recipe\Tests;
 
 use Drupal\views\Views;

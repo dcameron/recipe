@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\ingredient\Tests\IngredientTest
- */
-
 namespace Drupal\ingredient\Tests;
 
 use Drupal\Core\URL;

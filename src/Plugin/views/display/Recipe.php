@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\recipe\Plugin\views\display\Recipe.
- */
-
 namespace Drupal\recipe\Plugin\views\display;
 
 use Drupal\Core\Cache\CacheableMetadata;
