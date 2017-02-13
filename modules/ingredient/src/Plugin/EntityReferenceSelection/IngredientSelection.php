@@ -8,7 +8,6 @@
 namespace Drupal\ingredient\Plugin\EntityReferenceSelection;
 
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
-use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Provides specific access control for the ingredient entity type.

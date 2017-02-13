@@ -10,7 +10,6 @@ namespace Drupal\recipe\Plugin\Field\FieldFormatter;
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Template\Attribute;
 use Drupal\ingredient\IngredientUnitTrait;
 use Drupal\ingredient\Plugin\Field\FieldFormatter\IngredientFormatter;
 

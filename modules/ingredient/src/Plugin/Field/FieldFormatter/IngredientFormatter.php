@@ -11,7 +11,6 @@ use Drupal\Component\Utility\Xss;
 use Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceFormatterBase;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Template\Attribute;
 use Drupal\ingredient\IngredientUnitTrait;
 
 /**

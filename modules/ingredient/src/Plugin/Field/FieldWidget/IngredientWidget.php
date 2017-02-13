@@ -10,7 +10,6 @@ namespace Drupal\ingredient\Plugin\Field\FieldWidget;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\ingredient\Entity\Ingredient;
 use Drupal\ingredient\IngredientUnitTrait;
 
 /**

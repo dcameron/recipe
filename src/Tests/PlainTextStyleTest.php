@@ -8,7 +8,6 @@
 namespace Drupal\recipe\Tests;
 
 use Drupal\Component\Render\FormattableMarkup;
-use Drupal\recipe\Tests\RecipeTestBase;
 use Drupal\views\Views;
 
 /**

@@ -8,7 +8,6 @@
 namespace Drupal\recipe\Tests;
 
 use Drupal\Core\URL;
-use Drupal\recipe\Tests\RecipeTestBase;
 
 /**
  * Tests the functionality of the Recipe content type and Recipe blocks.

@@ -12,7 +12,6 @@ use Drupal\Core\Breadcrumb\BreadcrumbBuilderInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\ingredient\IngredientInterface;
 
 class IngredientBreadcrumbBuilder implements BreadcrumbBuilderInterface {
 

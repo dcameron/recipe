@@ -8,7 +8,6 @@
 namespace Drupal\ingredient\Tests;
 
 use Drupal\ingredient\Entity\Ingredient;
-use Drupal\ingredient\Tests\IngredientTestTrait;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\Node;
 use Drupal\simpletest\WebTestBase;

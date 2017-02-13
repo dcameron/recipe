@@ -7,7 +7,6 @@
 
 namespace Drupal\ingredient\Tests;
 
-use Drupal\ingredient\Tests\IngredientTestTrait;
 use Drupal\simpletest\WebTestBase;
 
 /**

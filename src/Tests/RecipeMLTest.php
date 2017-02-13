@@ -7,7 +7,6 @@
 
 namespace Drupal\recipe\Tests;
 
-use Drupal\recipe\Tests\RecipeTestBase;
 use Drupal\views\Views;
 
 /**
