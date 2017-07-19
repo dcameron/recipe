@@ -7,6 +7,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -22,11 +23,11 @@ class IngredientListBuilder extends EntityListBuilder {
   protected $dateFormatter;
 
   /**
-   * The redirect destination service.
+   * The language manager service.
    *
-   * @var \Drupal\Core\Routing\RedirectDestinationInterface
+   * @var \Drupal\Core\Language\LanguageManagerInterface
    */
-  protected $redirectDestination;
+  protected $languageManager;
 
   /**
    * Constructs a new NodeListBuilder object.
@@ -37,13 +38,14 @@ class IngredientListBuilder extends EntityListBuilder {
    *   The entity storage class.
    * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
    *   The date formatter service.
-   * @param \Drupal\Core\Routing\RedirectDestinationInterface $redirect_destination
-   *   The redirect destination service.
+   * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
+   *   The language manager service.
    */
-  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, DateFormatterInterface $date_formatter) {
+  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, DateFormatterInterface $date_formatter, LanguageManagerInterface $language_manager) {
     parent::__construct($entity_type, $storage);
 
     $this->dateFormatter = $date_formatter;
+    $this->languageManager = $language_manager;
   }
 
   /**
@@ -53,7 +55,8 @@ class IngredientListBuilder extends EntityListBuilder {
     return new static(
       $entity_type,
       $container->get('entity.manager')->getStorage($entity_type->id()),
-      $container->get('date.formatter')
+      $container->get('date.formatter'),
+      $container->get('language_manager')
     );
   }
 
@@ -66,7 +69,7 @@ class IngredientListBuilder extends EntityListBuilder {
       'data' => $this->t('Updated'),
       'class' => [RESPONSIVE_PRIORITY_LOW],
     ];
-    if (\Drupal::languageManager()->isMultilingual()) {
+    if ($this->languageManager->isMultilingual()) {
       $header['language_name'] = [
         'data' => $this->t('Language'),
         'class' => [RESPONSIVE_PRIORITY_LOW],
@@ -80,11 +83,10 @@ class IngredientListBuilder extends EntityListBuilder {
    */
   public function buildRow(EntityInterface $entity) {
     /* @var $entity \Drupal\ingredient\Entity\Ingredient */
-    $row['name'] = $entity->link();
+    $row['name'] = $entity->toLink();
     $row['changed'] = $this->dateFormatter->format($entity->getChangedTime(), 'short');
-    $language_manager = \Drupal::languageManager();
-    if ($language_manager->isMultilingual()) {
-      $row['language_name'] = $language_manager->getLanguageName($langcode);
+    if ($this->languageManager->isMultilingual()) {
+      $row['language_name'] = $this->languageManager->getLanguageName($entity->language());
     }
     return $row + parent::buildRow($entity);
   }

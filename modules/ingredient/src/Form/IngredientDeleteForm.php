@@ -3,13 +3,46 @@
 namespace Drupal\ingredient\Form;
 
 use Drupal\Core\Entity\ContentEntityConfirmFormBase;
+use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Url;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a form for deleting an ingredient.
  */
 class IngredientDeleteForm extends ContentEntityConfirmFormBase {
+
+  /**
+   * The ingredient logger channel.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelInterface
+   */
+  protected $loggerChannel;
+
+  /**
+   * Constructs a new IngredientDeleteForm object.
+   *
+   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   *   The entity manager.
+   * @param \Drupal\Core\Logger\LoggerChannelInterface $logger_channel
+   *   The logger service.
+   */
+  public function __construct(EntityManagerInterface $entity_manager, LoggerChannelInterface $logger_channel) {
+    parent::__construct($entity_manager);
+    $this->loggerChannel = $logger_channel;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('entity.manager'),
+      $container->get('logger.factory')->get('ingredient')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -43,7 +76,7 @@ class IngredientDeleteForm extends ContentEntityConfirmFormBase {
     $entity = $this->getEntity();
     $entity->delete();
 
-    \Drupal::logger('ingredient')->notice('@type: deleted %title.',
+    $this->loggerChannel->notice('@type: deleted %title.',
       [
         '@type' => $this->entity->bundle(),
         '%title' => $this->entity->label(),

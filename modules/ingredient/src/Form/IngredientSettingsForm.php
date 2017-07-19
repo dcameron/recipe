@@ -2,14 +2,47 @@
 
 namespace Drupal\ingredient\Form;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\language\Entity\ContentLanguageSettings;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Configure ingredient settings for this site.
  */
 class IngredientSettingsForm extends ConfigFormBase {
+
+  /**
+   * The module handler service.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
+   * Constructs a new IngredientSettingsForm object.
+   *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The factory for configuration objects.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler service.
+   */
+  public function __construct(ConfigFactoryInterface $config_factory, ModuleHandlerInterface $module_handler) {
+    parent::__construct($config_factory);
+    $this->moduleHandler = $module_handler;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('config.factory'),
+      $container->get('module_handler')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -39,7 +72,7 @@ class IngredientSettingsForm extends ConfigFormBase {
       '#description' => t('If enabled, the names of <em>new</em> ingredients will be converted to lowercase when they are entered. The names of registered trademarks, any ingredient name containing the &reg; symbol, will be excluded from normalization.'),
       '#required' => TRUE,
     ];
-    if (\Drupal::moduleHandler()->moduleExists('language')) {
+    if ($this->moduleHandler->moduleExists('language')) {
       $form['default_ingredient_language'] = [
         '#type' => 'details',
         '#title' => $this->t('Ingredients language'),

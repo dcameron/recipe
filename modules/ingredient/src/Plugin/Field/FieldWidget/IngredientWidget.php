@@ -81,10 +81,15 @@ class IngredientWidget extends WidgetBase {
 
   /**
    * Validate the ingredient field.
+   *
+   * @param array $element
+   *   The ingredient field's form element.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
    */
   public function validate($element, FormStateInterface $form_state) {
     if (empty($element['unit_key']['#value']) && !empty($element['name']['#value'])) {
-      form_error($element['unit_key'], t('You must choose a valid unit.'));
+      $form_state->setError($element['unit_key'], t('You must choose a valid unit.'));
       return;
     }
   }

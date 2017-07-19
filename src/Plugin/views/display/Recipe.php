@@ -5,9 +5,13 @@ namespace Drupal\recipe\Plugin\views\display;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\CacheableResponse;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\RendererInterface;
+use Drupal\Core\Routing\RouteProviderInterface;
+use Drupal\Core\State\StateInterface;
 use Drupal\views\Plugin\views\display\PathPluginBase;
 use Drupal\views\Plugin\views\display\ResponseDisplayPluginInterface;
 use Drupal\views\ViewExecutable;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -25,6 +29,48 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * )
  */
 class Recipe extends PathPluginBase implements ResponseDisplayPluginInterface {
+
+  /**
+   * The renderer service.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected $renderer;
+
+  /**
+   * Constructs a Recipe Views display plugin object.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Core\Routing\RouteProviderInterface $route_provider
+   *   The route provider.
+   * @param \Drupal\Core\State\StateInterface $state
+   *   The state key value store.
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   *   The renderer service.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, RouteProviderInterface $route_provider, StateInterface $state, RendererInterface $renderer) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $route_provider, $state);
+    $this->renderer = $renderer;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('router.route_provider'),
+      $container->get('state'),
+      $container->get('renderer')
+    );
+  }
 
   /**
    * Whether the display allows the use of AJAX or not.
@@ -58,10 +104,7 @@ class Recipe extends PathPluginBase implements ResponseDisplayPluginInterface {
     $response = new CacheableResponse('', 200);
     $build['#response'] = $response;
 
-    /** @var \Drupal\Core\Render\RendererInterface $renderer */
-    $renderer = \Drupal::service('renderer');
-
-    $output = (string) $renderer->renderRoot($build);
+    $output = (string) \Drupal::service('renderer')->renderRoot($build);
 
     if (empty($output)) {
       throw new NotFoundHttpException();
@@ -92,7 +135,7 @@ class Recipe extends PathPluginBase implements ResponseDisplayPluginInterface {
     if (!empty($this->view->live_preview)) {
       $output = [
         '#prefix' => '<pre>',
-        '#plain_text' => drupal_render_root($output),
+        '#plain_text' => $this->renderer->renderRoot($output),
         '#suffix' => '</pre>',
       ];
     }

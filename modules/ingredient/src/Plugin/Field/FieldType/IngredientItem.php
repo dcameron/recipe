@@ -176,7 +176,7 @@ class IngredientItem extends EntityReferenceItem {
     $random_unit_key = mt_rand(0, count($unit_keys) - 1);
 
     // Generate an ingredient entity.
-    $ingredient = entity_create('ingredient', ['name' => $random->name(10, TRUE)]);
+    $ingredient = \Drupal::entityTypeManager()->getStorage('ingredient')->create(['name' => $random->name(10, TRUE)]);
     $values = [
       'target_id' => $ingredient->id(),
       'quantity' => mt_rand(1, 5),

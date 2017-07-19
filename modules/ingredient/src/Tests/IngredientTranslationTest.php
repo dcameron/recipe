@@ -17,6 +17,27 @@ class IngredientTranslationTest extends WebTestBase {
   use IngredientTestTrait;
 
   /**
+   * The content transation manager service.
+   *
+   * @var \Drupal\content_translation\ContentTranslationManagerInterface
+   */
+  protected $contentTranslationManager;
+
+  /**
+   * The router builder service.
+   *
+   * @var \Drupal\Core\Routing\RouteBuilderInterface
+   */
+  protected $routerBuilder;
+
+  /**
+   * The entity definition update manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityDefinitionUpdateManagerInterface
+   */
+  protected $entityDefinitionUpdateManager;
+
+  /**
    * The langcode of the source language.
    *
    * @var string
@@ -76,6 +97,7 @@ class IngredientTranslationTest extends WebTestBase {
    */
   public function setUp() {
     parent::setUp();
+
     $this->ingredientCreateContentType();
     $this->setUpLanguages();
     $this->enableTranslation();
@@ -132,12 +154,12 @@ class IngredientTranslationTest extends WebTestBase {
   protected function enableTranslation() {
     // Enable translation for the current entity type and ensure the change is
     // picked up.
-    \Drupal::service('content_translation.manager')->setEnabled('node', 'test_bundle', TRUE);
-    \Drupal::service('content_translation.manager')->setEnabled('ingredient', 'ingredient', TRUE);
+    $this->getContentTranslationManager()->setEnabled('node', 'test_bundle', TRUE);
+    $this->getContentTranslationManager()->setEnabled('ingredient', 'ingredient', TRUE);
     drupal_static_reset();
-    \Drupal::entityManager()->clearCachedDefinitions();
-    \Drupal::service('router.builder')->rebuild();
-    \Drupal::service('entity.definition_update_manager')->applyUpdates();
+    $this->getEntityTypeManager()->clearCachedDefinitions();
+    $this->getRouterBuilder()->rebuild();
+    $this->getEntityDefinitionUpdateManager()->applyUpdates();
   }
 
   /**
@@ -170,6 +192,50 @@ class IngredientTranslationTest extends WebTestBase {
 
     $this->ingredient->addTranslation($this->translateToLangcode, ['name' => $this->translatedIngredientName]);
     $this->ingredient->save();
+  }
+
+  /**
+   * Gets the content translation manager service.
+   *
+   * @return \Drupal\content_translation\ContentTranslationManagerInterface
+   *   The content translation manager service.
+   */
+  protected function getContentTranslationManager() {
+    if (!$this->contentTranslationManager) {
+      $this->contentTranslationManager = $this->container->get('content_translation.manager');
+    }
+
+    return $this->contentTranslationManager;
+  }
+
+
+  /**
+   * Gets the router builder service.
+   *
+   * @return \Drupal\Core\Routing\RouteBuilderInterface
+   *   The router builder service.
+   */
+  protected function getRouterBuilder() {
+    if (!$this->routerBuilder) {
+      $this->routerBuilder = $this->container->get('router.builder');
+    }
+
+    return $this->routerBuilder;
+  }
+
+
+  /**
+   * Gets the entity definition update manager service.
+   *
+   * @return \Drupal\Core\Entity\EntityDefinitionUpdateManagerInterface
+   *   The entity definition update manager service.
+   */
+  protected function getEntityDefinitionUpdateManager() {
+    if (!$this->entityDefinitionUpdateManager) {
+      $this->entityDefinitionUpdateManager = $this->container->get('entity.definition_update_manager');
+    }
+
+    return $this->entityDefinitionUpdateManager;
   }
 
 }

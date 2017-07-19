@@ -2,7 +2,8 @@
 
 namespace Drupal\recipe\Tests;
 
-use Drupal\Core\URL;
+use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Core\Url;
 
 /**
  * Tests the functionality of the Recipe content type and Recipe blocks.
@@ -54,7 +55,7 @@ class RecipeNodeTest extends RecipeTestBase {
 
     // Check the page for the recipe content.
     $this->assertRaw($description, 'Found the recipe description.');
-    $this->assertText(format_string('@amount @unit', ['@amount' => $yield_amount, '@unit' => $yield_unit]), 'Found the recipe yield.');
+    $this->assertText(new FormattableMarkup('@amount @unit', ['@amount' => $yield_amount, '@unit' => $yield_unit]), 'Found the recipe yield.');
     $this->assertRaw('<a href="http://www.example.com">http://www.example.com</a>', 'Found the recipe source.');
     $this->assertRaw($notes, 'Found the recipe notes.');
     $this->assertRaw($instructions, 'Found the recipe instructions');
@@ -63,7 +64,7 @@ class RecipeNodeTest extends RecipeTestBase {
     $this->assertText('3 hours, 15 minutes', 'Found the recipe total time.');
 
     $this->assertText(t('1 T'), 'Found the ingredient quantity and abbreviation.');
-    $this->assertText(format_string('@name (@note)', ['@name' => $ing_0_name, '@note' => $ing_0_note]), 'Found the ingredient name and note.');
+    $this->assertText(new FormattableMarkup('@name (@note)', ['@name' => $ing_0_name, '@note' => $ing_0_note]), 'Found the ingredient name and note.');
 
     // Check the page HTML for the recipe RDF properties.
     $properties = [
@@ -78,7 +79,7 @@ class RecipeNodeTest extends RecipeTestBase {
       'schema:recipeYield',
     ];
     foreach ($properties as $property) {
-      $this->assertRaw($property, format_string('Found the RDF property "@property" in the recipe node HTML.', ['@property' => $property]));
+      $this->assertRaw($property, new FormattableMarkup('Found the RDF property "@property" in the recipe node HTML.', ['@property' => $property]));
     }
 
     // Check the page HTML for the ISO 8601 recipe durations.
@@ -88,13 +89,13 @@ class RecipeNodeTest extends RecipeTestBase {
       'total_time' => 'PT3H15M',
     ];
     foreach ($durations as $duration) {
-      $this->assertRaw($duration, format_string('Found the ISO 8601 duration "@duration" in the recipe node HTML.', ['@duration' => $duration]));
+      $this->assertRaw($duration, new FormattableMarkup('Found the ISO 8601 duration "@duration" in the recipe node HTML.', ['@duration' => $duration]));
     }
 
     // Check for the breadcrumb.
     $expected_breadcrumb = [];
-    $expected_breadcrumb[] = URL::fromRoute('<front>')->toString();
-    $expected_breadcrumb[] = URL::fromRoute('recipe.landing_page')->toString();
+    $expected_breadcrumb[] = Url::fromRoute('<front>')->toString();
+    $expected_breadcrumb[] = Url::fromRoute('recipe.landing_page')->toString();
 
     // Fetch links in the current breadcrumb.
     $links = $this->xpath('//nav[@class="breadcrumb"]/ol/li/a');

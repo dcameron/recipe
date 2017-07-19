@@ -6,6 +6,7 @@ use Drupal\Component\Utility\Xss;
 use Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceFormatterBase;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
 use Drupal\ingredient\IngredientUnitTrait;
 
 /**
@@ -107,7 +108,7 @@ class IngredientFormatter extends EntityReferenceFormatterBase {
       // link.
       if ($output_as_link && !$entity->isNew()) {
         $url = $entity->toUrl();
-        $name = \Drupal::l($name, $url);
+        $name = Link::fromTextAndUrl($name, $url);
       }
 
       if ($items[$delta]->quantity > 0) {

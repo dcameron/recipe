@@ -2,6 +2,7 @@
 
 namespace Drupal\ingredient\Tests;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\simpletest\WebTestBase;
 
 /**
@@ -134,7 +135,7 @@ class IngredientFieldTest extends WebTestBase {
         $this->assertNoText(t('0 T'), 'Did not find the ingredient quantity === 0.');
       }
       elseif ($ingredient['unit_key'] == 'unit') {
-        $this->assertRaw(format_string('<span class="quantity-unit">@quantity</span>', ['@quantity' => $ingredient['quantity']]), 'Found the ingredient quantity with no unit.');
+        $this->assertRaw(new FormattableMarkup('<span class="quantity-unit">@quantity</span>', ['@quantity' => $ingredient['quantity']]), 'Found the ingredient quantity with no unit.');
       }
       else {
         $this->assertText(t('@quantity T', ['@quantity' => $ingredient['quantity']]), 'Found the ingredient quantity and unit abbreviation.');
@@ -142,11 +143,11 @@ class IngredientFieldTest extends WebTestBase {
 
       // Check for the ingredient name and the presence or absence of the note.
       if ($ingredient['note'] === '') {
-        $this->assertText(format_string('@name', ['@name' => $ingredient['name']]), 'Found the ingredient name.');
-        $this->assertNoText(format_string('@name (@note)', ['@name' => $ingredient['name'], '@note' => $ingredient['note']]), 'Did not find ingredient name with blank note field, "()".');
+        $this->assertText(new FormattableMarkup('@name', ['@name' => $ingredient['name']]), 'Found the ingredient name.');
+        $this->assertNoText(new FormattableMarkup('@name (@note)', ['@name' => $ingredient['name'], '@note' => $ingredient['note']]), 'Did not find ingredient name with blank note field, "()".');
       }
       else {
-        $this->assertText(format_string('@name (@note)', ['@name' => $ingredient['name'], '@note' => $ingredient['note']]), 'Found the ingredient name and note.');
+        $this->assertText(new FormattableMarkup('@name (@note)', ['@name' => $ingredient['name'], '@note' => $ingredient['note']]), 'Found the ingredient name and note.');
       }
     }
   }

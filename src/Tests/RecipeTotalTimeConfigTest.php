@@ -20,6 +20,13 @@ class RecipeTotalTimeConfigTest extends WebTestBase {
   public static $modules = ['recipe'];
 
   /**
+   * The entity type manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * A test user with administrative privileges.
    *
    * @var \Drupal\user\UserInterface
@@ -31,6 +38,7 @@ class RecipeTotalTimeConfigTest extends WebTestBase {
    */
   public function setUp() {
     parent::setUp();
+    $this->entityTypeManager = $this->container->get('entity_type.manager');
 
     // Create and log in the admin user with Recipe content permissions.
     $this->admin_user = $this->drupalCreateUser(['create recipe content', 'edit any recipe content', 'administer site configuration']);
@@ -111,7 +119,7 @@ class RecipeTotalTimeConfigTest extends WebTestBase {
    *   A list of display settings that will be added to the display defaults.
    */
   protected function createIntegerField($name, $entity_type, $bundle, $storage_settings = [], $field_settings = [], $widget_settings = [], $display_settings = []) {
-    $field_storage = entity_create('field_storage_config', [
+    $field_storage = $this->entityTypeManager->getStorage('field_storage_config')->create([
       'entity_type' => $entity_type,
       'field_name' => $name,
       'type' => 'integer',
@@ -149,16 +157,16 @@ class RecipeTotalTimeConfigTest extends WebTestBase {
       'required' => !empty($field_settings['required']),
       'settings' => $field_settings,
     ];
-    entity_create('field_config', $field)->save();
+    $this->entityTypeManager->getStorage('field_config')->create($field)->save();
 
-    $form_display = \Drupal::entityManager()->getStorage('entity_form_display')->load($entity_type . '.' . $bundle . '.default');
+    $form_display = $this->entityTypeManager->getStorage('entity_form_display')->load($entity_type . '.' . $bundle . '.default');
     $form_display->setComponent($name, [
       'type' => 'number',
       'settings' => $widget_settings,
     ])
       ->save();
     // Assign display settings.
-    $view_display = \Drupal::entityManager()->getStorage('entity_view_display')->load($entity_type . '.' . $bundle . '.default');
+    $view_display = $this->entityTypeManager->getStorage('entity_view_display')->load($entity_type . '.' . $bundle . '.default');
     $view_display->setComponent($name, [
       'label' => 'hidden',
       'type' => 'recipe_duration',
