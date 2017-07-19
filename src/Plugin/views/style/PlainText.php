@@ -87,7 +87,7 @@ class PlainText extends StylePluginBase {
   /**
    * {@inheritdoc}
    */
-  protected function renderRowGroup(array $rows = array()) {
+  protected function renderRowGroup(array $rows = []) {
     return [
       '#theme' => $this->themeFunctions(),
       '#view' => $this->view,

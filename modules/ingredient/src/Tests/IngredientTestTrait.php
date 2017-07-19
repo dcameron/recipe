@@ -29,13 +29,13 @@ trait IngredientTestTrait {
    *   A list of display settings that will be added to the display defaults.
    */
   protected function createIngredientField($storage_settings = [], $field_settings = [], $widget_settings = [], $display_settings = []) {
-    $field_storage = entity_create('field_storage_config', array(
+    $field_storage = entity_create('field_storage_config', [
       'entity_type' => 'node',
       'field_name' => 'field_ingredient',
       'type' => 'ingredient',
       'settings' => $storage_settings,
       'cardinality' => !empty($storage_settings['cardinality']) ? $storage_settings['cardinality'] : 1,
-    ));
+    ]);
     $field_storage->save();
 
     $this->attachIngredientField($field_settings, $widget_settings, $display_settings);

@@ -35,22 +35,22 @@ class IngredientWidget extends WidgetBase {
 
     // Strange, but html_entity_decode() doesn't handle &frasl;
     $quantity = isset($items[$delta]->quantity) ? preg_replace('/\&frasl;/', '/', ingredient_quantity_from_decimal($items[$delta]->quantity, '{%d} %d&frasl;%d', TRUE)) : '';
-    $element['quantity'] = array(
+    $element['quantity'] = [
       '#type' => 'textfield',
       '#title' => t('Quantity'),
       '#default_value' => $quantity,
       '#size' => 8,
       '#maxlength' => 8,
-      '#attributes' => array('class' => array('recipe-ingredient-quantity')),
-    );
-    $element['unit_key'] = array(
+      '#attributes' => ['class' => ['recipe-ingredient-quantity']],
+    ];
+    $element['unit_key'] = [
       '#type' => 'select',
       '#title' => t('Unit'),
       '#default_value' => isset($items[$delta]->unit_key) ? $items[$delta]->unit_key : $this->getFieldSetting('default_unit'),
       '#options' => $this->createUnitSelectOptions($units),
-      '#attributes' => array('class' => array('recipe-ingredient-unit-key')),
-    );
-    $element['target_id'] = array(
+      '#attributes' => ['class' => ['recipe-ingredient-unit-key']],
+    ];
+    $element['target_id'] = [
       '#type' => 'entity_autocomplete',
       '#title' => t('Name'),
       '#target_type' => 'ingredient',
@@ -63,17 +63,17 @@ class IngredientWidget extends WidgetBase {
       '#default_value' => isset($referenced_entities[$delta]) ? $referenced_entities[$delta] : NULL,
       '#size' => 25,
       '#maxlength' => 128,
-      '#attributes' => array('class' => array('recipe-ingredient-name')),
-    );
-    $element['note'] = array(
+      '#attributes' => ['class' => ['recipe-ingredient-name']],
+    ];
+    $element['note'] = [
       '#type' => 'textfield',
       '#title' => t('Note'),
       '#default_value' => isset($items[$delta]->note) ? $items[$delta]->note : '',
       '#size' => 40,
       '#maxlength' => 255,
-      '#attributes' => array('class' => array('recipe-ingredient-note')),
-    );
-    $element['#element_validate'] = array(array($this, 'validate'));
+      '#attributes' => ['class' => ['recipe-ingredient-note']],
+    ];
+    $element['#element_validate'] = [[$this, 'validate']];
     $element['#attached']['library'][] = 'ingredient/drupal.ingredient';
 
     return $element;

@@ -63,12 +63,12 @@ class IngredientRecipeMLFormatter extends IngredientFormatter {
     $fraction_format = $this->getSetting('fraction_format');
     $output_as_link = $this->getSetting('link');
     $unit_list = $this->getConfiguredUnits();
-    $elements = array();
+    $elements = [];
 
     foreach ($this->getEntitiesToView($items, $langcode) as $delta => $entity) {
       // Sanitize the name and note.
-      $name = Xss::filter($entity->label(), array());
-      $note = Xss::filter($items[$delta]->note, array());
+      $name = Xss::filter($entity->label(), []);
+      $note = Xss::filter($items[$delta]->note, []);
 
       if ($items[$delta]->quantity > 0) {
         $formatted_quantity = ingredient_quantity_from_decimal($items[$delta]->quantity, $fraction_format);
@@ -81,13 +81,13 @@ class IngredientRecipeMLFormatter extends IngredientFormatter {
       // printed in any case.
       $unit_name = '';
       $unit_abbreviation = '';
-      $unit = isset($unit_list[$items[$delta]->unit_key]) ? $unit_list[$items[$delta]->unit_key] : array();
+      $unit = isset($unit_list[$items[$delta]->unit_key]) ? $unit_list[$items[$delta]->unit_key] : [];
       if (!empty($unit['abbreviation'])) {
         $unit_name = $items[$delta]->quantity > 1 ? $unit['plural'] : $unit['name'];
         $unit_abbreviation = $unit['abbreviation'];
       }
 
-      $elements[$delta] = array(
+      $elements[$delta] = [
         '#theme' => 'ingredient_recipeml_formatter',
         '#name' => $name,
         '#quantity' => $formatted_quantity,
@@ -95,7 +95,7 @@ class IngredientRecipeMLFormatter extends IngredientFormatter {
         '#unit_abbreviation' => $unit_abbreviation,
         '#unit_display' => $this->getSetting('unit_abbreviation'),
         '#note' => $note,
-      );
+      ];
     }
     return $elements;
   }

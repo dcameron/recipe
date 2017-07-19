@@ -16,7 +16,7 @@ class RecipeSettingsTest extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = array('recipe');
+  public static $modules = ['recipe'];
 
   /**
    * A test user with administrative privileges.
@@ -29,7 +29,7 @@ class RecipeSettingsTest extends WebTestBase {
     parent::setUp();
 
     // Create and log in the admin user with Recipe content permissions.
-    $this->admin_user = $this->drupalCreateUser(array('create recipe content', 'edit any recipe content', 'administer content types'));
+    $this->admin_user = $this->drupalCreateUser(['create recipe content', 'edit any recipe content', 'administer content types']);
     $this->drupalLogin($this->admin_user);
   }
 
@@ -43,13 +43,13 @@ class RecipeSettingsTest extends WebTestBase {
     $preptime = 60;
     $cooktime = 135;
 
-    $edit = array(
+    $edit = [
       'title[0][value]' => $title,
       'recipe_yield_amount[0][value]' => $yield_amount,
       'recipe_yield_unit[0][value]' => $yield_unit,
       'recipe_prep_time[0][value]' => $preptime,
       'recipe_cook_time[0][value]' => $cooktime,
-    );
+    ];
 
     // Post the values to the node form.
     $this->drupalPostForm('node/add/recipe', $edit, t('Save'));

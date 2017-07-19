@@ -15,7 +15,7 @@ class IngredientDeleteForm extends ContentEntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t('Are you sure you want to delete ingredient %name?', array('%name' => $this->entity->label()));
+    return $this->t('Are you sure you want to delete ingredient %name?', ['%name' => $this->entity->label()]);
   }
 
   /**
@@ -44,10 +44,10 @@ class IngredientDeleteForm extends ContentEntityConfirmFormBase {
     $entity->delete();
 
     \Drupal::logger('ingredient')->notice('@type: deleted %title.',
-      array(
+      [
         '@type' => $this->entity->bundle(),
         '%title' => $this->entity->label(),
-      ));
+      ]);
     $form_state->setRedirect('ingredient.admin');
   }
 

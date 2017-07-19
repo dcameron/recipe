@@ -13,14 +13,14 @@ use Drupal\ingredient\Entity\Ingredient;
  * Implements hook_theme().
  */
 function ingredient_theme($existing, $type, $theme, $path) {
-  return array(
-    'ingredient' => array(
+  return [
+    'ingredient' => [
       'render element' => 'elements',
-    ),
-    'ingredient_formatter' => array(
-      'variables' => array('name' => NULL, 'quantity' => 0, 'unit_name' => '', 'unit_abbreviation' => '', 'unit_display' => 0, 'note' => ''),
-    ),
-  );
+    ],
+    'ingredient_formatter' => [
+      'variables' => ['name' => NULL, 'quantity' => 0, 'unit_name' => '', 'unit_abbreviation' => '', 'unit_display' => 0, 'note' => ''],
+    ],
+  ];
 }
 
 /**
@@ -50,7 +50,7 @@ function template_preprocess_ingredient(&$variables) {
   $variables['page'] = $variables['view_mode'] == 'full' && ingredient_is_page($ingredient);
 
   // Helpful $content variable for templates.
-  $variables['content'] = array();
+  $variables['content'] = [];
   foreach (Element::children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];
   }
@@ -94,12 +94,27 @@ function ingredient_quantity_from_decimal($ingredient_quantity, $fraction_format
     }
 
     // We have to workaround for repeating, non-exact decimals for thirds, sixths, ninths, twelfths.
-    $overrides = array(
-      '3333' => array(1, 3), '6666' => array(2, 3), '9999' => array(3, 3), // thirds
-      '1666' => array(1, 6), '8333' => array(5, 6), // sixths
-      '1111' => array(1, 9), '2222' => array(2, 9), '4444' => array(4, 9), '5555' => array(5, 9), '7777' => array(7, 9), '8888' => array(8, 9), // ninths
-      '0833' => array(1, 12), '4166' => array(5, 12), '5833' => array(7, 12), '9166' => array(11, 12), // twelfths
-    );
+    $overrides = [
+    // Thirds.
+      '3333' => [1, 3],
+      '6666' => [2, 3],
+      '9999' => [3, 3],
+      '1666' => [1, 6],
+    // Sixths.
+      '8333' => [5, 6],
+    // Ninths.
+      '1111' => [1, 9],
+      '2222' => [2, 9],
+      '4444' => [4, 9],
+      '5555' => [5, 9],
+      '7777' => [7, 9],
+      '8888' => [8, 9],
+      '0833' => [1, 12],
+      '4166' => [5, 12],
+      '5833' => [7, 12],
+    // twelfths.
+      '9166' => [11, 12],
+    ];
     // truncate the whole part to get just the fractional part
     $conversionstr = substr((string) ($decimal - floor($decimal)), 2, 4);
     if (array_key_exists($conversionstr, $overrides)) {
@@ -204,7 +219,7 @@ function ingredient_unit_fuzzymatch($subject) {
 
   // First pass unit case must match exactly( T=Tbsp, t=tsp ).
   foreach ($units as $unit_key => $unit) {
-    $patterns = array();
+    $patterns = [];
     // Add name pattern.
     $patterns[] = '^' . $unit['name'] . 's{0,1}$';
     // Add plural name pattern.
@@ -222,7 +237,7 @@ function ingredient_unit_fuzzymatch($subject) {
 
   // Second pass unit case doesn't matter.
   foreach ($units as $unit_key => $unit) {
-    $patterns = array();
+    $patterns = [];
     // Add name pattern.
     $patterns[] = '^' . $unit['name'] . 's{0,1}$';
     // Add plural name pattern.

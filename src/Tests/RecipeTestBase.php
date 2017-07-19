@@ -14,7 +14,7 @@ class RecipeTestBase extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = array('block', 'recipe', 'views');
+  public static $modules = ['block', 'recipe', 'views'];
 
   /**
    * A test user with administrative privileges.
@@ -28,7 +28,7 @@ class RecipeTestBase extends WebTestBase {
     $this->drupalPlaceBlock('system_breadcrumb_block');
 
     // Create and log in the admin user with Recipe content permissions.
-    $this->admin_user = $this->drupalCreateUser(array('create recipe content', 'edit any recipe content', 'administer site configuration', 'view ingredient'));
+    $this->admin_user = $this->drupalCreateUser(['create recipe content', 'edit any recipe content', 'administer site configuration', 'view ingredient']);
     $this->drupalLogin($this->admin_user);
   }
 }

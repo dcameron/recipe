@@ -17,7 +17,7 @@ class RecipeTotalTimeConfigTest extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = array('recipe');
+  public static $modules = ['recipe'];
 
   /**
    * A test user with administrative privileges.
@@ -30,7 +30,7 @@ class RecipeTotalTimeConfigTest extends WebTestBase {
     parent::setUp();
 
     // Create and log in the admin user with Recipe content permissions.
-    $this->admin_user = $this->drupalCreateUser(array('create recipe content', 'edit any recipe content', 'administer site configuration'));
+    $this->admin_user = $this->drupalCreateUser(['create recipe content', 'edit any recipe content', 'administer site configuration']);
     $this->drupalLogin($this->admin_user);
   }
 
@@ -43,11 +43,11 @@ class RecipeTotalTimeConfigTest extends WebTestBase {
     $cooktime = 135;
     $new_field_value = 20;
 
-    $edit = array(
+    $edit = [
       'title[0][value]' => $title,
       'recipe_prep_time[0][value]' => $preptime,
       'recipe_cook_time[0][value]' => $cooktime,
-    );
+    ];
 
     // Post the values to the node form.
     $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
@@ -107,14 +107,14 @@ class RecipeTotalTimeConfigTest extends WebTestBase {
    * @param array $display_settings
    *   A list of display settings that will be added to the display defaults.
    */
-  protected function createIntegerField($name, $entity_type, $bundle, $storage_settings = array(), $field_settings = array(), $widget_settings = array(), $display_settings = array()) {
-    $field_storage = entity_create('field_storage_config', array(
+  protected function createIntegerField($name, $entity_type, $bundle, $storage_settings = [], $field_settings = [], $widget_settings = [], $display_settings = []) {
+    $field_storage = entity_create('field_storage_config', [
       'entity_type' => $entity_type,
       'field_name' => $name,
       'type' => 'integer',
       'settings' => $storage_settings,
       'cardinality' => !empty($storage_settings['cardinality']) ? $storage_settings['cardinality'] : 1,
-    ));
+    ]);
     $field_storage->save();
 
     $this->attachIntegerField($name, $entity_type, $bundle, $field_settings, $widget_settings, $display_settings);
@@ -137,30 +137,30 @@ class RecipeTotalTimeConfigTest extends WebTestBase {
    * @param array $display_settings
    *   A list of display settings that will be added to the display defaults.
    */
-  protected function attachIntegerField($name, $entity_type, $bundle, $field_settings = array(), $widget_settings = array(), $display_settings = array()) {
-    $field = array(
+  protected function attachIntegerField($name, $entity_type, $bundle, $field_settings = [], $widget_settings = [], $display_settings = []) {
+    $field = [
       'field_name' => $name,
       'label' => $name,
       'entity_type' => $entity_type,
       'bundle' => $bundle,
       'required' => !empty($field_settings['required']),
       'settings' => $field_settings,
-    );
+    ];
     entity_create('field_config', $field)->save();
 
     $form_display = \Drupal::entityManager()->getStorage('entity_form_display')->load($entity_type . '.' . $bundle . '.default');
-    $form_display->setComponent($name, array(
-        'type' => 'number',
-        'settings' => $widget_settings,
-      ))
+    $form_display->setComponent($name, [
+      'type' => 'number',
+      'settings' => $widget_settings,
+    ])
       ->save();
     // Assign display settings.
     $view_display = \Drupal::entityManager()->getStorage('entity_view_display')->load($entity_type . '.' . $bundle . '.default');
-    $view_display->setComponent($name, array(
-        'label' => 'hidden',
-        'type' => 'recipe_duration',
-        'settings' => $display_settings,
-      ))
+    $view_display->setComponent($name, [
+      'label' => 'hidden',
+      'type' => 'recipe_duration',
+      'settings' => $display_settings,
+    ])
       ->save();
   }
 

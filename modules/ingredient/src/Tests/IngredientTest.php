@@ -18,7 +18,7 @@ class IngredientTest extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = array('block', 'ingredient', 'field_ui', 'views');
+  public static $modules = ['block', 'ingredient', 'field_ui', 'views'];
 
   /**
    * {@inheritdoc}
@@ -45,7 +45,7 @@ class IngredientTest extends WebTestBase {
    * Basic tests for Content Entity Example.
    */
   public function testIngredient() {
-    $web_user = $this->drupalCreateUser(array(
+    $web_user = $this->drupalCreateUser([
       'add ingredient',
       'edit ingredient',
       'view ingredient',
@@ -53,7 +53,8 @@ class IngredientTest extends WebTestBase {
       'administer ingredient',
       'administer ingredient display',
       'administer ingredient fields',
-      'administer ingredient form display'));
+      'administer ingredient form display',
+    ]);
 
     $this->drupalLogin($web_user);
 
@@ -68,9 +69,9 @@ class IngredientTest extends WebTestBase {
     $this->assertFieldByName('name[0][value]', '', 'Name Field, empty');
 
     // Post content, save an instance. Go back to list after saving.
-    $edit = array(
+    $edit = [
       'name[0][value]' => 'test name',
-    );
+    ];
     $this->drupalPostForm(NULL, $edit, t('Save'));
 
     // Entity listed.
@@ -91,7 +92,7 @@ class IngredientTest extends WebTestBase {
 
     // Fetch links in the current breadcrumb.
     $links = $this->xpath('//nav[@class="breadcrumb"]/ol/li/a');
-    $got_breadcrumb = array();
+    $got_breadcrumb = [];
     foreach ($links as $link) {
       $got_breadcrumb[] = (string) $link['href'];
     }
@@ -104,7 +105,7 @@ class IngredientTest extends WebTestBase {
 
     // Confirm deletion.
     $this->assertLink(t('Cancel'));
-    $this->drupalPostForm(NULL, array(), 'Delete');
+    $this->drupalPostForm(NULL, [], 'Delete');
 
     // Back to list, must be empty.
     $this->assertNoText('test name');
@@ -126,9 +127,9 @@ class IngredientTest extends WebTestBase {
   public function testPaths() {
     // Generate an ingredient so that we can test the paths against it.
     $ingredient = Ingredient::create(
-      array(
+      [
         'name' => 'test name',
-      )
+      ]
     );
     $ingredient->save();
 
@@ -140,7 +141,7 @@ class IngredientTest extends WebTestBase {
       // drupalCreateUser() doesn't know what to do with an empty permission
       // array, so we help it out.
       if ($datum[2]) {
-        $user = $this->drupalCreateUser(array($datum[2]));
+        $user = $this->drupalCreateUser([$datum[2]]);
         $this->drupalLogin($user);
       }
       else {
@@ -165,68 +166,68 @@ class IngredientTest extends WebTestBase {
    *   - Permission for the user.
    */
   protected function providerTestPaths($ingredient_id) {
-    return array(
-      array(
+    return [
+      [
         200,
         '/ingredient/' . $ingredient_id,
         'view ingredient',
-      ),
-      array(
+      ],
+      [
         403,
         '/ingredient/' . $ingredient_id,
         '',
-      ),
-      array(
+      ],
+      [
         200,
         '/admin/content/ingredient',
         'administer ingredient',
-      ),
-      array(
+      ],
+      [
         403,
         '/admin/content/ingredient',
         '',
-      ),
-      array(
+      ],
+      [
         200,
         '/ingredient/add',
         'add ingredient',
-      ),
-      array(
+      ],
+      [
         403,
         '/ingredient/add',
         '',
-      ),
-      array(
+      ],
+      [
         200,
         '/ingredient/' . $ingredient_id . '/edit',
         'edit ingredient',
-      ),
-      array(
+      ],
+      [
         403,
         '/ingredient/' . $ingredient_id . '/edit',
         '',
-      ),
-      array(
+      ],
+      [
         200,
         '/ingredient/' . $ingredient_id . '/delete',
         'delete ingredient',
-      ),
-      array(
+      ],
+      [
         403,
         '/ingredient/' . $ingredient_id . '/delete',
         '',
-      ),
-      array(
+      ],
+      [
         200,
         'admin/structure/ingredient_settings',
         'administer ingredient',
-      ),
-      array(
+      ],
+      [
         403,
         'admin/structure/ingredient_settings',
         '',
-      ),
-    );
+      ],
+    ];
   }
 
   /**

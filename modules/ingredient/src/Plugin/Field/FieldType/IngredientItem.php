@@ -50,42 +50,42 @@ class IngredientItem extends EntityReferenceItem {
    * {@inheritdoc}
    */
   public static function schema(FieldStorageDefinitionInterface $field_definition) {
-    return array(
-      'columns' => array(
-        'target_id' => array(
+    return [
+      'columns' => [
+        'target_id' => [
           'description' => 'The ID of the ingredient entity.',
           'type' => 'int',
           'unsigned' => TRUE,
-        ),
-        'quantity' => array(
+        ],
+        'quantity' => [
           'type' => 'float',
           'not null' => FALSE,
-        ),
-        'unit_key' => array(
+        ],
+        'unit_key' => [
           'description' => 'Untranslated unit key from the units array.',
           'type' => 'varchar',
           'length' => 255,
           'not null' => TRUE,
           'default' => '',
-        ),
-        'note' => array(
+        ],
+        'note' => [
           'description' => 'Ingredient processing or notes related to recipe.',
           'type' => 'varchar',
           'length' => 255,
           'not null' => TRUE,
           'default' => '',
-        ),
-      ),
-      'indexes' => array(
-        'target_id' => array('target_id'),
-      ),
-      'foreign keys' => array(
-        'target_id' => array(
+        ],
+      ],
+      'indexes' => [
+        'target_id' => ['target_id'],
+      ],
+      'foreign keys' => [
+        'target_id' => [
           'table' => 'ingredient',
-          'columns' => array('target_id' => 'id'),
-        ),
-      ),
-    );
+          'columns' => ['target_id' => 'id'],
+        ],
+      ],
+    ];
   }
 
   /**

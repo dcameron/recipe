@@ -40,19 +40,19 @@ class IngredientSettingsForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
     if (\Drupal::moduleHandler()->moduleExists('language')) {
-      $form['default_ingredient_language'] = array(
+      $form['default_ingredient_language'] = [
         '#type' => 'details',
         '#title' => $this->t('Ingredients language'),
         '#open' => TRUE,
-      );
-      $form['default_ingredient_language']['default_language'] = array(
+      ];
+      $form['default_ingredient_language']['default_language'] = [
         '#type' => 'language_configuration',
-        '#entity_information' => array(
+        '#entity_information' => [
           'entity_type' => 'ingredient',
           'bundle' => 'ingredient',
-        ),
+        ],
         '#default_value' => ContentLanguageSettings::loadByEntityTypeBundle('ingredient', 'ingredient'),
-      );
+      ];
     }
 
     return parent::buildForm($form, $form_state);

@@ -38,29 +38,28 @@ class IngredientFormatter extends EntityReferenceFormatterBase {
   /**
    * {@inheritdoc}
    */
-  
   public function settingsForm(array $form, FormStateInterface $form_state) {
-    $element['fraction_format'] = array(
+    $element['fraction_format'] = [
       '#type' => 'textfield',
       '#title' => t('Fractions display string'),
       '#default_value' => $this->getSetting('fraction_format'),
       '#size' => 35,
       '#maxlength' => 255,
       '#description' => t('How fractions should be displayed. Leave blank to display as decimals.<br />Each incidence of %d will be replaced by the whole number, the numerator, and the denominator in that order.<br />Anything between curly braces will not be displayed when the whole number is equal to 0.<br />Recommended settings are "{%d }%d&amp;frasl;%d" or "{%d }&lt;sup&gt;%d&lt;/sup&gt;/&lt;sub&gt;%d&lt;/sub&gt;"'),
-    );
-    $element['unit_display'] = array(
+    ];
+    $element['unit_display'] = [
       '#type' => 'radios',
       '#title' => t('Ingredient unit display'),
       '#default_value' => $this->getSetting('unit_display'),
       '#options' => $this->getUnitDisplayOptions(),
       '#description' => t('Display ingredient units like Tbsp or Tablespoon.'),
       '#required' => TRUE,
-    );
-    $element['link'] = array(
+    ];
+    $element['link'] = [
       '#title' => t('Link name to the referenced ingredient'),
       '#type' => 'checkbox',
       '#default_value' => $this->getSetting('link'),
-    );
+    ];
     return $element;
   }
 
@@ -81,7 +80,7 @@ class IngredientFormatter extends EntityReferenceFormatterBase {
    * {@inheritdoc}
    */
   public function settingsSummary() {
-    $summary[] = t('Fractions display string: @fraction_format', array('@fraction_format' => $this->getSetting('fraction_format')));
+    $summary[] = t('Fractions display string: @fraction_format', ['@fraction_format' => $this->getSetting('fraction_format')]);
     $unit_display_options = $this->getUnitDisplayOptions();
     $unit_display_text = $unit_display_options[$this->getSetting('unit_display')];
     $summary[] = t('Ingredient unit display: @unit_display_text', ['@unit_display_text' => $unit_display_text]);
@@ -97,12 +96,12 @@ class IngredientFormatter extends EntityReferenceFormatterBase {
     $fraction_format = $this->getSetting('fraction_format');
     $output_as_link = $this->getSetting('link');
     $unit_list = $this->getConfiguredUnits();
-    $elements = array();
+    $elements = [];
 
     foreach ($this->getEntitiesToView($items, $langcode) as $delta => $entity) {
       // Sanitize the name and note.
-      $name = Xss::filter($entity->label(), array());
-      $note = Xss::filter($items[$delta]->note, array());
+      $name = Xss::filter($entity->label(), []);
+      $note = Xss::filter($items[$delta]->note, []);
 
       // If the link should be displayed and the entity has a URI, display the
       // link.
@@ -122,13 +121,13 @@ class IngredientFormatter extends EntityReferenceFormatterBase {
       // printed in any case.
       $unit_name = '';
       $unit_abbreviation = '';
-      $unit = isset($unit_list[$items[$delta]->unit_key]) ? $unit_list[$items[$delta]->unit_key] : array();
+      $unit = isset($unit_list[$items[$delta]->unit_key]) ? $unit_list[$items[$delta]->unit_key] : [];
       if (!empty($unit['abbreviation'])) {
         $unit_name = $items[$delta]->quantity > 1 ? $unit['plural'] : $unit['name'];
         $unit_abbreviation = $unit['abbreviation'];
       }
 
-      $elements[$delta] = array(
+      $elements[$delta] = [
         '#theme' => 'ingredient_formatter',
         '#name' => $name,
         '#quantity' => $formatted_quantity,
@@ -136,7 +135,7 @@ class IngredientFormatter extends EntityReferenceFormatterBase {
         '#unit_abbreviation' => $unit_abbreviation,
         '#unit_display' => $this->getSetting('unit_display'),
         '#note' => $note,
-      );
+      ];
     }
     return $elements;
   }

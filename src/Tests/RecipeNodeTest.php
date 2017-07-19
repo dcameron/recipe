@@ -32,7 +32,7 @@ class RecipeNodeTest extends RecipeTestBase {
     $ing_0_name = $this->randomMachineName(16);
     $ing_0_note = $this->randomMachineName(16);
 
-    $edit = array(
+    $edit = [
       'title[0][value]' => $title,
       'recipe_description[0][value]' => $description,
       'recipe_yield_amount[0][value]' => $yield_amount,
@@ -46,11 +46,11 @@ class RecipeNodeTest extends RecipeTestBase {
       'recipe_ingredient[0][unit_key]' => $ing_0_unit,
       'recipe_ingredient[0][target_id]' => $ing_0_name,
       'recipe_ingredient[0][note]' => $ing_0_note,
-    );
+    ];
 
     // Post the values to the node form.
     $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
-    $this->assertText(t('Recipe @title has been created.', array('@title' => $title)));
+    $this->assertText(t('Recipe @title has been created.', ['@title' => $title]));
 
     // Check the page for the recipe content.
     $this->assertRaw($description, 'Found the recipe description.');
@@ -63,10 +63,10 @@ class RecipeNodeTest extends RecipeTestBase {
     $this->assertText('3 hours, 15 minutes', 'Found the recipe total time.');
 
     $this->assertText(t('1 T'), 'Found the ingredient quantity and abbreviation.');
-    $this->assertText(format_string('@name (@note)', array('@name' => $ing_0_name, '@note' => $ing_0_note)), 'Found the ingredient name and note.');
+    $this->assertText(format_string('@name (@note)', ['@name' => $ing_0_name, '@note' => $ing_0_note]), 'Found the ingredient name and note.');
 
     // Check the page HTML for the recipe RDF properties.
-    $properties = array(
+    $properties = [
       'schema:Recipe',
       'schema:name',
       'schema:recipeInstructions',
@@ -76,19 +76,19 @@ class RecipeNodeTest extends RecipeTestBase {
       'schema:cookTime',
       'schema:totalTime',
       'schema:recipeYield',
-    );
+    ];
     foreach ($properties as $property) {
-      $this->assertRaw($property, format_string('Found the RDF property "@property" in the recipe node HTML.', array('@property' => $property)));
+      $this->assertRaw($property, format_string('Found the RDF property "@property" in the recipe node HTML.', ['@property' => $property]));
     }
 
     // Check the page HTML for the ISO 8601 recipe durations.
-    $durations = array(
+    $durations = [
       'prep_time' => 'PT1H',
       'cook_time' => 'PT2H15M',
       'total_time' => 'PT3H15M',
-    );
+    ];
     foreach ($durations as $duration) {
-      $this->assertRaw($duration, format_string('Found the ISO 8601 duration "@duration" in the recipe node HTML.', array('@duration' => $duration)));
+      $this->assertRaw($duration, format_string('Found the ISO 8601 duration "@duration" in the recipe node HTML.', ['@duration' => $duration]));
     }
 
     // Check for the breadcrumb.
@@ -98,7 +98,7 @@ class RecipeNodeTest extends RecipeTestBase {
 
     // Fetch links in the current breadcrumb.
     $links = $this->xpath('//nav[@class="breadcrumb"]/ol/li/a');
-    $got_breadcrumb = array();
+    $got_breadcrumb = [];
     foreach ($links as $link) {
       $got_breadcrumb[] = (string) $link['href'];
     }
@@ -112,13 +112,13 @@ class RecipeNodeTest extends RecipeTestBase {
    */
   public function testPseudoFields() {
     // Create a node with values in all of the pseudo-field sub-fields.
-    $edit = array(
+    $edit = [
       'title[0][value]' => $this->randomMachineName(16),
       'recipe_yield_amount[0][value]' => 1,
       'recipe_yield_unit[0][value]' => $this->randomMachineName(16),
       'recipe_prep_time[0][value]' => 1,
       'recipe_cook_time[0][value]' => 1,
-    );
+    ];
     $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
 
     // Verify that the pseudo-fields are shown on the node view.
@@ -127,11 +127,11 @@ class RecipeNodeTest extends RecipeTestBase {
 
     // Create a node with no value in the yield_amount and a value in only one
     // time field.
-    $edit = array(
+    $edit = [
       'title[0][value]' => $this->randomMachineName(16),
       'recipe_yield_unit[0][value]' => $this->randomMachineName(16),
       'recipe_cook_time[0][value]' => 1,
-    );
+    ];
     $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
 
     // Verify that the pseudo-fields are not shown on the node view.
@@ -139,9 +139,9 @@ class RecipeNodeTest extends RecipeTestBase {
     $this->assertNoText('Total time', 'Did not find the Total time pseudo-field.');
 
     // Create a node with no values in time fields.
-    $edit = array(
+    $edit = [
       'title[0][value]' => $this->randomMachineName(16),
-    );
+    ];
     $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
 
     // Verify that the pseudo-fields are not shown on the node view.

@@ -91,11 +91,11 @@ class Recipe extends PathPluginBase implements ResponseDisplayPluginInterface {
     $output = $this->view->render();
 
     if (!empty($this->view->live_preview)) {
-      $output = array(
+      $output = [
         '#prefix' => '<pre>',
         '#plain_text' => drupal_render_root($output),
         '#suffix' => '</pre>',
-      );
+      ];
     }
 
     return $output;
@@ -118,7 +118,7 @@ class Recipe extends PathPluginBase implements ResponseDisplayPluginInterface {
   protected function defineOptions() {
     $options = parent::defineOptions();
 
-    $options['displays'] = array('default' => array());
+    $options['displays'] = ['default' => []];
 
     // Overrides for standard stuff.
     $options['style']['contains']['type']['default'] = 'recipeml';
@@ -137,13 +137,13 @@ class Recipe extends PathPluginBase implements ResponseDisplayPluginInterface {
 
     // Since we're childing off the 'path' type, we'll still *call* our
     // category 'page' but let's override it so it says feed settings.
-    $categories['page'] = array(
+    $categories['page'] = [
       'title' => $this->t('Recipe settings'),
       'column' => 'second',
-      'build' => array(
+      'build' => [
         '#weight' => -10,
-      ),
-    );
+      ],
+    ];
 
     $displays = array_filter($this->getOption('displays'));
     if (count($displays) > 1) {
@@ -161,11 +161,11 @@ class Recipe extends PathPluginBase implements ResponseDisplayPluginInterface {
       $attach_to = $this->t('None');
     }
 
-    $options['displays'] = array(
+    $options['displays'] = [
       'category' => 'page',
       'title' => $this->t('Attach to'),
       'value' => $attach_to,
-    );
+    ];
   }
 
   /**
@@ -178,20 +178,20 @@ class Recipe extends PathPluginBase implements ResponseDisplayPluginInterface {
     switch ($form_state->get('section')) {
       case 'displays':
         $form['#title'] .= $this->t('Attach to');
-        $displays = array();
+        $displays = [];
         foreach ($this->view->storage->get('display') as $display_id => $display) {
           // @todo The display plugin should have display_title and id as well.
           if ($this->view->displayHandlers->has($display_id) && $this->view->displayHandlers->get($display_id)->acceptAttachments()) {
             $displays[$display_id] = $display['display_title'];
           }
         }
-        $form['displays'] = array(
+        $form['displays'] = [
           '#title' => $this->t('Displays'),
           '#type' => 'checkboxes',
           '#description' => $this->t('The format link will be available only to the selected displays.'),
           '#options' => array_map('\Drupal\Component\Utility\Html::escape', $displays),
           '#default_value' => $this->getOption('displays'),
-        );
+        ];
         break;
     }
   }

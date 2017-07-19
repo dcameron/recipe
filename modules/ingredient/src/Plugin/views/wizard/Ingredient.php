@@ -30,16 +30,16 @@ class Ingredient extends WizardPluginBase {
    */
   public function getAvailableSorts() {
     // You can't execute functions in properties, so override the method
-    return array(
-      'ingredient_field_data-name:ASC' => $this->t('Name')
-    );
+    return [
+      'ingredient_field_data-name:ASC' => $this->t('Name'),
+    ];
   }
 
   /**
    * {@inheritdoc}
    */
   protected function rowStyleOptions() {
-    $options = array();
+    $options = [];
     $options['full_posts'] = $this->t('full posts');
     $options['names'] = $this->t('names');
     $options['names_linked'] = $this->t('names (linked)');
@@ -89,8 +89,8 @@ class Ingredient extends WizardPluginBase {
    */
   protected function pageDisplayOptions(array $form, FormStateInterface $form_state) {
     $display_options = parent::pageDisplayOptions($form, $form_state);
-    $row_plugin = $form_state->getValue(array('page', 'style', 'row_plugin'));
-    $row_options = $form_state->getValue(array('page', 'style', 'row_options'), array());
+    $row_plugin = $form_state->getValue(['page', 'style', 'row_plugin']);
+    $row_options = $form_state->getValue(['page', 'style', 'row_options'], []);
     $this->display_options_row($display_options, $row_plugin, $row_options);
     return $display_options;
   }
@@ -100,8 +100,8 @@ class Ingredient extends WizardPluginBase {
    */
   protected function blockDisplayOptions(array $form, FormStateInterface $form_state) {
     $display_options = parent::blockDisplayOptions($form, $form_state);
-    $row_plugin = $form_state->getValue(array('block', 'style', 'row_plugin'));
-    $row_options = $form_state->getValue(array('block', 'style', 'row_options'), array());
+    $row_plugin = $form_state->getValue(['block', 'style', 'row_plugin']);
+    $row_options = $form_state->getValue(['block', 'style', 'row_options'], []);
     $this->display_options_row($display_options, $row_plugin, $row_options);
     return $display_options;
   }

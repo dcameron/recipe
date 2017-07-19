@@ -33,30 +33,30 @@ function ingredient_field_views_data(FieldStorageConfigInterface $field_storage)
     $field_name = $field_storage->getName();
 
     // Provide a relationship for the entity type with the ingredient field.
-    $args = array(
+    $args = [
       '@label' => $target_entity_type->getLabel(),
       '@field_name' => $field_name,
-    );
-    $data[$table_name][$field_name]['relationship'] = array(
+    ];
+    $data[$table_name][$field_name]['relationship'] = [
       'title' => t('@label referenced from @field_name', $args),
       'label' => t('@field_name: @label', $args),
       'group' => $entity_type->getLabel(),
-      'help' =>  t('Appears in: @bundles.', array('@bundles' => implode(', ', $field_storage->getBundles()))),
+      'help' => t('Appears in: @bundles.', ['@bundles' => implode(', ', $field_storage->getBundles())]),
       'id' => 'standard',
       'base' => $target_base_table,
       'entity type' => $target_entity_type_id,
       'base field' => $target_entity_type->getKey('id'),
       'relationship field' => $field_name . '_target_id',
-    );
+    ];
 
     // Provide a reverse relationship for the entity type that is referenced by
     // the field.
     $args['@entity'] = $entity_type->getLabel();
     $args['@label'] = $target_entity_type->getLowercaseLabel();
     $pseudo_field_name = 'reverse__' . $entity_type_id . '__' . $field_name;
-    $data[$target_base_table][$pseudo_field_name]['relationship'] = array(
+    $data[$target_base_table][$pseudo_field_name]['relationship'] = [
       'title' => t('@entity using @field_name', $args),
-      'label' => t('@field_name', array('@field_name' => $field_name)),
+      'label' => t('@field_name', ['@field_name' => $field_name]),
       'group' => $target_entity_type->getLabel(),
       'help' => t('Relate each @entity with a @field_name set to the @label.', $args),
       'id' => 'entity_reverse',
@@ -66,14 +66,14 @@ function ingredient_field_views_data(FieldStorageConfigInterface $field_storage)
       'field_name' => $field_name,
       'field table' => $table_mapping->getDedicatedDataTableName($field_storage),
       'field field' => $field_name . '_target_id',
-      'join_extra' => array(
-        array(
+      'join_extra' => [
+        [
           'field' => 'deleted',
           'value' => 0,
           'numeric' => TRUE,
-        ),
-      ),
-    );
+        ],
+      ],
+    ];
   }
 
   return $data;

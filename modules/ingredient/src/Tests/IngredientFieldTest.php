@@ -131,7 +131,7 @@ class IngredientFieldTest extends WebTestBase {
         $this->assertNoText(t('0 T'), 'Did not find the ingredient quantity === 0.');
       }
       elseif ($ingredient['unit_key'] == 'unit') {
-        $this->assertRaw(format_string('<span class="quantity-unit">@quantity</span>', array('@quantity' => $ingredient['quantity'])), 'Found the ingredient quantity with no unit.');
+        $this->assertRaw(format_string('<span class="quantity-unit">@quantity</span>', ['@quantity' => $ingredient['quantity']]), 'Found the ingredient quantity with no unit.');
       }
       else {
         $this->assertText(t('@quantity T', ['@quantity' => $ingredient['quantity']]), 'Found the ingredient quantity and unit abbreviation.');
@@ -140,10 +140,10 @@ class IngredientFieldTest extends WebTestBase {
       // Check for the ingredient name and the presence or absence of the note.
       if ($ingredient['note'] === '') {
         $this->assertText(format_string('@name', ['@name' => $ingredient['name']]), 'Found the ingredient name.');
-        $this->assertNoText(format_string('@name (@note)', array('@name' => $ingredient['name'], '@note' => $ingredient['note'])), 'Did not find ingredient name with blank note field, "()".');
+        $this->assertNoText(format_string('@name (@note)', ['@name' => $ingredient['name'], '@note' => $ingredient['note']]), 'Did not find ingredient name with blank note field, "()".');
       }
       else {
-        $this->assertText(format_string('@name (@note)', array('@name' => $ingredient['name'], '@note' => $ingredient['note'])), 'Found the ingredient name and note.');
+        $this->assertText(format_string('@name (@note)', ['@name' => $ingredient['name'], '@note' => $ingredient['note']]), 'Found the ingredient name and note.');
       }
     }
   }
@@ -160,13 +160,13 @@ class IngredientFieldTest extends WebTestBase {
     $this->drupalGet('admin/structure/types/manage/test_bundle/display');
     $this->assertText('Link to ingredient: No', 'Ingredient entity link display is turned off.');
 
-    $edit = array(
+    $edit = [
       'title[0][value]' => $this->randomMachineName(16),
       'field_ingredient[0][quantity]' => 4,
       'field_ingredient[0][unit_key]' => 'tablespoon',
       'field_ingredient[0][target_id]' => 'test ingredient',
       'field_ingredient[0][note]' => '',
-    );
+    ];
 
     $this->drupalGet('node/add/test_bundle');
     // Post the values to the node form.

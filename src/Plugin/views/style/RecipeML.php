@@ -56,7 +56,7 @@ class RecipeML extends StylePluginBase {
   protected $usesFields = TRUE;
 
   public function attachTo(array &$build, $display_id, Url $url, $title) {
-    $url_options = array();
+    $url_options = [];
     $input = $this->view->getExposedInput();
     if ($input) {
       $url_options['query'] = $input;
@@ -64,12 +64,12 @@ class RecipeML extends StylePluginBase {
     $url_options['absolute'] = TRUE;
 
     // Attach a link to the RecipeML, which is an alternate representation.
-    $build['#attached']['html_head_link'][][] = array(
+    $build['#attached']['html_head_link'][][] = [
       'rel' => 'alternate',
       'type' => 'text/xml',
       'title' => $title,
       'href' => $url->setOptions($url_options)->toString(),
-    );
+    ];
   }
 
   protected function defineOptions() {
@@ -89,7 +89,7 @@ class RecipeML extends StylePluginBase {
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
 
-    $initial_labels = array('' => $this->t('- None -'));
+    $initial_labels = ['' => $this->t('- None -')];
     $view_fields_labels = $this->displayHandler->getFieldLabels();
     $view_fields_labels = array_merge($initial_labels, $view_fields_labels);
 
@@ -180,8 +180,8 @@ class RecipeML extends StylePluginBase {
   public function submitOptionsForm(&$form, FormStateInterface $form_state) {
     parent::submitOptionsForm($form, $form_state);
 
-    $time_fields = $form_state->getValue(array('style_options', 'time_fields'));
-    $form_state->setValue(array('style_options', 'time_fields'), array_filter($time_fields));
+    $time_fields = $form_state->getValue(['style_options', 'time_fields']);
+    $form_state->setValue(['style_options', 'time_fields'], array_filter($time_fields));
   }
 
   /**
@@ -232,12 +232,12 @@ class RecipeML extends StylePluginBase {
       ];
     }
 
-    $build = array(
+    $build = [
       '#theme' => $this->themeFunctions(),
       '#view' => $this->view,
       '#options' => $this->options,
       '#rows' => $rows,
-    );
+    ];
     unset($this->view->row_index);
     return $build;
   }

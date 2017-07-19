@@ -21,7 +21,7 @@ class PlainTextStyleTest extends RecipeTestBase {
    *
    * @var array
    */
-  public static $modules = array('block', 'locale', 'recipe', 'views');
+  public static $modules = ['block', 'locale', 'recipe', 'views'];
 
   /**
    * Tests the display of Recipe nodes using the plain text Views style plugin.

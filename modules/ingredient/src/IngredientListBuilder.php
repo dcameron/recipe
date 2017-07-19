@@ -64,13 +64,13 @@ class IngredientListBuilder extends EntityListBuilder {
     $header['name'] = $this->t('Name');
     $header['changed'] = [
       'data' => $this->t('Updated'),
-      'class' => array(RESPONSIVE_PRIORITY_LOW),
+      'class' => [RESPONSIVE_PRIORITY_LOW],
     ];
     if (\Drupal::languageManager()->isMultilingual()) {
-      $header['language_name'] = array(
+      $header['language_name'] = [
         'data' => $this->t('Language'),
-        'class' => array(RESPONSIVE_PRIORITY_LOW),
-      );
+        'class' => [RESPONSIVE_PRIORITY_LOW],
+      ];
     }
     return $header + parent::buildHeader();
   }

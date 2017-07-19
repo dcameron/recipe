@@ -17,20 +17,20 @@ use \Drupal\node\NodeTypeInterface;
  * Implements hook_theme().
  */
 function recipe_theme($existing, $type, $theme, $path) {
-  return array(
-    'ingredient_recipeml_formatter' => array(
-      'variables' => array('name' => NULL, 'quantity' => 0, 'unit_name' => '', 'unit_abbreviation' => '', 'unit_display' => 0, 'note' => ''),
-    ),
-    'recipe_duration' => array(
-      'variables' => array('duration' => 0),
-    ),
+  return [
+    'ingredient_recipeml_formatter' => [
+      'variables' => ['name' => NULL, 'quantity' => 0, 'unit_name' => '', 'unit_abbreviation' => '', 'unit_display' => 0, 'note' => ''],
+    ],
+    'recipe_duration' => [
+      'variables' => ['duration' => 0],
+    ],
     'recipe_total_time' => [
       'variables' => ['total_time' => 0, 'label' => t('Total time'), 'label_display' => 'above'],
     ],
     'recipe_yield' => [
       'variables' => ['yield' => '', 'label' => t('Yield'), 'label_display' => 'above'],
     ],
-  );
+  ];
 }
 
 /**

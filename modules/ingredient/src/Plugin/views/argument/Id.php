@@ -16,7 +16,7 @@ class Id extends NumericArgument {
    * Override the behavior of title(). Get the title of the node.
    */
   public function titleQuery() {
-    $titles = array();
+    $titles = [];
 
     $ingredients = Ingredient::loadMultiple($this->value);
     foreach ($ingredients as $ingredient) {
