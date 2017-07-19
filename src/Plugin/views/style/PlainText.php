@@ -68,7 +68,7 @@ class PlainText extends StylePluginBase {
       '#type' => 'number',
       '#title' => $this->t('Wordwrap width'),
       '#default_value' => $this->options['wordwrap_width'],
-      '#description' => $this->t('The number of characters at which text will wrap to the next line.')
+      '#description' => $this->t('The number of characters at which text will wrap to the next line.'),
     ];
     $form['hide_empty'] = [
       '#type' => 'checkbox',

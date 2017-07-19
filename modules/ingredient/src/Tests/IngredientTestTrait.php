@@ -53,36 +53,36 @@ trait IngredientTestTrait {
    *   A list of display settings that will be added to the display defaults.
    */
   protected function attachIngredientField($field_settings = [], $widget_settings = [], $display_settings = []) {
-    $field = array(
+    $field = [
       'field_name' => 'field_ingredient',
       'label' => $this->randomMachineName(16),
       'entity_type' => 'node',
       'bundle' => 'test_bundle',
       'required' => !empty($field_settings['required']),
       'settings' => $field_settings,
-    );
+    ];
     entity_create('field_config', $field)->save();
 
     $form_display = \Drupal::entityManager()->getStorage('entity_form_display')->load('node.test_bundle.default');
     $form_display->setComponent('field_ingredient', [
-        'type' => 'ingredient_autocomplete',
-        'settings' => $widget_settings,
-      ])
+      'type' => 'ingredient_autocomplete',
+      'settings' => $widget_settings,
+    ])
       ->save();
     // Assign display settings.
     $view_display = \Drupal::entityManager()->getStorage('entity_view_display')->load('node.test_bundle.default');
     $view_display->setComponent('field_ingredient', [
-        'label' => 'hidden',
-        'type' => 'ingredient_default',
-        'settings' => $display_settings,
-      ])
+      'label' => 'hidden',
+      'type' => 'ingredient_default',
+      'settings' => $display_settings,
+    ])
       ->save();
   }
 
   /**
    * Updates an existing ingredient field with new settings.
    */
-  function updateIngredientField($field_settings = [], $widget_settings = [], $display_settings = []) {
+  protected function updateIngredientField($field_settings = [], $widget_settings = [], $display_settings = []) {
     $field = FieldConfig::loadByName('node', 'test_bundle', 'field_ingredient');
     $field->setSettings(array_merge($field->getSettings(), $field_settings));
     $field->save();

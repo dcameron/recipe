@@ -88,6 +88,7 @@ class IngredientTranslationTest extends WebTestBase {
     $this->admin_user = $this->drupalCreateUser($permissions);
     $this->drupalLogin($this->admin_user);
   }
+
   /**
    * Tests Ingredient translation.
    */

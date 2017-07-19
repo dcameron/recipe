@@ -29,7 +29,7 @@ class Ingredient extends WizardPluginBase {
    *   corresponding values are human readable labels.
    */
   public function getAvailableSorts() {
-    // You can't execute functions in properties, so override the method
+    // You can't execute functions in properties, so override the method.
     return [
       'ingredient_field_data-name:ASC' => $this->t('Name'),
     ];
@@ -115,6 +115,7 @@ class Ingredient extends WizardPluginBase {
         $display_options['row']['type'] = 'entity:ingredient';
         $display_options['row']['options']['view_mode'] = 'full';
         break;
+
       case 'names_linked':
       case 'names':
         $display_options['row']['type'] = 'fields';

@@ -8,7 +8,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\ingredient\IngredientUnitTrait;
 use Drupal\ingredient\Plugin\Field\FieldFormatter\IngredientFormatter;
 
-
 /**
  * Plugin implementation of the 'ingredient_recipeml' formatter.
  *
@@ -38,7 +37,6 @@ class IngredientRecipeMLFormatter extends IngredientFormatter {
   /**
    * {@inheritdoc}
    */
-
   public function settingsForm(array $form, FormStateInterface $form_state) {
     // Remove the entity link element from the parent's settings form.
     $element = parent::settingsForm($form, $form_state);

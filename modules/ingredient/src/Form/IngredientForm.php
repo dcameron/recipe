@@ -18,4 +18,5 @@ class IngredientForm extends ContentEntityForm {
     $entity = $this->getEntity();
     $entity->save();
   }
+
 }

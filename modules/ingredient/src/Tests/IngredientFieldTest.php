@@ -151,7 +151,7 @@ class IngredientFieldTest extends WebTestBase {
   /**
    * Tests ingredient formatter settings.
    *
-   * todo: Add assertions for singular/plural unit full names.
+   * @todo Add assertions for singular/plural unit full names.
    */
   public function testIngredientFormatterSettings() {
     $this->createIngredientField();

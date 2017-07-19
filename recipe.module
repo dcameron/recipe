@@ -1,17 +1,18 @@
 <?php
+
 /**
  * @file
  * Contains functions for Recipe node CRUD and display.
  */
 
 use Drupal\Core\Cache\Cache;
-use \Drupal\Core\Entity\EntityInterface;
-use \Drupal\Core\Entity\Display\EntityViewDisplayInterface;
-use \Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Template\Attribute;
-use \Drupal\field\FieldConfigInterface;
-use \Drupal\node\Entity\NodeType;
-use \Drupal\node\NodeTypeInterface;
+use Drupal\field\FieldConfigInterface;
+use Drupal\node\Entity\NodeType;
+use Drupal\node\NodeTypeInterface;
 
 /**
  * Implements hook_theme().
@@ -126,8 +127,8 @@ function recipe_form_field_config_edit_form_alter(&$form, FormStateInterface $fo
  *
  * Adds recipe options to the node type form.
  *
- * @see NodeTypeForm::form().
- * @see recipe_form_node_type_form_builder().
+ * @see NodeTypeForm::form()
+ * @see recipe_form_node_type_form_builder()
  */
 function recipe_form_node_type_edit_form_alter(&$form, FormStateInterface $form_state) {
   $node_type = $form_state->getFormObject()->getEntity();
@@ -197,7 +198,7 @@ function recipe_form_node_type_edit_form_alter(&$form, FormStateInterface $form_
 /**
  * Entity builder for the node type form with menu options.
  *
- * @see recipe_form_node_type_form_alter().
+ * @see recipe_form_node_type_form_alter()
  */
 function recipe_form_node_type_form_builder($entity_type, NodeTypeInterface $type, &$form, FormStateInterface $form_state) {
   $type->setThirdPartySetting('recipe', 'total_time_label', $form_state->getValue('recipe_total_time_label'));
@@ -406,11 +407,12 @@ function recipe_entity_extra_field_info() {
  *
  * @param string $in_str
  *   A string with possible ISO-8859-1 chars.
+ *
  * @return string
  *   A UTF8 string representation of $in_str.
  */
 function fixEncoding($in_str) {
-  $cur_encoding = mb_detect_encoding($in_str) ;
+  $cur_encoding = mb_detect_encoding($in_str);
   if ($cur_encoding == "UTF-8" && mb_check_encoding($in_str, "UTF-8")) {
     return $in_str;
   }
@@ -437,6 +439,7 @@ function template_preprocess_recipe_duration(&$variables) {
  *
  * @param $duration
  *   An integer or array with 'value' element representing a time duration.
+ *
  * @return string
  *   A string representing a time duration in ISO 8601 format.
  */
@@ -484,7 +487,7 @@ function template_preprocess_recipe_view_plain_text(&$variables) {
 
     // Process the row fields.
     foreach ($view->field as $id => $field) {
-      // render this even if set to exclude so it can be used elsewhere.
+      // Render this even if set to exclude so it can be used elsewhere.
       $field_output = $view->style_plugin->getField($row->index, $id);
       $empty = $field->isValueEmpty($field_output, $field->options['empty_zero']);
       if (empty($field->options['exclude']) && (!$empty || (empty($field->options['hide_empty']) && empty($variables['options']['hide_empty'])))) {
@@ -499,10 +502,11 @@ function template_preprocess_recipe_view_plain_text(&$variables) {
           $object->raw = $row->{$view->field[$id]->field_alias};
         }
         else {
-          $object->raw = NULL; // make sure it exists to reduce NOTICE
+          // Make sure it exists to reduce NOTICE.
+          $object->raw = NULL;
         }
 
-        // Set up field label
+        // Set up field label.
         $object->label = $view->field[$id]->label();
 
         // Set up field label wrapper and its attributes.

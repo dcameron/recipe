@@ -33,7 +33,7 @@ class IngredientWidget extends WidgetBase {
     $units = $this->getConfiguredUnits($this->getFieldSetting('unit_sets'));
     $units = $this->sortUnitsByName($units);
 
-    // Strange, but html_entity_decode() doesn't handle &frasl;
+    // Strange, but html_entity_decode() doesn't handle &frasl;.
     $quantity = isset($items[$delta]->quantity) ? preg_replace('/\&frasl;/', '/', ingredient_quantity_from_decimal($items[$delta]->quantity, '{%d} %d&frasl;%d', TRUE)) : '';
     $element['quantity'] = [
       '#type' => 'textfield',

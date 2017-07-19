@@ -74,7 +74,6 @@ class Recipe extends PathPluginBase implements ResponseDisplayPluginInterface {
     return $response;
   }
 
-
   /**
    * {@inheritdoc}
    */

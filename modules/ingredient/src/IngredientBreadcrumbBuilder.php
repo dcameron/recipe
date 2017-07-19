@@ -33,4 +33,5 @@ class IngredientBreadcrumbBuilder implements BreadcrumbBuilderInterface {
     $breadcrumb->addCacheContexts(['route']);
     return $breadcrumb;
   }
+
 }

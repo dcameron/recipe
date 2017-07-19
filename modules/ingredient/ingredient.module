@@ -69,7 +69,6 @@ function ingredient_is_page(Ingredient $ingredient) {
   return FALSE;
 }
 
-
 /**
  * Converts an ingredient's quantity from decimal to fraction.
  */
@@ -115,11 +114,11 @@ function ingredient_quantity_from_decimal($ingredient_quantity, $fraction_format
     // twelfths.
       '9166' => [11, 12],
     ];
-    // truncate the whole part to get just the fractional part
+    // Truncate the whole part to get just the fractional part.
     $conversionstr = substr((string) ($decimal - floor($decimal)), 2, 4);
     if (array_key_exists($conversionstr, $overrides)) {
       if ($overrides[$conversionstr][0] == $overrides[$conversionstr][1]) {
-          return ($whole + 1);
+        return ($whole + 1);
       }
       $denominator = $overrides[$conversionstr][1];
       $numerator   = (floor($decimal) * $denominator) + $overrides[$conversionstr][0];
@@ -129,11 +128,11 @@ function ingredient_quantity_from_decimal($ingredient_quantity, $fraction_format
       $denominator = $power;
     }
 
-    // repeating decimals have been corrected
+    // Repeating decimals have been corrected.
     $gcd = ingredient_greatest_common_divisor($numerator, $denominator);
 
-    $numerator = $numerator/$gcd;
-    $denominator = $denominator/$gcd;
+    $numerator = $numerator / $gcd;
+    $denominator = $denominator / $gcd;
     $top_heavy = $numerator;
 
     $numerator = abs($top_heavy) - (abs($whole) * $denominator);
@@ -150,7 +149,7 @@ function ingredient_quantity_from_decimal($ingredient_quantity, $fraction_format
     }
 
     // In edit mode we don't want to show html tags like <sup> and <sub>.
-    if ( $edit_mode ) {
+    if ($edit_mode) {
       $ingredient_quantity = strip_tags($ingredient_quantity);
     }
   }
@@ -162,7 +161,7 @@ function ingredient_quantity_from_decimal($ingredient_quantity, $fraction_format
  * Finds the greatest common divisor of two numbers.
  */
 function ingredient_greatest_common_divisor($a, $b) {
-  while ( $b != 0) {
+  while ($b != 0) {
     $remainder = $a % $b;
     $a = $b;
     $b = $remainder;
@@ -189,7 +188,7 @@ function ingredient_quantity_from_fraction($ingredient_quantity) {
     $whole = substr($ingredient_quantity, 0, $pos_space);
     $numerator = substr($ingredient_quantity, $pos_space, $pos_slash);
     $denominator = substr($ingredient_quantity, $pos_slash + 1);
-    $ingredient_quantity = $whole+($numerator/$denominator);
+    $ingredient_quantity = $whole + ($numerator / $denominator);
   }
 
   return $ingredient_quantity;

@@ -220,7 +220,7 @@ class RecipeML extends StylePluginBase {
 
       $rows[] = [
         'langcode' => $row->_entity->language()->getId(),
-        'title' => $this->getField($row_index,  $this->options['title_field']),
+        'title' => $this->getField($row_index, $this->options['title_field']),
         'version' => $this->getField($row_index, $this->options['version_field']),
         'source' => $this->getField($row_index, $this->options['source_field']),
         'time_fields' => $time_fields,

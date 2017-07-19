@@ -31,4 +31,5 @@ class RecipeTestBase extends WebTestBase {
     $this->admin_user = $this->drupalCreateUser(['create recipe content', 'edit any recipe content', 'administer site configuration', 'view ingredient']);
     $this->drupalLogin($this->admin_user);
   }
+
 }

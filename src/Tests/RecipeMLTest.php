@@ -67,11 +67,11 @@ class RecipeMLTest extends RecipeTestBase {
     $result = current($this->xpath("//recipe/source"));
     $this->assertEqual($result->p, $source, 'Found the recipe source.');
     $result = current($this->xpath("//recipe/preptime[@type='Preparation time']"));
-    $this->assertEqual($result->time->qty, 60,  'Found the recipe preparation time.');
+    $this->assertEqual($result->time->qty, 60, 'Found the recipe preparation time.');
     $result = current($this->xpath("//recipe/preptime[@type='Cooking time']"));
-    $this->assertEqual($result->time->qty, 135,  'Found the recipe cooking time.');
+    $this->assertEqual($result->time->qty, 135, 'Found the recipe cooking time.');
     $result = current($this->xpath("//recipe/preptime[@type='Total time']"));
-    $this->assertEqual($result->time->qty, 195,  'Found the recipe total time.');
+    $this->assertEqual($result->time->qty, 195, 'Found the recipe total time.');
     $result = current($this->xpath("//recipe/yield"));
     $this->assertEqual($result->qty, $yield_amount, 'Found the recipe yield.');
     $this->assertEqual($result->unit, $yield_unit, 'Found the recipe yield unit.');

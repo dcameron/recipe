@@ -13,6 +13,6 @@ class IngredientFieldItemList extends EntityReferenceFieldItemList {
   /**
    * {@inheritdoc}
    */
-  public function defaultValuesForm(array &$form, FormStateInterface $form_state) { }
+  public function defaultValuesForm(array &$form, FormStateInterface $form_state) {}
 
 }
