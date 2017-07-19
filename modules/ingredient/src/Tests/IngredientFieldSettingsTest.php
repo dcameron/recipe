@@ -27,6 +27,9 @@ class IngredientFieldSettingsTest extends WebTestBase {
    */
   protected $admin_user;
 
+  /**
+   * {@inheritdoc}
+   */
   public function setUp() {
     parent::setUp();
 

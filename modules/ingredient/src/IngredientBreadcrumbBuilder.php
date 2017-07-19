@@ -8,6 +8,9 @@ use Drupal\Core\Link;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
+/**
+ * Builds breadcrumbs for Ingredient entities.
+ */
 class IngredientBreadcrumbBuilder implements BreadcrumbBuilderInterface {
 
   use StringTranslationTrait;

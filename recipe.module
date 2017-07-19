@@ -421,6 +421,16 @@ function fixEncoding($in_str) {
   }
 }
 
+/**
+ * Prepares variables for the recipe duration template.
+ *
+ * Default template: recipe-duration.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - hours: The amount of hours in the time duration.
+ *   - minutes: The amount of minutes in the time duration.
+ */
 function template_preprocess_recipe_duration(&$variables) {
   $hours = floor($variables['duration'] / 60);
   $minutes = $variables['duration'] % 60;

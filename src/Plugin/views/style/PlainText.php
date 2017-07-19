@@ -36,6 +36,9 @@ class PlainText extends StylePluginBase {
    */
   protected $usesFields = TRUE;
 
+  /**
+   * {@inheritdoc}
+   */
   public function attachTo(array &$build, $display_id, Url $url, $title) {
     $url_options = [];
     $input = $this->view->getExposedInput();
@@ -53,6 +56,9 @@ class PlainText extends StylePluginBase {
     ];
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function defineOptions() {
     $options = parent::defineOptions();
     $options['wordwrap_width'] = ['default' => 75];
@@ -61,6 +67,9 @@ class PlainText extends StylePluginBase {
     return $options;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
 

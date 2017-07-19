@@ -23,6 +23,9 @@ class RecipeTestBase extends WebTestBase {
    */
   protected $admin_user;
 
+  /**
+   * {@inheritdoc}
+   */
   public function setUp() {
     parent::setUp();
     $this->drupalPlaceBlock('system_breadcrumb_block');

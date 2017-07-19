@@ -9,6 +9,9 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\node\NodeInterface;
 
+/**
+ * Builds breadcrumbs for Recipe nodes.
+ */
 class RecipeBreadcrumbBuilder implements BreadcrumbBuilderInterface {
   use StringTranslationTrait;
 

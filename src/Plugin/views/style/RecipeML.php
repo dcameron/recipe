@@ -55,6 +55,9 @@ class RecipeML extends StylePluginBase {
    */
   protected $usesFields = TRUE;
 
+  /**
+   * {@inheritdoc}
+   */
   public function attachTo(array &$build, $display_id, Url $url, $title) {
     $url_options = [];
     $input = $this->view->getExposedInput();
@@ -72,6 +75,9 @@ class RecipeML extends StylePluginBase {
     ];
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function defineOptions() {
     $options = parent::defineOptions();
     $options['title_field'] = ['default' => ''];
@@ -86,6 +92,9 @@ class RecipeML extends StylePluginBase {
     return $options;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
 
@@ -162,6 +171,9 @@ class RecipeML extends StylePluginBase {
     ];
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function validate() {
     $errors = parent::validate();
     $required_options = ['title_field', 'ingredients_field', 'directions_field'];

@@ -71,6 +71,9 @@ class IngredientTranslationTest extends WebTestBase {
    */
   protected $admin_user;
 
+  /**
+   * {@inheritdoc}
+   */
   public function setUp() {
     parent::setUp();
     $this->ingredientCreateContentType();
