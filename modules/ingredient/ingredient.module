@@ -185,9 +185,9 @@ function ingredient_quantity_from_fraction($ingredient_quantity) {
       $pos_space = 0;
     }
 
-    $whole = substr($ingredient_quantity, 0, $pos_space);
-    $numerator = substr($ingredient_quantity, $pos_space, $pos_slash);
-    $denominator = substr($ingredient_quantity, $pos_slash + 1);
+    $whole = (int) substr($ingredient_quantity, 0, $pos_space);
+    $numerator = (int) substr($ingredient_quantity, $pos_space, $pos_slash);
+    $denominator = (int) substr($ingredient_quantity, $pos_slash + 1);
     $ingredient_quantity = $whole + ($numerator / $denominator);
   }
 
