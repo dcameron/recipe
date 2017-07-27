@@ -48,6 +48,9 @@ trait IngredientTestTrait {
    *   A list of widget settings that will be added to the widget defaults.
    * @param array $display_settings
    *   A list of display settings that will be added to the display defaults.
+   *
+   * @return \Drupal\Core\Field\FieldStorageDefinitionInterface
+   *   The ingredient field's storage definition.
    */
   protected function createIngredientField($storage_settings = [], $field_settings = [], $widget_settings = [], $display_settings = []) {
     $field_storage = $this->getEntityTypeManager()->getStorage('field_storage_config')->create([
@@ -110,6 +113,13 @@ trait IngredientTestTrait {
 
   /**
    * Updates an existing ingredient field with new settings.
+   *
+   * @param array $field_settings
+   *   A list of field settings that will be added to the defaults.
+   * @param array $widget_settings
+   *   A list of widget settings that will be added to the widget defaults.
+   * @param array $display_settings
+   *   A list of display settings that will be added to the display defaults.
    */
   protected function updateIngredientField($field_settings = [], $widget_settings = [], $display_settings = []) {
     $field = FieldConfig::loadByName('node', 'test_bundle', 'field_ingredient');

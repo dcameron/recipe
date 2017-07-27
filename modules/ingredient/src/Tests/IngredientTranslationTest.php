@@ -17,7 +17,7 @@ class IngredientTranslationTest extends WebTestBase {
   use IngredientTestTrait;
 
   /**
-   * The content transation manager service.
+   * The content translation manager service.
    *
    * @var \Drupal\content_translation\ContentTranslationManagerInterface
    */
@@ -81,7 +81,7 @@ class IngredientTranslationTest extends WebTestBase {
   /**
    * Modules to enable.
    *
-   * @var array
+   * @var string[]
    */
   public static $modules = ['content_translation', 'ingredient', 'node'];
 

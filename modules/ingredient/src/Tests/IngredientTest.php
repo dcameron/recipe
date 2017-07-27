@@ -16,7 +16,7 @@ class IngredientTest extends WebTestBase {
   /**
    * Modules to enable.
    *
-   * @var array
+   * @var string[]
    */
   public static $modules = ['block', 'ingredient', 'field_ui', 'views'];
 

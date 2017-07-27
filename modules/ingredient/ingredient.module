@@ -61,6 +61,9 @@ function template_preprocess_ingredient(&$variables) {
  *
  * @param \Drupal\ingredient\Entity\Ingredient $ingredient
  *   A ingredient entity.
+ *
+ * @return int|false
+ *   The ingredient's ID if displaying an ingredient's page, FALSE otherwise.
  */
 function ingredient_is_page(Ingredient $ingredient) {
   if (\Drupal::routeMatch()->getRouteName() == 'entity.ingredient.canonical' && $page_id = \Drupal::routeMatch()->getRawParameter('ingredient')) {
@@ -71,6 +74,16 @@ function ingredient_is_page(Ingredient $ingredient) {
 
 /**
  * Converts an ingredient's quantity from decimal to fraction.
+ *
+ * @param float $ingredient_quantity
+ *   The ingredient quantity formatted as a decimal.
+ * @param string $fraction_format
+ *   A string representing the fraction format, used by sprintf().
+ * @param bool $edit_mode
+ *   Whether or not the ingredient is being edited.
+ *
+ * @return string
+ *   The ingredient quantity formatted as a fraction.
  */
 function ingredient_quantity_from_decimal($ingredient_quantity, $fraction_format = '{%d} %d&frasl;%d', $edit_mode = FALSE) {
   if (strpos($ingredient_quantity, '.')) {
@@ -159,6 +172,14 @@ function ingredient_quantity_from_decimal($ingredient_quantity, $fraction_format
 
 /**
  * Finds the greatest common divisor of two numbers.
+ *
+ * @param int $a
+ *   The initial dividend of the operation.
+ * @param int $b
+ *   The initial divisor of the operation.
+ *
+ * @return int
+ *   The greatest common divisor of $a and $b.
  */
 function ingredient_greatest_common_divisor($a, $b) {
   while ($b != 0) {
@@ -171,6 +192,12 @@ function ingredient_greatest_common_divisor($a, $b) {
 
 /**
  * Converts an ingredient's quantity from fraction to decimal.
+
+ * @param string $ingredient_quantity
+ *   The ingredient quantity formatted as a fraction.
+ *
+ * @return float
+ *   The ingredient quantity formatted as a decimal.
  */
 function ingredient_quantity_from_fraction($ingredient_quantity) {
   // Replace a dash separated fraction with a ' ' to normalize the input string.
@@ -200,7 +227,7 @@ function ingredient_quantity_from_fraction($ingredient_quantity) {
  * @param string $subject
  *   The unit of measure for which the function will search.
  *
- * @return
+ * @return string|false
  *   The unit's key from configuration or FALSE if there was no match.
  */
 function ingredient_unit_fuzzymatch($subject) {

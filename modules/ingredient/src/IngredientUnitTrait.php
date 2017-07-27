@@ -10,10 +10,10 @@ trait IngredientUnitTrait {
   /**
    * Returns an array of units from configuration.
    *
-   * @param array $sets_to_get
+   * @param string[] $sets_to_get
    *   An array of set id strings.
    *
-   * @return array
+   * @return string[]
    *   An array of units.
    */
   protected function getConfiguredUnits($sets_to_get = []) {

@@ -12,7 +12,7 @@ class RecipeTestBase extends WebTestBase {
   /**
    * Modules to enable.
    *
-   * @var array
+   * @var string[]
    */
   public static $modules = ['block', 'recipe', 'views'];
 

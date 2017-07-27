@@ -17,7 +17,7 @@ class IngredientFieldTest extends WebTestBase {
   /**
    * Modules to enable.
    *
-   * @var array
+   * @var string[]
    */
   public static $modules = ['field_ui', 'ingredient', 'node'];
 

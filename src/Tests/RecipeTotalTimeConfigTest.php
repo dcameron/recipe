@@ -15,7 +15,7 @@ class RecipeTotalTimeConfigTest extends WebTestBase {
   /**
    * Modules to enable.
    *
-   * @var array
+   * @var string[]
    */
   public static $modules = ['recipe'];
 
