@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\recipe\Tests;
+namespace Drupal\Tests\recipe\Functional;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Url;
@@ -101,7 +101,7 @@ class RecipeNodeTest extends RecipeTestBase {
     $links = $this->xpath('//nav[@class="breadcrumb"]/ol/li/a');
     $got_breadcrumb = [];
     foreach ($links as $link) {
-      $got_breadcrumb[] = (string) $link['href'];
+      $got_breadcrumb[] = (string) $link->getAttribute('href');
     }
 
     // Compare expected and got breadcrumbs.
