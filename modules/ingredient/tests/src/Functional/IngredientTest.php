@@ -1,17 +1,17 @@
 <?php
 
-namespace Drupal\ingredient\Tests;
+namespace Drupal\Tests\ingredient\Functional;
 
 use Drupal\Core\URL;
 use Drupal\ingredient\Entity\Ingredient;
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Tests Ingredient CRUD functions.
  *
  * @group recipe
  */
-class IngredientTest extends WebTestBase {
+class IngredientTest extends BrowserTestBase {
 
   /**
    * Modules to enable.
@@ -94,7 +94,7 @@ class IngredientTest extends WebTestBase {
     $links = $this->xpath('//nav[@class="breadcrumb"]/ol/li/a');
     $got_breadcrumb = [];
     foreach ($links as $link) {
-      $got_breadcrumb[] = (string) $link['href'];
+      $got_breadcrumb[] = $link->getAttribute('href');
     }
 
     // Compare expected and got breadcrumbs.
