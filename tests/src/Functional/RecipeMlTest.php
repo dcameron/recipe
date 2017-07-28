@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\recipe\Tests;
+namespace Drupal\Tests\recipe\Functional;
 
 use Drupal\views\Views;
 
@@ -9,7 +9,7 @@ use Drupal\views\Views;
  *
  * @group recipe
  */
-class RecipeMLTest extends RecipeTestBase {
+class RecipeMlTest extends RecipeTestBase {
 
   /**
    * Tests the display of Recipe nodes using the RecipeML Views style plugin.
@@ -60,30 +60,35 @@ class RecipeMLTest extends RecipeTestBase {
 
     // Check the page for the recipe content.
     $this->drupalGet('node/1/recipeml');
-    $result = current($this->xpath("//recipe/@*[name()='xml:lang']"));
+    $driver = $this->getSession()->getDriver();
+    $result = $driver->getAttribute('//recipe', 'xml:lang');
     $this->assertEqual($result, 'en', 'Found the xml:lang attribute.');
-    $result = current($this->xpath("//recipe/title"));
+    $result = $driver->getText("//recipe/head/title");
     $this->assertEqual($result, $title, 'Found the recipe title.');
-    $result = current($this->xpath("//recipe/source"));
-    $this->assertEqual($result->p, $source, 'Found the recipe source.');
-    $result = current($this->xpath("//recipe/preptime[@type='Preparation time']"));
-    $this->assertEqual($result->time->qty, 60, 'Found the recipe preparation time.');
-    $result = current($this->xpath("//recipe/preptime[@type='Cooking time']"));
-    $this->assertEqual($result->time->qty, 135, 'Found the recipe cooking time.');
-    $result = current($this->xpath("//recipe/preptime[@type='Total time']"));
-    $this->assertEqual($result->time->qty, 195, 'Found the recipe total time.');
-    $result = current($this->xpath("//recipe/yield"));
-    $this->assertEqual($result->qty, $yield_amount, 'Found the recipe yield.');
-    $this->assertEqual($result->unit, $yield_unit, 'Found the recipe yield unit.');
-    $result = current($this->xpath("//recipe/description"));
-    $this->assertEqual($result->p, $description, 'Found the recipe description.');
-    $result = current($this->xpath("//recipe/ingredients/ing"));
-    $this->assertEqual($result->amt->qty, $ing_0_quantity, 'Found the ingredient 0 quantity');
-    $this->assertEqual($result->amt->unit, 'T', 'Found the ingredient 0 unit');
-    $this->assertEqual($result->item, $ing_0_name, 'Found the ingredient 0 name');
-    $this->assertEqual($result->prep, $ing_0_note, 'Found the ingredient 0 note');
-    $result = current($this->xpath("//recipe/directions"));
-    $this->assertEqual($result->p, $instructions, 'Found the recipe instructions');
+    $result = $driver->getText("//recipe/head/source");
+    $this->assertEqual($result, $source, 'Found the recipe source.');
+    $result = $driver->getText("//recipe/head/preptime[@type='Preparation time']/time/qty");
+    $this->assertEqual($result, 60, 'Found the recipe preparation time.');
+    $result = $driver->getText("//recipe/head/preptime[@type='Cooking time']/time/qty");
+    $this->assertEqual($result, 135, 'Found the recipe cooking time.');
+    $result = $driver->getText("//recipe/head/preptime[@type='Total time']/time/qty");
+    $this->assertEqual($result, 195, 'Found the recipe total time.');
+    $result = $driver->getText("//recipe/head/yield/qty");
+    $this->assertEqual($result, $yield_amount, 'Found the recipe yield.');
+    $result = $driver->getText("//recipe/head/yield/unit");
+    $this->assertEqual($result, $yield_unit, 'Found the recipe yield unit.');
+    $result = $driver->getText("//recipe/description");
+    $this->assertEqual($result, $description, 'Found the recipe description.');
+    $result = $driver->getText("//recipe/ingredients/ing/amt/qty");
+    $this->assertEqual($result, $ing_0_quantity, 'Found the ingredient 0 quantity');
+    $result = $driver->getText("//recipe/ingredients/ing/amt/unit");
+    $this->assertEqual($result, 'T', 'Found the ingredient 0 unit');
+    $result = $driver->getText("//recipe/ingredients/ing/item");
+    $this->assertEqual($result, $ing_0_name, 'Found the ingredient 0 name');
+    $result = $driver->getText("//recipe/ingredients/ing/prep");
+    $this->assertEqual($result, $ing_0_note, 'Found the ingredient 0 note');
+    $result = $driver->getText("//recipe/directions");
+    $this->assertEqual($result, $instructions, 'Found the recipe instructions');
   }
 
 }
