@@ -1,15 +1,15 @@
 <?php
 
-namespace Drupal\recipe\Tests;
+namespace Drupal\Tests\recipe\Functional;
 
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Tests the functionality of the Recipe module settings.
  *
  * @group recipe
  */
-class RecipeSettingsTest extends WebTestBase {
+class RecipeSettingsTest extends BrowserTestBase {
 
   /**
    * Modules to enable.
