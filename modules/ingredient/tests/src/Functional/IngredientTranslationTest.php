@@ -1,18 +1,20 @@
 <?php
 
-namespace Drupal\ingredient\Tests;
+namespace Drupal\Tests\ingredient\Functional;
 
 use Drupal\ingredient\Entity\Ingredient;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\Node;
 use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\ingredient\Traits\IngredientTestTrait;
 
 /**
  * Tests the translatability of Ingredient entities.
  *
  * @group recipe
  */
-class IngredientTranslationTest extends WebTestBase {
+class IngredientTranslationTest extends BrowserTestBase {
 
   use IngredientTestTrait;
 
