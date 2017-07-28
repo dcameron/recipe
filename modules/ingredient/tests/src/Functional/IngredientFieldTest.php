@@ -1,16 +1,17 @@
 <?php
 
-namespace Drupal\ingredient\Tests;
+namespace Drupal\Tests\ingredient\Functional;
 
 use Drupal\Component\Render\FormattableMarkup;
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\ingredient\Traits\IngredientTestTrait;
 
 /**
  * Tests the functionality of the ingredient field.
  *
  * @group recipe
  */
-class IngredientFieldTest extends WebTestBase {
+class IngredientFieldTest extends BrowserTestBase {
 
   use IngredientTestTrait;
 
