@@ -1,15 +1,16 @@
 <?php
 
-namespace Drupal\ingredient\Tests;
+namespace Drupal\Tests\ingredient\Functional;
 
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\ingredient\Traits\IngredientTestTrait;
 
 /**
  * Tests the functionality of the ingredient field settings.
  *
  * @group recipe
  */
-class IngredientFieldSettingsTest extends WebTestBase {
+class IngredientFieldSettingsTest extends BrowserTestBase {
 
   use IngredientTestTrait;
 
