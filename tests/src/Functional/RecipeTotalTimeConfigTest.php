@@ -1,16 +1,16 @@
 <?php
 
-namespace Drupal\recipe\Tests;
+namespace Drupal\Tests\recipe\Functional;
 
 use Drupal\field\Entity\FieldConfig;
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Tests the functionality of the Recipe Total Time third-party settings.
  *
  * @group recipe
  */
-class RecipeTotalTimeConfigTest extends WebTestBase {
+class RecipeTotalTimeConfigTest extends BrowserTestBase {
 
   /**
    * Modules to enable.
