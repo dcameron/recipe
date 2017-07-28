@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\recipe\Tests;
+namespace Drupal\Tests\recipe\Functional;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\views\Views;
