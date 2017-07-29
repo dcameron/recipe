@@ -62,10 +62,10 @@ class RecipeTotalTimeConfigTest extends BrowserTestBase {
 
     // Post the values to the node form.
     $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
-    $this->assertText(t('Recipe @title has been created.', ['@title' => $title]));
+    $this->assertSession()->pageTextContains(t('Recipe @title has been created.', ['@title' => $title]));
 
     // Check for the total time.
-    $this->assertText('3 hours, 15 minutes', 'Found the total time calculated from the default Recipe fields.');
+    $this->assertSession()->pageTextContains('3 hours, 15 minutes');
 
     // Add another integer field, but don't configure it as a total time field.
     $field_name = strtolower($this->randomMachineName());
@@ -82,22 +82,22 @@ class RecipeTotalTimeConfigTest extends BrowserTestBase {
 
     // Check for the new field's value.
     $this->drupalGet('node/1');
-    $this->assertText('20 minutes', "Found the new field's value.");
-    $this->assertText('3 hours, 15 minutes', 'The total time has not been altered.');
+    $this->assertSession()->pageTextContains('20 minutes');
+    $this->assertSession()->pageTextContains('3 hours, 15 minutes');
 
     // Configure the new field as a total time field.
     $this->updateFieldThirdPartySetting($field_name, 'node', 'recipe', 'total_time', 1);
 
     // Check for the updated total time value.
     $this->drupalGet('node/1');
-    $this->assertText('3 hours, 35 minutes', 'The total time has been altered.');
+    $this->assertSession()->pageTextContains('3 hours, 35 minutes');
 
     // De-configure the recipe_cook_time field as a total time field.
     $this->updateFieldThirdPartySetting('recipe_cook_time', 'node', 'recipe', 'total_time', 0);
 
     // Check that fields can be de-configured as total time fields.
     $this->drupalGet('node/1');
-    $this->assertText('1 hour, 20 minutes', 'The total time has been altered.');
+    $this->assertSession()->pageTextContains('1 hour, 20 minutes');
   }
 
   /**

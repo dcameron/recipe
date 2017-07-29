@@ -125,19 +125,19 @@ class IngredientTranslationTest extends BrowserTestBase {
 
     // Check the Ingredient entity display views for the names.
     $this->drupalGet($ingredient_path);
-    $this->assertNoText($this->translatedIngredientName);
-    $this->assertText($this->baseIngredientName);
+    $this->assertSession()->pageTextNotContains($this->translatedIngredientName);
+    $this->assertSession()->pageTextContains($this->baseIngredientName);
     $this->drupalGet($ingredient_translation_path);
-    $this->assertText($this->translatedIngredientName);
-    $this->assertNoText($this->baseIngredientName);
+    $this->assertSession()->pageTextContains($this->translatedIngredientName);
+    $this->assertSession()->pageTextNotContains($this->baseIngredientName);
 
     // Check the Node display views for the names.
     $this->drupalGet($node_path);
-    $this->assertNoText($this->translatedIngredientName);
-    $this->assertText($this->baseIngredientName);
+    $this->assertSession()->pageTextNotContains($this->translatedIngredientName);
+    $this->assertSession()->pageTextContains($this->baseIngredientName);
     $this->drupalGet($node_translation_path);
-    $this->assertText($this->translatedIngredientName);
-    $this->assertNoText($this->baseIngredientName);
+    $this->assertSession()->pageTextContains($this->translatedIngredientName);
+    $this->assertSession()->pageTextNotContains($this->baseIngredientName);
   }
 
   /**

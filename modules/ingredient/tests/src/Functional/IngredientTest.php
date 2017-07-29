@@ -62,11 +62,11 @@ class IngredientTest extends BrowserTestBase {
     $this->drupalGet('admin/content/ingredient');
 
     // WebUser can add entity content.
-    $this->assertLink(t('Add Ingredient'));
+    $this->assertSession()->linkExists('Add Ingredient');
 
     $this->clickLink(t('Add Ingredient'));
 
-    $this->assertFieldByName('name[0][value]', '', 'Name Field, empty');
+    $this->assertSession()->fieldExists('name[0][value]');
 
     // Post content, save an instance. Go back to list after saving.
     $edit = [
@@ -75,15 +75,15 @@ class IngredientTest extends BrowserTestBase {
     $this->drupalPostForm(NULL, $edit, t('Save'));
 
     // Entity listed.
-    $this->assertLink(t('Edit'));
-    $this->assertLink(t('Delete'));
+    $this->assertSession()->linkExists('Edit');
+    $this->assertSession()->linkExists('Delete');
 
     $this->clickLink('test name');
 
     // Entity shown.
-    $this->assertText(t('test name'));
-    $this->assertLink(t('Edit'));
-    $this->assertLink(t('Delete'));
+    $this->assertSession()->pageTextContains('test name');
+    $this->assertSession()->pageTextContains('Edit');
+    $this->assertSession()->pageTextContains('Delete');
 
     // Check for the breadcrumb.
     $expected_breadcrumb = [];
@@ -98,27 +98,27 @@ class IngredientTest extends BrowserTestBase {
     }
 
     // Compare expected and got breadcrumbs.
-    $this->assertIdentical($expected_breadcrumb, $got_breadcrumb, 'The breadcrumb is correctly displayed on the page.');
+    $this->assertSame($expected_breadcrumb, $got_breadcrumb, 'The breadcrumb is correctly displayed on the page.');
 
     // Delete the entity.
     $this->clickLink('Delete');
 
     // Confirm deletion.
-    $this->assertLink(t('Cancel'));
+    $this->assertSession()->linkExists('Cancel');
     $this->drupalPostForm(NULL, [], 'Delete');
 
     // Back to list, must be empty.
-    $this->assertNoText('test name');
+    $this->assertSession()->pageTextNotContains('test name');
 
     // Settings page.
     $this->drupalGet('admin/structure/ingredient_settings');
-    $this->assertText(t('Ingredient Settings'));
+    $this->assertSession()->pageTextContains('Ingredient Settings');
 
     // Make sure the field manipulation links are available.
-    $this->assertLink(t('Settings'));
-    $this->assertLink(t('Manage fields'));
-    $this->assertLink(t('Manage form display'));
-    $this->assertLink(t('Manage display'));
+    $this->assertSession()->linkExists('Settings');
+    $this->assertSession()->linkExists('Manage fields');
+    $this->assertSession()->linkExists('Manage form display');
+    $this->assertSession()->linkExists('Manage display');
   }
 
   /**
@@ -149,7 +149,7 @@ class IngredientTest extends BrowserTestBase {
         $this->drupalLogin($user);
       }
       $this->drupalGet($datum[1]);
-      $this->assertResponse($datum[0]);
+      $this->assertSession()->statusCodeEquals($datum[0]);
     }
   }
 
@@ -246,7 +246,7 @@ class IngredientTest extends BrowserTestBase {
 
     // Verify that ingredient normalization is off by default.
     $this->drupalGet('admin/structure/ingredient_settings');
-    $this->assertFieldChecked('edit-ingredient-name-normalize-0', 'Ingredient normalization is off by default.');
+    $this->assertSession()->checkboxChecked('edit-ingredient-name-normalize-0');
 
     // Add a new ingredient with capitalized characters in the name.
     $edit = [
@@ -254,7 +254,7 @@ class IngredientTest extends BrowserTestBase {
     ];
     $this->drupalPostForm('ingredient/add', $edit, t('Save'));
     // Verify that the name did not change on save.
-    $this->assertText('TeSt InGrEdIeNt 1', 'Found the ingredient name with capitalized characters.');
+    $this->assertSession()->pageTextContains('TeSt InGrEdIeNt 1');
 
     // Turn ingredient normaliation on.
     $edit = [
@@ -268,7 +268,7 @@ class IngredientTest extends BrowserTestBase {
     ];
     $this->drupalPostForm('ingredient/add', $edit, t('Save'));
     // Verify that the name was normalized on save.
-    $this->assertText('test ingredient 2', 'Found the ingredient name with normalized characters.');
+    $this->assertSession()->pageTextContains('test ingredient 2');
 
     // Add a new ingredient with capitalized characters and an &reg; symbol in
     // the name.
@@ -277,7 +277,7 @@ class IngredientTest extends BrowserTestBase {
     ];
     $this->drupalPostForm('ingredient/add', $edit, t('Save'));
     // Verify that the name was not normalized on save.
-    $this->assertText('TeSt InGrEdIeNt 3 ®', 'Found the ingredient name with capitalized characters.');
+    $this->assertSession()->pageTextContains('TeSt InGrEdIeNt 3 ®');
 
     // Turn ingredient normaliation back off.
     $edit = [
@@ -291,7 +291,7 @@ class IngredientTest extends BrowserTestBase {
     ];
     $this->drupalPostForm('ingredient/add', $edit, t('Save'));
     // Verify that the name did not change on save.
-    $this->assertText('TeSt InGrEdIeNt 4', 'Found the ingredient name with capitalized characters.');
+    $this->assertSession()->pageTextContains('TeSt InGrEdIeNt 4');
   }
 
 }

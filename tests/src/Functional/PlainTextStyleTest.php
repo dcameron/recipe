@@ -52,21 +52,21 @@ class PlainTextStyleTest extends RecipeTestBase {
 
     // Post the values to the node form.
     $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
-    $this->assertText(t('Recipe @title has been created.', ['@title' => $title]));
+    $this->assertSession()->pageTextContains(new FormattableMarkup('Recipe @title has been created.', ['@title' => $title]));
 
     // Enable the plain text view.
     $view = Views::getView('recipe_plain_text');
-    $view->initDisplay('plain_text');
+    $view->initDisplay();
     $view->storage->enable()->save();
     $this->container->get('router.builder')->rebuildIfNeeded();
 
     // Check the page for the recipe content.
     $this->drupalGet('node/1/plain-text');
-    $this->assertRaw($title, 'Found the recipe title.');
-    $this->assertRaw($description, 'Found the recipe description.');
-    $this->assertRaw($notes, 'Found the recipe notes.');
-    $this->assertRaw($instructions, 'Found the recipe instructions');
-    $this->assertRaw(new FormattableMarkup('1 T @name (@note)', ['@name' => $ing_0_name, '@note' => $ing_0_note]), 'Found ingredient 0.');
+    $this->assertSession()->responseContains($title);
+    $this->assertSession()->responseContains($description);
+    $this->assertSession()->responseContains($notes);
+    $this->assertSession()->responseContains($instructions);
+    $this->assertSession()->responseContains(new FormattableMarkup('1 T @name (@note)', ['@name' => $ing_0_name, '@note' => $ing_0_note]));
   }
 
 }

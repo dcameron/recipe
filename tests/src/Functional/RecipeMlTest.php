@@ -54,7 +54,7 @@ class RecipeMlTest extends RecipeTestBase {
 
     // Enable the RecipeML view.
     $view = Views::getView('recipeml');
-    $view->initDisplay('recipeml');
+    $view->initDisplay();
     $view->storage->enable()->save();
     $this->container->get('router.builder')->rebuildIfNeeded();
 
@@ -62,33 +62,33 @@ class RecipeMlTest extends RecipeTestBase {
     $this->drupalGet('node/1/recipeml');
     $driver = $this->getSession()->getDriver();
     $result = $driver->getAttribute('//recipe', 'xml:lang');
-    $this->assertEqual($result, 'en', 'Found the xml:lang attribute.');
+    $this->assertEquals($result, 'en', 'Found the xml:lang attribute.');
     $result = $driver->getText("//recipe/head/title");
-    $this->assertEqual($result, $title, 'Found the recipe title.');
+    $this->assertEquals($result, $title, 'Found the recipe title.');
     $result = $driver->getText("//recipe/head/source");
-    $this->assertEqual($result, $source, 'Found the recipe source.');
+    $this->assertEquals($result, $source, 'Found the recipe source.');
     $result = $driver->getText("//recipe/head/preptime[@type='Preparation time']/time/qty");
-    $this->assertEqual($result, 60, 'Found the recipe preparation time.');
+    $this->assertEquals($result, 60, 'Found the recipe preparation time.');
     $result = $driver->getText("//recipe/head/preptime[@type='Cooking time']/time/qty");
-    $this->assertEqual($result, 135, 'Found the recipe cooking time.');
+    $this->assertEquals($result, 135, 'Found the recipe cooking time.');
     $result = $driver->getText("//recipe/head/preptime[@type='Total time']/time/qty");
-    $this->assertEqual($result, 195, 'Found the recipe total time.');
+    $this->assertEquals($result, 195, 'Found the recipe total time.');
     $result = $driver->getText("//recipe/head/yield/qty");
-    $this->assertEqual($result, $yield_amount, 'Found the recipe yield.');
+    $this->assertEquals($result, $yield_amount, 'Found the recipe yield.');
     $result = $driver->getText("//recipe/head/yield/unit");
-    $this->assertEqual($result, $yield_unit, 'Found the recipe yield unit.');
+    $this->assertEquals($result, $yield_unit, 'Found the recipe yield unit.');
     $result = $driver->getText("//recipe/description");
-    $this->assertEqual($result, $description, 'Found the recipe description.');
+    $this->assertEquals($result, $description, 'Found the recipe description.');
     $result = $driver->getText("//recipe/ingredients/ing/amt/qty");
-    $this->assertEqual($result, $ing_0_quantity, 'Found the ingredient 0 quantity');
+    $this->assertEquals($result, $ing_0_quantity, 'Found the ingredient 0 quantity');
     $result = $driver->getText("//recipe/ingredients/ing/amt/unit");
-    $this->assertEqual($result, 'T', 'Found the ingredient 0 unit');
+    $this->assertEquals($result, 'T', 'Found the ingredient 0 unit');
     $result = $driver->getText("//recipe/ingredients/ing/item");
-    $this->assertEqual($result, $ing_0_name, 'Found the ingredient 0 name');
+    $this->assertEquals($result, $ing_0_name, 'Found the ingredient 0 name');
     $result = $driver->getText("//recipe/ingredients/ing/prep");
-    $this->assertEqual($result, $ing_0_note, 'Found the ingredient 0 note');
+    $this->assertEquals($result, $ing_0_note, 'Found the ingredient 0 note');
     $result = $driver->getText("//recipe/directions");
-    $this->assertEqual($result, $instructions, 'Found the recipe instructions');
+    $this->assertEquals($result, $instructions, 'Found the recipe instructions');
   }
 
 }

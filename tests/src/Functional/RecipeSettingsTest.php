@@ -59,8 +59,8 @@ class RecipeSettingsTest extends BrowserTestBase {
     $this->assertText(t('Recipe @title has been created.', ['@title' => $title]));
 
     // Check for the default pseudo-field labels.
-    $this->assertText(t('Total time'), 'Found the default Total time label.');
-    $this->assertText(t('Yield'), 'Found the default Yield label.');
+    $this->assertSession()->pageTextContains('Total time');
+    $this->assertSession()->pageTextContains('Yield');
 
     // Alter the pseudo-field labels.
     $total_time_label = $this->randomMachineName(20);
@@ -72,12 +72,12 @@ class RecipeSettingsTest extends BrowserTestBase {
 
     // Post the values to the settings form.
     $this->drupalPostForm('admin/structure/types/manage/recipe', $edit, t('Save content type'));
-    $this->assertText(t('The content type Recipe has been updated.'));
+    $this->assertSession()->pageTextContains('The content type Recipe has been updated.');
 
     // Check the node display for the new labels.
     $this->drupalGet('node/1');
-    $this->assertText($total_time_label, 'Found the new Total time label.');
-    $this->assertText($yield_label, 'Found the new Yield label.');
+    $this->assertSession()->pageTextContains($total_time_label);
+    $this->assertSession()->pageTextContains($yield_label);
 
     // Alter the pseudo-field label displays.
     $edit = [
@@ -87,12 +87,12 @@ class RecipeSettingsTest extends BrowserTestBase {
 
     // Post the values to the settings form.
     $this->drupalPostForm('admin/structure/types/manage/recipe', $edit, t('Save content type'));
-    $this->assertText(t('The content type Recipe has been updated.'));
+    $this->assertSession()->pageTextContains('The content type Recipe has been updated.');
 
     // Check the node display for the new labels.
     $this->drupalGet('node/1');
-    $this->assertNoText($total_time_label, 'The Total time label display was set to hidden.');
-    $this->assertNoText($yield_label, 'The Yield label display was set to hidden.');
+    $this->assertSession()->pageTextNotContains($total_time_label);
+    $this->assertSession()->pageTextNotContains($yield_label);
   }
 
 }

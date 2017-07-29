@@ -67,19 +67,20 @@ class IngredientFieldSettingsTest extends BrowserTestBase {
 
     // Visit the field settings page and verify that the settings are selected.
     $this->drupalGet('admin/structure/types/manage/test_bundle/fields/node.test_bundle.field_ingredient');
-    $this->assertFieldChecked('edit-settings-unit-sets-us', 'The U.S. customary unit set was enabled.');
-    $this->assertFieldChecked('edit-settings-unit-sets-si', 'The SI/Metric unit set was enabled.');
-    $this->assertFieldChecked('edit-settings-unit-sets-common', 'The Common unit set was enabled.');
+    $this->assertSession()->checkboxChecked('edit-settings-unit-sets-us');
+    $this->assertSession()->checkboxChecked('edit-settings-unit-sets-si');
+    $this->assertSession()->checkboxChecked('edit-settings-unit-sets-common');
     $this->assertOptionSelected('edit-settings-default-unit', '', 'The blank default unit was selected.');
 
     // Visit the node edit page and verify that we can find units from each of
     // the enabled sets and that the select element shows the empty option by
     // default.
     $this->drupalGet('node/add/test_bundle');
-    $this->assertFieldByXPath("//option[@value='cup']", t('cup (c)'), 'Found an option from the U.S. customary unit set.');
-    $this->assertFieldByXPath("//option[@value='milliliter']", t('milliliter (ml)'), 'Found an option from the SI/Metric unit set.');
-    $this->assertFieldByXPath("//option[@value='tablespoon']", t('tablespoon (T)'), 'Found an option from the Common unit set.');
-    $this->assertOptionSelected('edit-field-ingredient-0-unit-key', '', 'The empty unit option was selected.');
+    $this->assertEquals($this->xpath("//option[@value='cup']")[0]->getText(), t('cup (c)'), 'Found an option from the U.S. customary unit set.');
+    $this->assertEquals($this->xpath("//option[@value='milliliter']")[0]->getText(), t('milliliter (ml)'), 'Found an option from the SI/Metric unit set.');
+    $this->assertEquals($this->xpath("//option[@value='tablespoon']")[0]->getText(), t('tablespoon (T)'), 'Found an option from the Common unit set.');
+    $option_field = $this->assertSession()->optionExists('edit-field-ingredient-0-unit-key', '');
+    $this->assertTrue($option_field->hasAttribute('selected'), 'The empty unit option was selected.');
 
     // Update the field settings and disable the SI/Metric unit set.  Then
     // verify that its unit cannot be found on the node edit page.  Also verify
@@ -93,10 +94,11 @@ class IngredientFieldSettingsTest extends BrowserTestBase {
     ];
     $this->updateIngredientField($field_settings);
     $this->drupalGet('node/add/test_bundle');
-    $this->assertFieldByXPath("//option[@value='cup']", t('cup (c)'), 'Found an option from the U.S. customary unit set.');
-    $this->assertNoFieldByXPath("//option[@value='milliliter']", t('milliliter (ml)'), 'Found an option from the SI/Metric unit set.');
-    $this->assertFieldByXPath("//option[@value='tablespoon']", t('tablespoon (T)'), 'Found an option from the Common unit set.');
-    $this->assertOptionSelected('edit-field-ingredient-0-unit-key', 'cup', 'The default unit was selected.');
+    $this->assertEquals($this->xpath("//option[@value='cup']")[0]->getText(), t('cup (c)'), 'Found an option from the U.S. customary unit set.');
+    $this->assertEmpty($this->xpath("//option[@value='milliliter']"), 'Did not find an option from the SI/Metric unit set.');
+    $this->assertEquals($this->xpath("//option[@value='tablespoon']")[0]->getText(), t('tablespoon (T)'), 'Found an option from the Common unit set.');
+    $option_field = $this->assertSession()->optionExists('edit-field-ingredient-0-unit-key', 'cup');
+    $this->assertTrue($option_field->hasAttribute('selected'), 'The default unit was selected.');
 
     // Update the field settings and disable all unit sets to verify that all
     // units will then appear in the edit form by default.
@@ -106,9 +108,9 @@ class IngredientFieldSettingsTest extends BrowserTestBase {
     ];
     $this->updateIngredientField($field_settings);
     $this->drupalGet('node/add/test_bundle');
-    $this->assertFieldByXPath("//option[@value='cup']", t('cup (c)'), 'Found an option from the U.S. customary unit set.');
-    $this->assertFieldByXPath("//option[@value='milliliter']", t('milliliter (ml)'), 'Found an option from the SI/Metric unit set.');
-    $this->assertFieldByXPath("//option[@value='tablespoon']", t('tablespoon (T)'), 'Found an option from the Common unit set.');
+    $this->assertEquals($this->xpath("//option[@value='cup']")[0]->getText(), t('cup (c)'), 'Found an option from the U.S. customary unit set.');
+    $this->assertEquals($this->xpath("//option[@value='milliliter']")[0]->getText(), t('milliliter (ml)'), 'Found an option from the SI/Metric unit set.');
+    $this->assertEquals($this->xpath("//option[@value='tablespoon']")[0]->getText(), t('tablespoon (T)'), 'Found an option from the Common unit set.');
   }
 
 }

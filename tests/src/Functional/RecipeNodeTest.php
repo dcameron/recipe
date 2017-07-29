@@ -51,20 +51,20 @@ class RecipeNodeTest extends RecipeTestBase {
 
     // Post the values to the node form.
     $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
-    $this->assertText(t('Recipe @title has been created.', ['@title' => $title]));
+    $this->assertSession()->pageTextContains(new FormattableMarkup('Recipe @title has been created.', ['@title' => $title]));
 
     // Check the page for the recipe content.
-    $this->assertRaw($description, 'Found the recipe description.');
-    $this->assertText(new FormattableMarkup('@amount @unit', ['@amount' => $yield_amount, '@unit' => $yield_unit]), 'Found the recipe yield.');
-    $this->assertRaw('<a href="http://www.example.com">http://www.example.com</a>', 'Found the recipe source.');
-    $this->assertRaw($notes, 'Found the recipe notes.');
-    $this->assertRaw($instructions, 'Found the recipe instructions');
-    $this->assertText('1 hour', 'Found the recipe prep time.');
-    $this->assertText('2 hours, 15 minutes', 'Found the recipe cook time.');
-    $this->assertText('3 hours, 15 minutes', 'Found the recipe total time.');
+    $this->assertSession()->responseContains($description);
+    $this->assertSession()->pageTextContains(new FormattableMarkup('@amount @unit', ['@amount' => $yield_amount, '@unit' => $yield_unit]));
+    $this->assertSession()->responseContains('<a href="http://www.example.com">http://www.example.com</a>');
+    $this->assertSession()->responseContains($notes);
+    $this->assertSession()->responseContains($instructions);
+    $this->assertSession()->pageTextContains('1 hour');
+    $this->assertSession()->pageTextContains('2 hours, 15 minutes');
+    $this->assertSession()->pageTextContains('3 hours, 15 minutes');
 
-    $this->assertText(t('1 T'), 'Found the ingredient quantity and abbreviation.');
-    $this->assertText(new FormattableMarkup('@name (@note)', ['@name' => $ing_0_name, '@note' => $ing_0_note]), 'Found the ingredient name and note.');
+    $this->assertSession()->pageTextContains('1 T');
+    $this->assertSession()->pageTextContains(new FormattableMarkup('@name (@note)', ['@name' => $ing_0_name, '@note' => $ing_0_note]));
 
     // Check the page HTML for the recipe RDF properties.
     $properties = [
@@ -79,7 +79,7 @@ class RecipeNodeTest extends RecipeTestBase {
       'schema:recipeYield',
     ];
     foreach ($properties as $property) {
-      $this->assertRaw($property, new FormattableMarkup('Found the RDF property "@property" in the recipe node HTML.', ['@property' => $property]));
+      $this->assertSession()->responseContains($property);
     }
 
     // Check the page HTML for the ISO 8601 recipe durations.
@@ -89,7 +89,7 @@ class RecipeNodeTest extends RecipeTestBase {
       'total_time' => 'PT3H15M',
     ];
     foreach ($durations as $duration) {
-      $this->assertRaw($duration, new FormattableMarkup('Found the ISO 8601 duration "@duration" in the recipe node HTML.', ['@duration' => $duration]));
+      $this->assertSession()->responseContains($duration);
     }
 
     // Check for the breadcrumb.
@@ -105,7 +105,7 @@ class RecipeNodeTest extends RecipeTestBase {
     }
 
     // Compare expected and got breadcrumbs.
-    $this->assertIdentical($expected_breadcrumb, $got_breadcrumb, 'The breadcrumb is correctly displayed on the page.');
+    $this->assertSame($expected_breadcrumb, $got_breadcrumb, 'The breadcrumb is correctly displayed on the page.');
   }
 
   /**
@@ -123,8 +123,8 @@ class RecipeNodeTest extends RecipeTestBase {
     $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
 
     // Verify that the pseudo-fields are shown on the node view.
-    $this->assertText('Yield', 'Found the Yield psuedo-field.');
-    $this->assertText('Total time', 'Found the Total time pseudo-field.');
+    $this->assertSession()->pageTextContains('Yield');
+    $this->assertSession()->pageTextContains('Total time');
 
     // Create a node with no value in the yield_amount and a value in only one
     // time field.
@@ -136,8 +136,8 @@ class RecipeNodeTest extends RecipeTestBase {
     $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
 
     // Verify that the pseudo-fields are not shown on the node view.
-    $this->assertNoText('Yield', 'Did not find the Yield psuedo-field.');
-    $this->assertNoText('Total time', 'Did not find the Total time pseudo-field.');
+    $this->assertSession()->pageTextNotContains('Yield');
+    $this->assertSession()->pageTextNotContains('Total time');
 
     // Create a node with no values in time fields.
     $edit = [
@@ -146,8 +146,8 @@ class RecipeNodeTest extends RecipeTestBase {
     $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
 
     // Verify that the pseudo-fields are not shown on the node view.
-    $this->assertNoText('Yield', 'Did not find the Yield psuedo-field.');
-    $this->assertNoText('Total time', 'Did not find the Total time pseudo-field.');
+    $this->assertSession()->pageTextNotContains('Yield');
+    $this->assertSession()->pageTextNotContains('Total time');
   }
 
 }
