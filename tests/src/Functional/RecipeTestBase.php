@@ -7,7 +7,7 @@ use Drupal\Tests\BrowserTestBase;
 /**
  * Provides setup and helper methods for recipe module tests.
  */
-class RecipeTestBase extends BrowserTestBase {
+abstract class RecipeTestBase extends BrowserTestBase {
 
   /**
    * Modules to enable.
