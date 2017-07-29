@@ -3,7 +3,6 @@
 namespace Drupal\Tests\ingredient\Functional;
 
 use Drupal\Tests\BrowserTestBase;
-use Drupal\Tests\ingredient\Traits\IngredientTestTrait;
 
 /**
  * Tests the functionality of the ingredient field settings.

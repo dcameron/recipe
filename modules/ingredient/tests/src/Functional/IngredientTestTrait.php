@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\ingredient\Traits;
+namespace Drupal\Tests\ingredient\Functional;
 
 use Drupal\field\Entity\FieldConfig;
 
