@@ -51,7 +51,7 @@ class PlainTextStyleTest extends RecipeTestBase {
     ];
 
     // Post the values to the node form.
-    $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
+    $this->drupalPostForm('node/add/recipe', $edit, 'Save');
     $this->assertSession()->pageTextContains(new FormattableMarkup('Recipe @title has been created.', ['@title' => $title]));
 
     // Enable the plain text view.

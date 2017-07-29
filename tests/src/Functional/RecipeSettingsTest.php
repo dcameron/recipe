@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\recipe\Functional;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -55,8 +56,8 @@ class RecipeSettingsTest extends BrowserTestBase {
     ];
 
     // Post the values to the node form.
-    $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
-    $this->assertText(t('Recipe @title has been created.', ['@title' => $title]));
+    $this->drupalPostForm('node/add/recipe', $edit, 'Save');
+    $this->assertSession()->pageTextContains(new FormattableMarkup('Recipe @title has been created.', ['@title' => $title]));
 
     // Check for the default pseudo-field labels.
     $this->assertSession()->pageTextContains('Total time');
@@ -71,7 +72,7 @@ class RecipeSettingsTest extends BrowserTestBase {
     ];
 
     // Post the values to the settings form.
-    $this->drupalPostForm('admin/structure/types/manage/recipe', $edit, t('Save content type'));
+    $this->drupalPostForm('admin/structure/types/manage/recipe', $edit, 'Save content type');
     $this->assertSession()->pageTextContains('The content type Recipe has been updated.');
 
     // Check the node display for the new labels.
@@ -86,7 +87,7 @@ class RecipeSettingsTest extends BrowserTestBase {
     ];
 
     // Post the values to the settings form.
-    $this->drupalPostForm('admin/structure/types/manage/recipe', $edit, t('Save content type'));
+    $this->drupalPostForm('admin/structure/types/manage/recipe', $edit, 'Save content type');
     $this->assertSession()->pageTextContains('The content type Recipe has been updated.');
 
     // Check the node display for the new labels.

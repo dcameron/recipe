@@ -70,15 +70,16 @@ class IngredientFieldSettingsTest extends BrowserTestBase {
     $this->assertSession()->checkboxChecked('edit-settings-unit-sets-us');
     $this->assertSession()->checkboxChecked('edit-settings-unit-sets-si');
     $this->assertSession()->checkboxChecked('edit-settings-unit-sets-common');
-    $this->assertOptionSelected('edit-settings-default-unit', '', 'The blank default unit was selected.');
+    $option_field = $this->assertSession()->optionExists('edit-settings-default-unit', '');
+    $this->assertTrue($option_field->hasAttribute('selected'), 'The blank default unit was selected.');
 
     // Visit the node edit page and verify that we can find units from each of
     // the enabled sets and that the select element shows the empty option by
     // default.
     $this->drupalGet('node/add/test_bundle');
-    $this->assertEquals($this->xpath("//option[@value='cup']")[0]->getText(), t('cup (c)'), 'Found an option from the U.S. customary unit set.');
-    $this->assertEquals($this->xpath("//option[@value='milliliter']")[0]->getText(), t('milliliter (ml)'), 'Found an option from the SI/Metric unit set.');
-    $this->assertEquals($this->xpath("//option[@value='tablespoon']")[0]->getText(), t('tablespoon (T)'), 'Found an option from the Common unit set.');
+    $this->assertEquals($this->xpath("//option[@value='cup']")[0]->getText(), 'cup (c)', 'Found an option from the U.S. customary unit set.');
+    $this->assertEquals($this->xpath("//option[@value='milliliter']")[0]->getText(), 'milliliter (ml)', 'Found an option from the SI/Metric unit set.');
+    $this->assertEquals($this->xpath("//option[@value='tablespoon']")[0]->getText(), 'tablespoon (T)', 'Found an option from the Common unit set.');
     $option_field = $this->assertSession()->optionExists('edit-field-ingredient-0-unit-key', '');
     $this->assertTrue($option_field->hasAttribute('selected'), 'The empty unit option was selected.');
 
@@ -94,9 +95,9 @@ class IngredientFieldSettingsTest extends BrowserTestBase {
     ];
     $this->updateIngredientField($field_settings);
     $this->drupalGet('node/add/test_bundle');
-    $this->assertEquals($this->xpath("//option[@value='cup']")[0]->getText(), t('cup (c)'), 'Found an option from the U.S. customary unit set.');
+    $this->assertEquals($this->xpath("//option[@value='cup']")[0]->getText(), 'cup (c)', 'Found an option from the U.S. customary unit set.');
     $this->assertEmpty($this->xpath("//option[@value='milliliter']"), 'Did not find an option from the SI/Metric unit set.');
-    $this->assertEquals($this->xpath("//option[@value='tablespoon']")[0]->getText(), t('tablespoon (T)'), 'Found an option from the Common unit set.');
+    $this->assertEquals($this->xpath("//option[@value='tablespoon']")[0]->getText(), 'tablespoon (T)', 'Found an option from the Common unit set.');
     $option_field = $this->assertSession()->optionExists('edit-field-ingredient-0-unit-key', 'cup');
     $this->assertTrue($option_field->hasAttribute('selected'), 'The default unit was selected.');
 
@@ -108,9 +109,9 @@ class IngredientFieldSettingsTest extends BrowserTestBase {
     ];
     $this->updateIngredientField($field_settings);
     $this->drupalGet('node/add/test_bundle');
-    $this->assertEquals($this->xpath("//option[@value='cup']")[0]->getText(), t('cup (c)'), 'Found an option from the U.S. customary unit set.');
-    $this->assertEquals($this->xpath("//option[@value='milliliter']")[0]->getText(), t('milliliter (ml)'), 'Found an option from the SI/Metric unit set.');
-    $this->assertEquals($this->xpath("//option[@value='tablespoon']")[0]->getText(), t('tablespoon (T)'), 'Found an option from the Common unit set.');
+    $this->assertEquals($this->xpath("//option[@value='cup']")[0]->getText(), 'cup (c)', 'Found an option from the U.S. customary unit set.');
+    $this->assertEquals($this->xpath("//option[@value='milliliter']")[0]->getText(), 'milliliter (ml)', 'Found an option from the SI/Metric unit set.');
+    $this->assertEquals($this->xpath("//option[@value='tablespoon']")[0]->getText(), 'tablespoon (T)', 'Found an option from the Common unit set.');
   }
 
 }

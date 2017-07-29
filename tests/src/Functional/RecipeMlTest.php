@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\recipe\Functional;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\views\Views;
 
 /**
@@ -49,8 +50,8 @@ class RecipeMlTest extends RecipeTestBase {
     ];
 
     // Post the values to the node form.
-    $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
-    $this->assertText(t('Recipe @title has been created.', ['@title' => $title]));
+    $this->drupalPostForm('node/add/recipe', $edit, 'Save');
+    $this->assertSession()->pageTextContains(new FormattableMarkup('Recipe @title has been created.', ['@title' => $title]));
 
     // Enable the RecipeML view.
     $view = Views::getView('recipeml');

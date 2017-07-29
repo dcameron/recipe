@@ -122,7 +122,7 @@ class IngredientFieldTest extends BrowserTestBase {
         'field_ingredient[0][target_id]' => $ingredient['name'],
         'field_ingredient[0][note]' => $ingredient['note'],
       ];
-      $this->drupalPostForm('node/add/test_bundle', $edit, t('Save'));
+      $this->drupalPostForm('node/add/test_bundle', $edit, 'Save');
 
       // Check for the node title to verify redirection to the node view.
       $this->assertSession()->pageTextContains($title);
@@ -174,7 +174,7 @@ class IngredientFieldTest extends BrowserTestBase {
 
     $this->drupalGet('node/add/test_bundle');
     // Post the values to the node form.
-    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->drupalPostForm(NULL, $edit, 'Save');
 
     // Verify that the ingredient name is not linked to its entity.
     $this->assertSession()->pageTextContains('4 T');

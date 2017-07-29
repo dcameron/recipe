@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\recipe\Functional;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\Tests\BrowserTestBase;
 
@@ -61,8 +62,8 @@ class RecipeTotalTimeConfigTest extends BrowserTestBase {
     ];
 
     // Post the values to the node form.
-    $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
-    $this->assertSession()->pageTextContains(t('Recipe @title has been created.', ['@title' => $title]));
+    $this->drupalPostForm('node/add/recipe', $edit, 'Save');
+    $this->assertSession()->pageTextContains(new FormattableMarkup('Recipe @title has been created.', ['@title' => $title]));
 
     // Check for the total time.
     $this->assertSession()->pageTextContains('3 hours, 15 minutes');
@@ -78,7 +79,7 @@ class RecipeTotalTimeConfigTest extends BrowserTestBase {
     $edit = [
       $field_name . '[0][value]' => $new_field_value,
     ];
-    $this->drupalPostForm('node/1/edit', $edit, t('Save'));
+    $this->drupalPostForm('node/1/edit', $edit, 'Save');
 
     // Check for the new field's value.
     $this->drupalGet('node/1');

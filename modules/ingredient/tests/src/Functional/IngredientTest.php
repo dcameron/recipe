@@ -72,7 +72,7 @@ class IngredientTest extends BrowserTestBase {
     $edit = [
       'name[0][value]' => 'test name',
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->drupalPostForm(NULL, $edit, 'Save');
 
     // Entity listed.
     $this->assertSession()->linkExists('Edit');
@@ -252,21 +252,21 @@ class IngredientTest extends BrowserTestBase {
     $edit = [
       'name[0][value]' => 'TeSt InGrEdIeNt 1',
     ];
-    $this->drupalPostForm('ingredient/add', $edit, t('Save'));
+    $this->drupalPostForm('ingredient/add', $edit, 'Save');
     // Verify that the name did not change on save.
     $this->assertSession()->pageTextContains('TeSt InGrEdIeNt 1');
 
-    // Turn ingredient normaliation on.
+    // Turn ingredient normalization on.
     $edit = [
       'ingredient_name_normalize' => 1,
     ];
-    $this->drupalPostForm('admin/structure/ingredient_settings', $edit, t('Save configuration'));
+    $this->drupalPostForm('admin/structure/ingredient_settings', $edit, 'Save configuration');
 
     // Add a new ingredient with capitalized characters in the name.
     $edit = [
       'name[0][value]' => 'TeSt InGrEdIeNt 2',
     ];
-    $this->drupalPostForm('ingredient/add', $edit, t('Save'));
+    $this->drupalPostForm('ingredient/add', $edit, 'Save');
     // Verify that the name was normalized on save.
     $this->assertSession()->pageTextContains('test ingredient 2');
 
@@ -275,7 +275,7 @@ class IngredientTest extends BrowserTestBase {
     $edit = [
       'name[0][value]' => 'TeSt InGrEdIeNt 3 ®',
     ];
-    $this->drupalPostForm('ingredient/add', $edit, t('Save'));
+    $this->drupalPostForm('ingredient/add', $edit, 'Save');
     // Verify that the name was not normalized on save.
     $this->assertSession()->pageTextContains('TeSt InGrEdIeNt 3 ®');
 
@@ -283,13 +283,13 @@ class IngredientTest extends BrowserTestBase {
     $edit = [
       'ingredient_name_normalize' => 0,
     ];
-    $this->drupalPostForm('admin/structure/ingredient_settings', $edit, t('Save configuration'));
+    $this->drupalPostForm('admin/structure/ingredient_settings', $edit, 'Save configuration');
 
     // Add a new ingredient with capitalized characters in the name.
     $edit = [
       'name[0][value]' => 'TeSt InGrEdIeNt 4',
     ];
-    $this->drupalPostForm('ingredient/add', $edit, t('Save'));
+    $this->drupalPostForm('ingredient/add', $edit, 'Save');
     // Verify that the name did not change on save.
     $this->assertSession()->pageTextContains('TeSt InGrEdIeNt 4');
   }

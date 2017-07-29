@@ -50,7 +50,7 @@ class RecipeNodeTest extends RecipeTestBase {
     ];
 
     // Post the values to the node form.
-    $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
+    $this->drupalPostForm('node/add/recipe', $edit, 'Save');
     $this->assertSession()->pageTextContains(new FormattableMarkup('Recipe @title has been created.', ['@title' => $title]));
 
     // Check the page for the recipe content.
@@ -120,7 +120,7 @@ class RecipeNodeTest extends RecipeTestBase {
       'recipe_prep_time[0][value]' => 1,
       'recipe_cook_time[0][value]' => 1,
     ];
-    $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
+    $this->drupalPostForm('node/add/recipe', $edit, 'Save');
 
     // Verify that the pseudo-fields are shown on the node view.
     $this->assertSession()->pageTextContains('Yield');
@@ -133,7 +133,7 @@ class RecipeNodeTest extends RecipeTestBase {
       'recipe_yield_unit[0][value]' => $this->randomMachineName(16),
       'recipe_cook_time[0][value]' => 1,
     ];
-    $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
+    $this->drupalPostForm('node/add/recipe', $edit, 'Save');
 
     // Verify that the pseudo-fields are not shown on the node view.
     $this->assertSession()->pageTextNotContains('Yield');
@@ -143,7 +143,7 @@ class RecipeNodeTest extends RecipeTestBase {
     $edit = [
       'title[0][value]' => $this->randomMachineName(16),
     ];
-    $this->drupalPostForm('node/add/recipe', $edit, t('Save'));
+    $this->drupalPostForm('node/add/recipe', $edit, 'Save');
 
     // Verify that the pseudo-fields are not shown on the node view.
     $this->assertSession()->pageTextNotContains('Yield');
