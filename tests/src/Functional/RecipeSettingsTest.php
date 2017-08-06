@@ -13,9 +13,7 @@ use Drupal\Tests\BrowserTestBase;
 class RecipeSettingsTest extends BrowserTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var string[]
+   * {@inheritdoc}
    */
   public static $modules = ['recipe'];
 
@@ -24,7 +22,7 @@ class RecipeSettingsTest extends BrowserTestBase {
    *
    * @var \Drupal\user\UserInterface
    */
-  protected $admin_user;
+  protected $adminUser;
 
   /**
    * {@inheritdoc}
@@ -33,8 +31,13 @@ class RecipeSettingsTest extends BrowserTestBase {
     parent::setUp();
 
     // Create and log in the admin user with Recipe content permissions.
-    $this->admin_user = $this->drupalCreateUser(['create recipe content', 'edit any recipe content', 'administer content types']);
-    $this->drupalLogin($this->admin_user);
+    $permissions = [
+      'create recipe content',
+      'edit any recipe content',
+      'administer content types'
+    ];
+    $this->adminUser = $this->drupalCreateUser($permissions);
+    $this->drupalLogin($this->adminUser);
   }
 
   /**

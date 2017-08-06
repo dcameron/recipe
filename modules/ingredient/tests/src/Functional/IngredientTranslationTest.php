@@ -53,14 +53,14 @@ class IngredientTranslationTest extends BrowserTestBase {
   /**
    * The node to check the translated value on.
    *
-   * @var \Drupal\node\Entity\Node
+   * @var \Drupal\node\NodeInterface
    */
   protected $node;
 
   /**
    * The ingredient that should be translated.
    *
-   * @var \Drupal\ingredient\Entity\Ingredient
+   * @var \Drupal\ingredient\IngredientInterface
    */
   protected $ingredient;
 
@@ -79,9 +79,7 @@ class IngredientTranslationTest extends BrowserTestBase {
   protected $translatedIngredientName = 'TranslatedIngredientName';
 
   /**
-   * Modules to enable.
-   *
-   * @var string[]
+   * {@inheritdoc}
    */
   public static $modules = ['content_translation', 'ingredient', 'node'];
 
@@ -90,7 +88,7 @@ class IngredientTranslationTest extends BrowserTestBase {
    *
    * @var \Drupal\user\UserInterface
    */
-  protected $admin_user;
+  protected $adminUser;
 
   /**
    * {@inheritdoc}
@@ -110,8 +108,8 @@ class IngredientTranslationTest extends BrowserTestBase {
       'access content',
       'view ingredient',
     ];
-    $this->admin_user = $this->drupalCreateUser($permissions);
-    $this->drupalLogin($this->admin_user);
+    $this->adminUser = $this->drupalCreateUser($permissions);
+    $this->drupalLogin($this->adminUser);
   }
 
   /**
@@ -208,7 +206,6 @@ class IngredientTranslationTest extends BrowserTestBase {
     return $this->contentTranslationManager;
   }
 
-
   /**
    * Gets the router builder service.
    *
@@ -222,7 +219,6 @@ class IngredientTranslationTest extends BrowserTestBase {
 
     return $this->routerBuilder;
   }
-
 
   /**
    * Gets the entity definition update manager service.

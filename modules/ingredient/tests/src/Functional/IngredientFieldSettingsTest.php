@@ -14,9 +14,7 @@ class IngredientFieldSettingsTest extends BrowserTestBase {
   use IngredientTestTrait;
 
   /**
-   * Modules to enable.
-   *
-   * @var string[]
+   * {@inheritdoc}
    */
   public static $modules = ['field_ui', 'ingredient', 'node'];
 
@@ -25,7 +23,7 @@ class IngredientFieldSettingsTest extends BrowserTestBase {
    *
    * @var \Drupal\user\UserInterface
    */
-  protected $admin_user;
+  protected $adminUser;
 
   /**
    * {@inheritdoc}
@@ -46,8 +44,8 @@ class IngredientFieldSettingsTest extends BrowserTestBase {
       'view ingredient',
       'administer site configuration',
     ];
-    $this->admin_user = $this->drupalCreateUser($permissions);
-    $this->drupalLogin($this->admin_user);
+    $this->adminUser = $this->drupalCreateUser($permissions);
+    $this->drupalLogin($this->adminUser);
   }
 
   /**

@@ -59,7 +59,6 @@ class IngredientRecipeMLFormatter extends IngredientFormatter {
    */
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $fraction_format = $this->getSetting('fraction_format');
-    $output_as_link = $this->getSetting('link');
     $unit_list = $this->getConfiguredUnits();
     $elements = [];
 

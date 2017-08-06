@@ -4,8 +4,8 @@ description: 'Collect and display recipes.'
 package: Recipe
 core: 8.x
 dependencies:
-  - ingredient
-  - node
-  - path
-  - rdf
-  - text
+  - recipe:ingredient
+  - drupal:node
+  - drupal:path
+  - drupal:rdf
+  - drupal:text

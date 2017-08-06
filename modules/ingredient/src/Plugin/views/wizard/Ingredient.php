@@ -17,6 +17,8 @@ use Drupal\views\Plugin\views\wizard\WizardPluginBase;
 class Ingredient extends WizardPluginBase {
 
   /**
+   * @var string
+   *
    * Set the created column.
    */
   protected $createdColumn = 'ingredient_field_data-created';
@@ -109,7 +111,7 @@ class Ingredient extends WizardPluginBase {
   /**
    * Set the row style and row style plugins to the display_options.
    */
-  protected  function display_options_row(&$display_options, $row_plugin, $row_options) {
+  protected function display_options_row(&$display_options, $row_plugin, $row_options) {
     switch ($row_plugin) {
       case 'full_posts':
         $display_options['row']['type'] = 'entity:ingredient';

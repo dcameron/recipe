@@ -16,7 +16,7 @@ trait IngredientUnitTrait {
    * @return string[]
    *   An array of units.
    */
-  protected function getConfiguredUnits($sets_to_get = []) {
+  protected function getConfiguredUnits(array $sets_to_get = []) {
     // The field settings will set disabled set values to 0 in configuration.
     // Filter out any disabled values.  This prevents custom unit sets with an
     // ID of '0' and another solution may have to be found eventually.
@@ -49,7 +49,7 @@ trait IngredientUnitTrait {
    * @return array
    *   The sorted array of units.
    */
-  protected function sortUnitsByName($units) {
+  protected function sortUnitsByName(array $units) {
     uasort($units, function ($a, $b) {
       return strcmp($a['name'], $b['name']);
     });
@@ -73,7 +73,7 @@ trait IngredientUnitTrait {
    * @return array
    *   An array of unit key/value pairs for use as select form element options.
    */
-  protected function createUnitSelectOptions($units = []) {
+  protected function createUnitSelectOptions(array $units = []) {
     // Put in a blank so non-matching units will not validate and save.
     $options = ['' => ''];
 

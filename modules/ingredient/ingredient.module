@@ -18,7 +18,14 @@ function ingredient_theme($existing, $type, $theme, $path) {
       'render element' => 'elements',
     ],
     'ingredient_formatter' => [
-      'variables' => ['name' => NULL, 'quantity' => 0, 'unit_name' => '', 'unit_abbreviation' => '', 'unit_display' => 0, 'note' => ''],
+      'variables' => [
+        'name' => NULL,
+        'quantity' => 0,
+        'unit_name' => '',
+        'unit_abbreviation' => '',
+        'unit_display' => 0,
+        'note' => ''
+      ],
     ],
   ];
 }
@@ -37,7 +44,7 @@ function ingredient_theme($existing, $type, $theme, $path) {
  *       'teaser'.
  *   - attributes: HTML attributes for the containing element.
  */
-function template_preprocess_ingredient(&$variables) {
+function template_preprocess_ingredient(array &$variables) {
   $variables['view_mode'] = $variables['elements']['#view_mode'];
   $variables['ingredient'] = $variables['elements']['#ingredient'];
   /** @var \Drupal\ingredient\IngerdientInterface $ingredient */
@@ -105,7 +112,8 @@ function ingredient_quantity_from_decimal($ingredient_quantity, $fraction_format
       }
     }
 
-    // We have to workaround for repeating, non-exact decimals for thirds, sixths, ninths, twelfths.
+    // We have to workaround for repeating, non-exact decimals for thirds,
+    // sixths, ninths, twelfths.
     $overrides = [
     // Thirds.
       '3333' => [1, 3],
@@ -248,13 +256,19 @@ function ingredient_unit_fuzzymatch($subject) {
     $patterns = [];
     // Add name pattern.
     $patterns[] = '^' . $unit['name'] . 's{0,1}$';
-    // Add plural name pattern.
-    $patterns[] = '^' . $unit['plural'] . 's{0,1}$';
-    // Add abbreviation pattern.
-    $patterns[] = '^' . $unit['abbreviation'] . 's{0,1}\.{0,1}$';
-    // Add alias patterns.
-    foreach ($unit['aliases'] as $alias) {
-      $patterns[] = '^' . trim($alias) . 's{0,1}\.{0,1}$';
+    if (isset($unit['plural'])) {
+      // Add plural name pattern.
+      $patterns[] = '^' . $unit['plural'] . 's{0,1}$';
+    }
+    if (isset($unit['abbreviation'])) {
+      // Add abbreviation pattern.
+      $patterns[] = '^' . $unit['abbreviation'] . 's{0,1}\.{0,1}$';
+    }
+    if (isset($unit['aliases'])) {
+      // Add alias patterns.
+      foreach ($unit['aliases'] as $alias) {
+        $patterns[] = '^' . trim($alias) . 's{0,1}\.{0,1}$';
+      }
     }
     if (preg_match("/" . implode('|', $patterns) . "/", $subject)) {
       return $unit_key;
@@ -266,13 +280,19 @@ function ingredient_unit_fuzzymatch($subject) {
     $patterns = [];
     // Add name pattern.
     $patterns[] = '^' . $unit['name'] . 's{0,1}$';
-    // Add plural name pattern.
-    $patterns[] = '^' . $unit['plural'] . 's{0,1}$';
-    // Add abbreviation pattern.
-    $patterns[] = '^' . $unit['abbreviation'] . 's{0,1}\.{0,1}$';
-    // Add alias patterns.
-    foreach ($unit['aliases'] as $alias) {
-      $patterns[] = '^' . trim($alias) . 's{0,1}\.{0,1}$';
+    if (isset($unit['plural'])) {
+      // Add plural name pattern.
+      $patterns[] = '^' . $unit['plural'] . 's{0,1}$';
+    }
+    if (isset($unit['abbreviation'])) {
+      // Add abbreviation pattern.
+      $patterns[] = '^' . $unit['abbreviation'] . 's{0,1}\.{0,1}$';
+    }
+    if (isset($unit['aliases'])) {
+      // Add alias patterns.
+      foreach ($unit['aliases'] as $alias) {
+        $patterns[] = '^' . trim($alias) . 's{0,1}\.{0,1}$';
+      }
     }
     if (preg_match("/" . implode('|', $patterns) . "/i", $subject)) {
       return $unit_key;

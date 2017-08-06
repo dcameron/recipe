@@ -17,9 +17,7 @@ use Drupal\views\Views;
 class PlainTextStyleTest extends RecipeTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var string[]
+   * {@inheritdoc}
    */
   public static $modules = ['block', 'locale', 'recipe', 'views'];
 

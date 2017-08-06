@@ -66,10 +66,13 @@ class IngredientSettingsForm extends ConfigFormBase {
 
     $form['ingredient_name_normalize'] = [
       '#type' => 'radios',
-      '#title' => t('Ingredient name normalization'),
+      '#title' => $this->t('Ingredient name normalization'),
       '#default_value' => $config->get('ingredient_name_normalize'),
-      '#options' => [t('Leave as entered'), t('Convert to lowercase')],
-      '#description' => t('If enabled, the names of <em>new</em> ingredients will be converted to lowercase when they are entered. The names of registered trademarks, any ingredient name containing the &reg; symbol, will be excluded from normalization.'),
+      '#options' => [
+        $this->t('Leave as entered'),
+        $this->t('Convert to lowercase')
+      ],
+      '#description' => $this->t('If enabled, the names of <em>new</em> ingredients will be converted to lowercase when they are entered. The names of registered trademarks, any ingredient name containing the &reg; symbol, will be excluded from normalization.'),
       '#required' => TRUE,
     ];
     if ($this->moduleHandler->moduleExists('language')) {

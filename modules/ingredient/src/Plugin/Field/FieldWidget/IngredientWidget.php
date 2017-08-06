@@ -37,7 +37,7 @@ class IngredientWidget extends WidgetBase {
     $quantity = isset($items[$delta]->quantity) ? preg_replace('/\&frasl;/', '/', ingredient_quantity_from_decimal($items[$delta]->quantity, '{%d} %d&frasl;%d', TRUE)) : '';
     $element['quantity'] = [
       '#type' => 'textfield',
-      '#title' => t('Quantity'),
+      '#title' => $this->t('Quantity'),
       '#default_value' => $quantity,
       '#size' => 8,
       '#maxlength' => 8,
@@ -45,14 +45,14 @@ class IngredientWidget extends WidgetBase {
     ];
     $element['unit_key'] = [
       '#type' => 'select',
-      '#title' => t('Unit'),
+      '#title' => $this->t('Unit'),
       '#default_value' => isset($items[$delta]->unit_key) ? $items[$delta]->unit_key : $this->getFieldSetting('default_unit'),
       '#options' => $this->createUnitSelectOptions($units),
       '#attributes' => ['class' => ['recipe-ingredient-unit-key']],
     ];
     $element['target_id'] = [
       '#type' => 'entity_autocomplete',
-      '#title' => t('Name'),
+      '#title' => $this->t('Name'),
       '#target_type' => 'ingredient',
       '#autocreate' => [
         'bundle' => 'ingredient',
@@ -67,7 +67,7 @@ class IngredientWidget extends WidgetBase {
     ];
     $element['note'] = [
       '#type' => 'textfield',
-      '#title' => t('Note'),
+      '#title' => $this->t('Note'),
       '#default_value' => isset($items[$delta]->note) ? $items[$delta]->note : '',
       '#size' => 40,
       '#maxlength' => 255,
@@ -87,9 +87,9 @@ class IngredientWidget extends WidgetBase {
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The current state of the form.
    */
-  public function validate($element, FormStateInterface $form_state) {
+  public function validate(array $element, FormStateInterface $form_state) {
     if (empty($element['unit_key']['#value']) && !empty($element['name']['#value'])) {
-      $form_state->setError($element['unit_key'], t('You must choose a valid unit.'));
+      $form_state->setError($element['unit_key'], $this->t('You must choose a valid unit.'));
       return;
     }
   }

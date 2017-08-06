@@ -116,10 +116,10 @@ class IngredientItem extends EntityReferenceItem {
 
     $element['unit_sets'] = [
       '#type' => 'checkboxes',
-      '#title' => t('Enable sets of units'),
+      '#title' => $this->t('Enable sets of units'),
       '#default_value' => $this->getSetting('unit_sets'),
       '#options' => $this->getUnitSetOptions(),
-      '#description' => t('Units in enabled sets will appear in the field widget.  If no sets are selected then all units will appear by default.'),
+      '#description' => $this->t('Units in enabled sets will appear in the field widget.  If no sets are selected then all units will appear by default.'),
       '#ajax' => [
         'callback' => [$this, 'setChangeAjaxCallback'],
         'wrapper' => 'default-unit-wrapper',
@@ -127,7 +127,7 @@ class IngredientItem extends EntityReferenceItem {
     ];
     $element['default_unit'] = [
       '#type' => 'select',
-      '#title' => t('Default unit type for ingredients'),
+      '#title' => $this->t('Default unit type for ingredients'),
       '#default_value' => $this->getSetting('default_unit'),
       '#options' => [],
       '#process' => [[$this, 'processDefaultUnit']],
@@ -158,7 +158,7 @@ class IngredientItem extends EntityReferenceItem {
   }
 
   /**
-   * #ajax callback for the unit_sets form element.
+   * Ajax callback for the unit_sets form element.
    */
   public function setChangeAjaxCallback(array $form, FormStateInterface $form_state) {
     return $form['settings']['default_unit'];
@@ -169,7 +169,6 @@ class IngredientItem extends EntityReferenceItem {
    */
   public static function generateSampleValue(FieldDefinitionInterface $field_definition) {
     $random = new Random();
-    $settings = $field_definition->getSettings();
 
     // Get the ingredient unit keys.
     $unit_keys = array_keys($this->getConfiguredUnits());

@@ -14,9 +14,7 @@ use Drupal\Tests\BrowserTestBase;
 class RecipeTotalTimeConfigTest extends BrowserTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var string[]
+   * {@inheritdoc}
    */
   public static $modules = ['recipe'];
 
@@ -32,7 +30,7 @@ class RecipeTotalTimeConfigTest extends BrowserTestBase {
    *
    * @var \Drupal\user\UserInterface
    */
-  protected $admin_user;
+  protected $adminUser;
 
   /**
    * {@inheritdoc}
@@ -42,8 +40,13 @@ class RecipeTotalTimeConfigTest extends BrowserTestBase {
     $this->entityTypeManager = $this->container->get('entity_type.manager');
 
     // Create and log in the admin user with Recipe content permissions.
-    $this->admin_user = $this->drupalCreateUser(['create recipe content', 'edit any recipe content', 'administer site configuration']);
-    $this->drupalLogin($this->admin_user);
+    $permissions = [
+      'create recipe content',
+      'edit any recipe content',
+      'administer site configuration'
+    ];
+    $this->adminUser = $this->drupalCreateUser($permissions);
+    $this->drupalLogin($this->adminUser);
   }
 
   /**
@@ -119,7 +122,7 @@ class RecipeTotalTimeConfigTest extends BrowserTestBase {
    * @param array $display_settings
    *   A list of display settings that will be added to the display defaults.
    */
-  protected function createIntegerField($name, $entity_type, $bundle, $storage_settings = [], $field_settings = [], $widget_settings = [], $display_settings = []) {
+  protected function createIntegerField($name, $entity_type, $bundle, array $storage_settings = [], array $field_settings = [], array $widget_settings = [], array $display_settings = []) {
     $field_storage = $this->entityTypeManager->getStorage('field_storage_config')->create([
       'entity_type' => $entity_type,
       'field_name' => $name,
@@ -149,7 +152,7 @@ class RecipeTotalTimeConfigTest extends BrowserTestBase {
    * @param array $display_settings
    *   A list of display settings that will be added to the display defaults.
    */
-  protected function attachIntegerField($name, $entity_type, $bundle, $field_settings = [], $widget_settings = [], $display_settings = []) {
+  protected function attachIntegerField($name, $entity_type, $bundle, array $field_settings = [], array $widget_settings = [], array $display_settings = []) {
     $field = [
       'field_name' => $name,
       'label' => $name,

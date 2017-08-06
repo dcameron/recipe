@@ -14,9 +14,7 @@ use Drupal\Tests\BrowserTestBase;
 class IngredientTest extends BrowserTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var string[]
+   * {@inheritdoc}
    */
   public static $modules = ['block', 'ingredient', 'field_ui', 'views'];
 

@@ -56,7 +56,7 @@ class IngredientDeleteForm extends ContentEntityConfirmFormBase {
    *
    * If the delete command is canceled, return to the ingredient list.
    */
-  public function getCancelURL() {
+  public function getCancelUrl() {
     return new Url('ingredient.admin');
   }
 

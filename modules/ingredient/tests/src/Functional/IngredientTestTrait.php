@@ -9,6 +9,10 @@ use Drupal\field\Entity\FieldConfig;
  */
 trait IngredientTestTrait {
 
+  use ContentTypeCreationTrait {
+    createContentType as drupalCreateContentType;
+  }
+
   /**
    * The entity type manager service.
    *
@@ -52,7 +56,7 @@ trait IngredientTestTrait {
    * @return \Drupal\Core\Field\FieldStorageDefinitionInterface
    *   The ingredient field's storage definition.
    */
-  protected function createIngredientField($storage_settings = [], $field_settings = [], $widget_settings = [], $display_settings = []) {
+  protected function createIngredientField(array $storage_settings = [], array $field_settings = [], array $widget_settings = [], array $display_settings = []) {
     $field_storage = $this->getEntityTypeManager()->getStorage('field_storage_config')->create([
       'entity_type' => 'node',
       'field_name' => 'field_ingredient',
@@ -76,7 +80,7 @@ trait IngredientTestTrait {
    * @param array $display_settings
    *   A list of display settings that will be added to the display defaults.
    */
-  protected function attachIngredientField($field_settings = [], $widget_settings = [], $display_settings = []) {
+  protected function attachIngredientField(array $field_settings = [], array $widget_settings = [], array $display_settings = []) {
     $field = [
       'field_name' => 'field_ingredient',
       'label' => $this->randomMachineName(16),
@@ -121,7 +125,7 @@ trait IngredientTestTrait {
    * @param array $display_settings
    *   A list of display settings that will be added to the display defaults.
    */
-  protected function updateIngredientField($field_settings = [], $widget_settings = [], $display_settings = []) {
+  protected function updateIngredientField(array $field_settings = [], array $widget_settings = [], array $display_settings = []) {
     $field = FieldConfig::loadByName('node', 'test_bundle', 'field_ingredient');
     $field->setSettings(array_merge($field->getSettings(), $field_settings));
     $field->save();
