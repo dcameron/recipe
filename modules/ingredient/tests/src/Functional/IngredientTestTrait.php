@@ -3,6 +3,7 @@
 namespace Drupal\Tests\ingredient\Functional;
 
 use Drupal\field\Entity\FieldConfig;
+use Drupal\simpletest\ContentTypeCreationTrait;
 
 /**
  * Provides common helper methods for Ingredient field tests.
