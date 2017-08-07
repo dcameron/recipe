@@ -40,7 +40,10 @@ class IngredientTest extends BrowserTestBase {
   }
 
   /**
-   * Basic tests for Content Entity Example.
+   * @covers \Drupal\ingredient\IngredientListBuilder
+   * @covers \Drupal\ingredient\Form\IngredientForm
+   * @covers \Drupal\ingredient\IngredientBreadcrumbBuilder
+   * @covers \Drupal\ingredient\Form\IngredientDeleteForm
    */
   public function testIngredient() {
     $web_user = $this->drupalCreateUser([
@@ -62,7 +65,7 @@ class IngredientTest extends BrowserTestBase {
     // WebUser can add entity content.
     $this->assertSession()->linkExists('Add Ingredient');
 
-    $this->clickLink(t('Add Ingredient'));
+    $this->clickLink('Add Ingredient');
 
     $this->assertSession()->fieldExists('name[0][value]');
 
