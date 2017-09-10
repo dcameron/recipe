@@ -1,5 +1,5 @@
 <?php
-
+// @codingStandardsIgnoreFile
 /**
  * @file
  * Filled installation of Recipe 7.x-1.3, for test purposes.
