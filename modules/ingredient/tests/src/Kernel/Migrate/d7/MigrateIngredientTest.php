@@ -17,9 +17,7 @@ class MigrateIngredientTest extends MigrateDrupal7TestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
-    'ingredient',
-  ];
+  public static $modules = ['ingredient'];
 
   /**
    * {@inheritdoc}
@@ -27,9 +25,7 @@ class MigrateIngredientTest extends MigrateDrupal7TestBase {
   protected function setUp() {
     parent::setUp();
     $this->installEntitySchema('ingredient');
-    $this->executeMigrations([
-      'd7_ingredient',
-    ]);
+    $this->executeMigrations(['d7_ingredient']);
   }
 
   /**

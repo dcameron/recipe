@@ -246,7 +246,7 @@ $connection->insert('variable')->fields(array(
   ))
   ->values(array(
     'name' => 'recipe_ingredient_name_normalize',
-    'value' => 's:1:"0";',
+    'value' => 's:1:"1";',
   ))
   ->values(array(
     'name' => 'recipe_preferred_system_of_measure',
