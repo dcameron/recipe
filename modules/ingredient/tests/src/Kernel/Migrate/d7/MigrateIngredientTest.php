@@ -36,7 +36,7 @@ class MigrateIngredientTest extends MigrateDrupal7TestBase {
    * {@inheritdoc}
    */
   protected function getFixtureFilePath() {
-    return __DIR__ . '/../../../fixtures/ingredient713.php';
+    return __DIR__ . '/../../../../fixtures/ingredient713.php';
   }
 
   /**
@@ -57,7 +57,7 @@ class MigrateIngredientTest extends MigrateDrupal7TestBase {
   /**
    * Tests the Drupal 7 ingredient to Drupal 8 migration.
    */
-  public function testUser() {
+  public function testIngredient() {
     $ingredients = Database::getConnection('default', 'migrate')
       ->select('recipe_ingredient', 'i')
       ->fields('i')

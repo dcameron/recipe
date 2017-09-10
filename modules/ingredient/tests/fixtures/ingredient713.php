@@ -126,6 +126,68 @@ $connection->insert('recipe_node_ingredient')->fields(array(
   ))
   ->execute();
 
+$connection->schema()->createTable('system', array(
+  'fields' => array(
+    'filename' => array(
+      'type' => 'varchar',
+      'not null' => TRUE,
+      'length' => '255',
+      'default' => '',
+    ),
+    'name' => array(
+      'type' => 'varchar',
+      'not null' => TRUE,
+      'length' => '255',
+      'default' => '',
+    ),
+    'type' => array(
+      'type' => 'varchar',
+      'not null' => TRUE,
+      'length' => '12',
+      'default' => '',
+    ),
+    'owner' => array(
+      'type' => 'varchar',
+      'not null' => TRUE,
+      'length' => '255',
+      'default' => '',
+    ),
+    'status' => array(
+      'type' => 'int',
+      'not null' => TRUE,
+      'size' => 'normal',
+      'default' => '0',
+    ),
+    'bootstrap' => array(
+      'type' => 'int',
+      'not null' => TRUE,
+      'size' => 'normal',
+      'default' => '0',
+    ),
+    'schema_version' => array(
+      'type' => 'int',
+      'not null' => TRUE,
+      'size' => 'normal',
+      'default' => '-1',
+    ),
+    'weight' => array(
+      'type' => 'int',
+      'not null' => TRUE,
+      'size' => 'normal',
+      'default' => '0',
+    ),
+    'info' => array(
+      'type' => 'blob',
+      'not null' => FALSE,
+      'size' => 'normal',
+    ),
+  ),
+  'primary key' => array(
+    'filename',
+  ),
+  'mysql_character_set' => 'utf8',
+));
+
 $connection->insert('system')->fields(array(
   'filename',
   'name',
@@ -149,6 +211,26 @@ $connection->insert('system')->fields(array(
     'info' => 'a:11:{s:4:"name";s:6:"Recipe";s:11:"description";s:28:"Collect and display recipes.";s:7:"package";s:6:"Recipe";s:4:"core";s:3:"7.x";s:7:"version";s:7:"7.x-1.3";s:7:"project";s:6:"recipe";s:9:"datestamp";s:10:"1335415286";s:12:"dependencies";a:0:{}s:3:"php";s:5:"5.2.4";s:5:"files";a:0:{}s:9:"bootstrap";i:0;}',
   ))
   ->execute();
+
+$connection->schema()->createTable('variable', array(
+  'fields' => array(
+    'name' => array(
+      'type' => 'varchar',
+      'not null' => TRUE,
+      'length' => '128',
+      'default' => '',
+    ),
+    'value' => array(
+      'type' => 'blob',
+      'not null' => TRUE,
+      'size' => 'normal',
+    ),
+  ),
+  'primary key' => array(
+    'name',
+  ),
+  'mysql_character_set' => 'utf8',
+));
 
 $connection->insert('variable')->fields(array(
   'name',
