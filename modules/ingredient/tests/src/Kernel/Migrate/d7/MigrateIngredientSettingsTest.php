@@ -26,6 +26,13 @@ class MigrateIngredientSettingsTest extends MigrateDrupal7TestBase {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  protected function getFixtureFilePath() {
+    return __DIR__ . '/../../../../fixtures/ingredient713.php';
+  }
+
+  /**
    * Tests migration of ingredient variables to configuration.
    */
   public function testMigration() {
