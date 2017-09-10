@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\ingredient\Kernel;
+namespace Drupal\Tests\ingredient\Kernel\Migrate\d7;
 
 use Drupal\Core\Database\Database;
 use Drupal\ingredient\Entity\Ingredient;
