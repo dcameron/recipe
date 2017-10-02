@@ -86,7 +86,7 @@ class IngredientListBuilder extends EntityListBuilder {
     $row['name'] = $entity->toLink();
     $row['changed'] = $this->dateFormatter->format($entity->getChangedTime(), 'short');
     if ($this->languageManager->isMultilingual()) {
-      $row['language_name'] = $this->languageManager->getLanguageName($entity->language());
+      $row['language_name'] = $this->languageManager->getLanguageName($entity->language()->getId());
     }
     return $row + parent::buildRow($entity);
   }
