@@ -1169,6 +1169,17 @@ $connection->insert('system')
   'info' => 'a:11:{s:4:"name";s:6:"Recipe";s:11:"description";s:28:"Collect and display recipes.";s:7:"package";s:6:"Recipe";s:4:"core";s:3:"7.x";s:7:"version";s:7:"7.x-1.3";s:7:"project";s:6:"recipe";s:9:"datestamp";s:10:"1335415286";s:12:"dependencies";a:0:{}s:3:"php";s:5:"5.2.4";s:5:"files";a:0:{}s:9:"bootstrap";i:0;}',
 ))
 ->values(array(
+  'filename' => 'modules/system/system.module',
+  'name' => 'system',
+  'type' => 'module',
+  'owner' => '',
+  'status' => '1',
+  'bootstrap' => '0',
+  'schema_version' => '7081',
+  'weight' => '0',
+  'info' => 'a:12:{s:4:"name";s:6:"System";s:11:"description";s:54:"Handles general site configuration for administrators.";s:7:"package";s:4:"Core";s:7:"version";s:8:"7.60-dev";s:4:"core";s:3:"7.x";s:5:"files";a:6:{i:0;s:19:"system.archiver.inc";i:1;s:15:"system.mail.inc";i:2;s:16:"system.queue.inc";i:3;s:14:"system.tar.inc";i:4;s:18:"system.updater.inc";i:5;s:11:"system.test";}s:8:"required";b:1;s:9:"configure";s:19:"admin/config/system";s:5:"mtime";i:1499892306;s:12:"dependencies";a:0:{}s:3:"php";s:5:"5.2.4";s:9:"bootstrap";i:0;}',
+))
+->values(array(
   'filename' => 'modules/user/user.module',
   'name' => 'user',
   'type' => 'module',
